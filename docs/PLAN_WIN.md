@@ -94,11 +94,82 @@ Structure (target 4:30, hard cap 5:00):
 | 0:00 | **Cold open**: split screen. Left: `ping 8.8.8.8` failing. Right: tutor streaming natural Bangla. "No internet. Full tutor. Sixty seconds of why." |
 | 0:20 | Problem: Bloom's two-sigma, the best learning effect ever measured, priced out of reach. And students are minors: their mistakes should never leave the building. |
 | 0:50 | **Do beat**: raw syllabus in a language nobody in the room reads goes in; concepts, prerequisites, and a course path build live on screen. |
-| 1:50 | **See beat**: phone photographs real handwriting. Sensei names the exact wrong step, walks the graph back: "you did not fail projectile motion, you failed vector decomposition, two prerequisites ago." Then it teaches Socratically and the memory panel shows yesterday's slip being used. |
+| 1:50 | **See beat**: phone photographs real handwriting — **Bengali prose with Latin digits, NOT Bengali numerals** (see §5a; this is measured, not stylistic). Sensei names the exact wrong step, walks the graph back: "you did not fail projectile motion, you failed vector decomposition, two prerequisites ago." Then it teaches Socratically and the memory panel shows yesterday's slip being used. |
 | 3:20 | **Spark beat**: stats overlay, 128 GB unified memory is why a 30B multimodal model fits at all, one-model pin as the answer to the router's cold-swap constraint, then the concurrency shot. |
 | 4:10 | **Close**: hand pulls the cable on camera mid-sentence. The tutor finishes its question. End card: repo, one line. |
 
 Production: script it word for word. 1080p screen capture. Phone shots on a tripod. Check audio on the first take, not the last. Export and re-watch before midnight Saturday.
+
+## 5a. Measured facts that override earlier assumptions
+
+Everything here is measured on the box, not estimated. Full method in
+[`VISION_FINDINGS.md`](./VISION_FINDINGS.md). **These supersede any conflicting claim in this
+file or `PLAN.md`.**
+
+### 🔴 The See beat must not use Bengali numerals
+
+The pinned model reads Bengali **prose** perfectly, and Bengali **digits** not at all.
+
+| Input | Expected | Got |
+|---|---|---|
+| Printed digit chart, **pristine 90px** | `০১২৩৪৫৬৭৮৯` | `0627867966` (2/10) |
+| One line, **printed, pristine 110px** | `২x + ৭ = ১৫` | `5x + 9 = 50` |
+
+0/9 across every Bengali-numeral case, ~30% digit accuracy against a 10% chance baseline — on
+*perfect printed input*. Not handwriting, not image quality, not prompting. Preprocessing and a
+digit key in the prompt both fail to fix it.
+
+**It never hedges.** On two cases where the student wrote `x = ৮ × ২ = ১৬` (multiplying instead
+of dividing), it transcribed `x = 11 / 2 = 5.5` — *inverting the student's real error*. On a
+fully correct page it invented a mistake in all four variants. On camera that is not a miss,
+it is the tutor confidently teaching a problem the student never wrote.
+
+**Demo path:** Bengali prose + Latin digits. Validated end to end under the full phone
+degradation stack (`c16`, `c17`). If that is not authentic to how HSC students actually write,
+run the See beat in a Latin-numeral language (Indonesian UN / Kenyan KCSE, both already in the
+pitch) and keep Bangla for the tutoring beat, which is flawless.
+
+### ✅ Handwriting risk retired
+20/22 on synthetic handwriting including 7° rotation, keystone, shadow gradient, JPEG q28,
+2.4px defocus, 0.30× downscale, cramped lines, crossed-out margin work. Zero failures in the
+full phone-stack group. Photo quality was never the risk.
+
+Validated insurance photos, already in `docs/vision_samples/`: **`c07`, `c08`, `c19`, `c20`,
+`c10`** (Latin, hard-looking, pass reliably) and **`c16`, `c17`** (the safe Bangla samples).
+§3 item 5's data kit can be built from these today rather than shot from scratch.
+
+### ✅ Concurrency scales — the beat is on
+
+| Streams | Aggregate | Per-stream | TTFT | Success |
+|---|---|---|---|---|
+| 1 | 33.6 tok/s | 33.6 | 1.16s | 1/1 |
+| 2 | 63.1 tok/s | 31.6 | 0.59s | 2/2 |
+| 4 | **82.2 tok/s** | 20.5 | 1.15s | **4/4** |
+
+2.45× aggregate throughput at 4 concurrent, no errors, sub-1.2s TTFT throughout. The GGUF
+backend *does* batch — §11's "may not scale" risk is retired. Per-stream 20.5 tok/s still
+outpaces reading speed. **Say four students, show four.**
+
+### ❌ The 32b fallback is disproven
+`qwen3-vl-32b-instruct-gguf` is *worse* on Latin (17/22 vs 20/22), identically broken on
+Bengali (0/9), and 4× slower (12.3s vs 3.0s median). Struck from `PLAN.md`. The pin stands.
+
+### ⚠️ Two cautions for the script
+- **Do not say "72 tok/s".** That figure is from vendor docs. Measured Bengali generation is
+  **33.6 tok/s** single-stream — Bengali tokenizes less efficiently than English. Quote the
+  aggregate concurrency number instead; it is both verified and a better story.
+- **The model is nondeterministic even at `temperature=0`.** Identical inputs gave different
+  answers across runs. Rehearsing a beat once proves nothing; run each camera beat several
+  times. The preprocessing pass (deskew → flatten → autocontrast → cap 1400px) converts
+  borderline cases into deterministic passes and is worth adopting purely for variance control.
+
+### 🔍 Still unvalidated (§4's annotated photo)
+Coordinate extraction from the VLM was **not** tested. VLMs are generally unreliable at precise
+bounding boxes, and a box drawn on the *wrong* line is worse than no box. Treat §4's fallback —
+quoting the wrong line as highlighted text — as the default, and only upgrade if coordinates
+verify cleanly today.
+
+---
 
 ## 6. Offline staging (make the cable pull undeniable)
 
@@ -161,8 +232,10 @@ Ordered by points per hour. Take from the top, stop when time runs out.
 | Risk | Mitigation |
 |---|---|
 | Video recorded too late, submission window missed | Hard gates Sat 17:00 record, Sat 22:00 dry run, Sun 10:00 submit |
-| Real handwriting fails on camera | Insurance photos validated Friday; never improvise the See beat live |
-| Concurrency does not scale on the GGUF backend | Validate Friday; degrade to 2 students or cut, silently |
+| ~~Real handwriting fails on camera~~ — **retired**, 20/22 | Insurance photos already validated and in `docs/vision_samples/` (§5a) |
+| ~~Concurrency does not scale on GGUF~~ — **retired**, 4/4 at 82.2 tok/s | Measured (§5a). Say four students, show four |
+| **Bengali numerals fabricate confidently on camera** | **Bengali prose + Latin digits only.** Not a tuning problem — see §5a |
+| Annotated-photo coordinates land on the wrong line | Untested. Default to the highlighted-text fallback unless verified today |
 | Judges stop watching at minute 1 | Cold open puts the wow at 0:00, not 4:00 |
 | Venue network surprises | Own travel router; nothing in the demo path touches upstream |
 | Demo overruns 5:00 | Script to 4:30; the edit enforces it |
@@ -171,10 +244,16 @@ Ordered by points per hour. Take from the top, stop when time runs out.
 
 Numbers move judges, wrong numbers sink us. Verify each before it enters the script, else cut it:
 
-- Khanmigo / Koji pricing and "cloud, English-first" claims (recheck current facts)
+- ~~Koji exists and is cloud/subscription~~ — **verified**. Brilliant.org's AI tutor, Socratic
+  ("without ever just giving you the answer"), foundational math and coding, free tier is a
+  limited preview then Premium. Safe to say: cloud, subscription-gated, English.
+- Khanmigo current pricing (still unchecked)
 - Count of students taking Bangla HSC (or any national-exam figure we cite)
 - GN100 street price for the cost-per-student math
-- Our own measurements: tok/s, load time, memory footprint, concurrency throughput
+- ~~Our own tok/s and concurrency throughput~~ — **measured**, §5a. Use **33.6 tok/s**
+  single-stream Bengali and **82.2 tok/s aggregate across 4 students**. Do *not* use the
+  vendor's 72 tok/s figure; we did not reproduce it in Bengali.
+- Load time and memory footprint (still unmeasured — cut from the script unless verified)
 
 ## 13. Team lanes (3-5 people)
 
