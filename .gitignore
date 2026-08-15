@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+uv.lock
+
+# Local learner data -- student records never belong in git
+*.db
+*.sqlite3
+
+# Secrets. The router bearer token lives in the environment, never in the repo.
+.env
+.env.*
+!.env.example
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+*.log
+
+# OS
+.DS_Store
