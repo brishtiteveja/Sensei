@@ -32,3 +32,7 @@ backend/graph.json
 docs/vision_samples/_fonts/
 docs/vision_samples/_preproc/
 docs/lang_samples/_fonts/
+
+# Web build output
+web/dist/
+web/node_modules/

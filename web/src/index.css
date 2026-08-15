@@ -1,0 +1,89 @@
+@import './styles/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: rgb(var(--s-border));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible, consistent focus ring everywhere. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-page rounded-[6px];
+  }
+
+  ::selection {
+    background-color: rgb(var(--s-accent) / 0.22);
+  }
+}
+
+@layer components {
+  .s-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--s-border-strong)) transparent;
+  }
+  .s-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .s-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .s-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--s-border-strong));
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  .s-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--s-text-disabled));
+    background-clip: content-box;
+  }
+
+  /* Streaming caret shown at the tail of an in-flight tutor message. */
+  .s-caret::after {
+    content: '';
+    display: inline-block;
+    width: 0.5ch;
+    height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    background-color: rgb(var(--s-accent));
+    border-radius: 1px;
+    animation: caret-blink 1.1s ease-in-out infinite;
+  }
+
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+    20%,
+    50% {
+      opacity: 0.2;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
