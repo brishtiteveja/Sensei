@@ -1,0 +1,281 @@
+{
+  "concepts": [
+    {
+      "id": "physical_quantity",
+      "name": "Physical Quantity",
+      "name_local": "ভৌত রাশি",
+      "unit": "অধ্যায় ১",
+      "prereqs": []
+    },
+    {
+      "id": "fundamental_units",
+      "name": "Fundamental Units",
+      "name_local": "মৌলিক একক",
+      "unit": "অধ্যায় ১",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "derived_units",
+      "name": "Derived Units",
+      "name_local": "লব্ধ একক",
+      "unit": "অধ্যায় ১",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "dimensional_analysis",
+      "name": "Dimensional Analysis",
+      "name_local": "মাত্রা সমীকরণ",
+      "unit": "অধ্যায় ১",
+      "prereqs": [
+        "physical_quantity",
+        "fundamental_units",
+        "derived_units"
+      ]
+    },
+    {
+      "id": "measurement_error",
+      "name": "Measurement Error",
+      "name_local": "পরিমাপের ত্রুটি",
+      "unit": "অধ্যায় ১",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "significant_figures",
+      "name": "Significant Figures",
+      "name_local": "সার্থক অঙ্ক",
+      "unit": "অধ্যায় ১",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "scalar_quantity",
+      "name": "Scalar Quantity",
+      "name_local": "স্কেলার রাশি",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "vector_quantity",
+      "name": "Vector Quantity",
+      "name_local": "ভেক্টর রাশি",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "physical_quantity"
+      ]
+    },
+    {
+      "id": "vector_addition",
+      "name": "Vector Addition",
+      "name_local": "ভেক্টর যোগ",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "vector_quantity"
+      ]
+    },
+    {
+      "id": "vector_resolution",
+      "name": "Vector Resolution",
+      "name_local": "ভেক্টরের উপাংশ বিশ্লেষণ",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "vector_quantity"
+      ]
+    },
+    {
+      "id": "scalar_product",
+      "name": "Scalar Product",
+      "name_local": "স্কেলার গুণন",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "vector_quantity"
+      ]
+    },
+    {
+      "id": "vector_product",
+      "name": "Vector Product",
+      "name_local": "ভেক্টর গুণন",
+      "unit": "অধ্যায় ২",
+      "prereqs": [
+        "vector_quantity"
+      ]
+    },
+    {
+      "id": "linear_motion",
+      "name": "Linear Motion",
+      "name_local": "সরলরৈখিক গতি",
+      "unit": "অধ্যায় ৩",
+      "prereqs": [
+        "scalar_quantity",
+        "vector_quantity",
+        "vector_addition",
+        "vector_resolution"
+      ]
+    },
+    {
+      "id": "equations_of_motion",
+      "name": "Equations of Motion",
+      "name_local": "গতির সমীকরণ",
+      "unit": "অধ্যায় ৩",
+      "prereqs": [
+        "linear_motion",
+        "vector_quantity",
+        "vector_addition"
+      ]
+    },
+    {
+      "id": "projectile_motion",
+      "name": "Projectile Motion",
+      "name_local": "প্রক্ষেপ গতি",
+      "unit": "অধ্যায় ৩",
+      "prereqs": [
+        "linear_motion",
+        "vector_resolution",
+        "equations_of_motion"
+      ]
+    },
+    {
+      "id": "circular_motion",
+      "name": "Circular Motion",
+      "name_local": "বৃত্তাকার গতি",
+      "unit": "অধ্যায় ৩",
+      "prereqs": [
+        "linear_motion",
+        "vector_quantity",
+        "vector_addition"
+      ]
+    },
+    {
+      "id": "newton_first_law",
+      "name": "Newton's First Law",
+      "name_local": "নিউটনের প্রথম সূত্র",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "linear_motion",
+        "vector_quantity"
+      ]
+    },
+    {
+      "id": "newton_second_law",
+      "name": "Newton's Second Law",
+      "name_local": "নিউটনের দ্বিতীয় সূত্র",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "linear_motion",
+        "vector_quantity",
+        "newton_first_law"
+      ]
+    },
+    {
+      "id": "newton_third_law",
+      "name": "Newton's Third Law",
+      "name_local": "নিউটনের তৃতীয় সূত্র",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "vector_quantity",
+        "newton_second_law"
+      ]
+    },
+    {
+      "id": "friction",
+      "name": "Friction",
+      "name_local": "ঘর্ষণ",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "vector_quantity",
+        "newton_second_law"
+      ]
+    },
+    {
+      "id": "conservation_of_momentum",
+      "name": "Conservation of Momentum",
+      "name_local": "ভরবেগ সংরক্ষণ",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "vector_quantity",
+        "newton_second_law",
+        "collision"
+      ]
+    },
+    {
+      "id": "collision",
+      "name": "Collision",
+      "name_local": "সংঘর্ষ",
+      "unit": "অধ্যায় ৪",
+      "prereqs": [
+        "vector_quantity",
+        "newton_second_law",
+        "conservation_of_momentum"
+      ]
+    },
+    {
+      "id": "work",
+      "name": "Work",
+      "name_local": "কাজ",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "vector_quantity",
+        "linear_motion"
+      ]
+    },
+    {
+      "id": "kinetic_energy",
+      "name": "Kinetic Energy",
+      "name_local": "গতিশক্তি",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "work",
+        "linear_motion"
+      ]
+    },
+    {
+      "id": "potential_energy",
+      "name": "Potential Energy",
+      "name_local": "বিভবশক্তি",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "work",
+        "linear_motion"
+      ]
+    },
+    {
+      "id": "conservation_of_energy",
+      "name": "Conservation of Energy",
+      "name_local": "শক্তির সংরক্ষণ সূত্র",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "work",
+        "kinetic_energy",
+        "potential_energy"
+      ]
+    },
+    {
+      "id": "power",
+      "name": "Power",
+      "name_local": "ক্ষমতা",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "work",
+        "conservation_of_energy"
+      ]
+    },
+    {
+      "id": "efficiency",
+      "name": "Efficiency",
+      "name_local": "দক্ষতা",
+      "unit": "অধ্যায় ৫",
+      "prereqs": [
+        "work",
+        "conservation_of_energy"
+      ]
+    }
+  ]
+}

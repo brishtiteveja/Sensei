@@ -10,14 +10,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from pathlib import Path
+
 from .config import load_settings
+from .curriculum import build_graph
+from .graph import KnowledgeGraph
 from .learner import LearnerStore
 from .llm import LLM
-from .tutor import build_system_prompt, diagnose_work, teach_from_diagnosis
+from .tutor import (
+    build_root_cause_prompt,
+    build_system_prompt,
+    diagnose_work,
+    teach_from_diagnosis,
+)
 
 settings = load_settings()
 llm = LLM(settings)
 store = LearnerStore()
+
+# The active course. Persisted so a restart mid-event doesn't lose a graph that took
+# two model calls to generate.
+GRAPH_PATH = Path(__file__).resolve().parent.parent / "graph.json"
+graph: KnowledgeGraph | None = (
+    KnowledgeGraph.load(GRAPH_PATH) if GRAPH_PATH.exists() else None
+)
 
 
 @asynccontextmanager
@@ -68,7 +84,14 @@ class ChatRequest(BaseModel):
     learner_id: str = "demo"
     message: str
     lesson: str | None = None
+    # When set, the tutor checks the graph for an upstream weakness and teaches the
+    # cause instead of the symptom.
+    concept_id: str | None = None
     history: list[Turn] = []
+
+
+class SyllabusRequest(BaseModel):
+    syllabus: str
 
 
 @app.get("/health")
@@ -119,12 +142,25 @@ def _sse(event: str, data: dict) -> str:
 async def tutor_stream(req: ChatRequest):
     """Stream one Socratic turn, grounded in what we know about this student."""
     profile = store.profile(req.learner_id)
-    messages = [{"role": "system", "content": build_system_prompt(profile, req.lesson)}]
+    system = build_system_prompt(profile, req.lesson)
+
+    # Root-cause redirect: if the graph says an upstream concept is the real problem,
+    # teach that instead. This is the difference between a tutor and a chatbot.
+    redirect = None
+    if graph is not None and req.concept_id:
+        redirect = build_root_cause_prompt(
+            graph, req.concept_id, store.mastery(req.learner_id), profile
+        )
+        if redirect:
+            system += "\n\n" + redirect
+
+    messages = [{"role": "system", "content": system}]
     messages += [t.model_dump() for t in req.history]
     messages.append({"role": "user", "content": req.message})
 
     async def gen():
-        yield _sse("start", {"model": settings.model})
+        # Surfaced so the client (and the stage) can see the redirect happening.
+        yield _sse("start", {"model": settings.model, "root_cause": redirect})
         try:
             async for piece in llm.stream(messages):
                 yield _sse("token", {"text": piece})
@@ -135,6 +171,48 @@ async def tutor_stream(req: ChatRequest):
             yield _sse("error", {"message": str(e)})
 
     return StreamingResponse(gen(), media_type="text/event-stream")
+
+
+@app.post("/curriculum/build")
+async def curriculum_build(req: SyllabusRequest):
+    """Syllabus in, knowledge graph out. Two model calls; expect ~30-60s.
+
+    Replaces the active course and persists it.
+    """
+    global graph
+    if not req.syllabus.strip():
+        raise HTTPException(400, "syllabus is required")
+
+    graph = await build_graph(llm, req.syllabus)
+    graph.save(GRAPH_PATH)
+    return {
+        "concepts": len(graph.concepts),
+        "edges": sum(len(c.prereqs) for c in graph.concepts.values()),
+        "path": graph.course_path(),
+    }
+
+
+@app.get("/curriculum/path")
+async def curriculum_path(learner_id: str = "demo"):
+    """The course path plus where this learner currently is in it."""
+    if graph is None:
+        raise HTTPException(404, "no course loaded; POST /curriculum/build first")
+
+    mastery = store.mastery(learner_id)
+    return {
+        "next": graph.next_concept(mastery),
+        "unlocked": graph.unlocked(mastery),
+        "concepts": [
+            {
+                "id": cid,
+                "name": graph.concepts[cid].name,
+                "name_local": graph.concepts[cid].name_local,
+                "prereqs": graph.concepts[cid].prereqs,
+                "mastery": round(mastery.get(cid, 0.0), 2),
+            }
+            for cid in graph.course_path()
+        ],
+    }
 
 
 @app.post("/tutor/diagnose")

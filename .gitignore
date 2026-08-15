@@ -23,3 +23,7 @@ dist/
 
 # OS
 .DS_Store
+
+# Active course is runtime state, rebuilt by POST /curriculum/build.
+# A known-good copy lives in backend/fixtures/ as demo insurance.
+backend/graph.json

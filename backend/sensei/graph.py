@@ -71,6 +71,56 @@ class KnowledgeGraph:
         payload = {"concepts": [c.__dict__ for c in self.concepts.values()]}
         Path(path).write_text(json.dumps(payload, ensure_ascii=False, indent=2))
 
+    def break_cycles(self) -> list[tuple[str, str]]:
+        """Remove back edges until the graph is acyclic. Returns what was cut.
+
+        Tolerating a cycle is not enough. Two concepts that require each other are
+        *permanently* locked -- `unlocked()` needs every prerequisite mastered, and
+        neither can ever qualify. The student would simply never be offered them, with
+        no error anywhere to explain why.
+
+        The curriculum agent produces mutual dependencies fairly readily (momentum
+        conservation and collisions genuinely are taught together, so a model asked
+        "what must come first" can answer "each other"). Since some edge has to go, we
+        cut the one closing the cycle and record it, rather than guessing which
+        direction the author meant.
+        """
+        removed: list[tuple[str, str]] = []
+        WHITE, GRAY, BLACK = 0, 1, 2
+        colour = {cid: WHITE for cid in self.concepts}
+
+        def visit(start: str) -> None:
+            # Explicit stack: a deep syllabus graph can exceed recursion limits, and
+            # blowing the stack mid-demo is not a failure mode worth risking.
+            stack: list[tuple[str, int]] = [(start, 0)]
+            while stack:
+                cid, idx = stack[-1]
+                if idx == 0:
+                    colour[cid] = GRAY
+                prereqs = self.concepts[cid].prereqs
+                if idx < len(prereqs):
+                    stack[-1] = (cid, idx + 1)
+                    nxt = prereqs[idx]
+                    if colour[nxt] == GRAY:
+                        # Back edge: cid depends on something still open in this path.
+                        self.concepts[cid].prereqs.remove(nxt)
+                        removed.append((cid, nxt))
+                        stack[-1] = (cid, idx)  # list shifted under us
+                    elif colour[nxt] == WHITE:
+                        stack.append((nxt, 0))
+                else:
+                    colour[cid] = BLACK
+                    stack.pop()
+
+        for cid in sorted(self.concepts):
+            if colour[cid] == WHITE:
+                visit(cid)
+
+        if removed:
+            desc = ", ".join(f"{a} -/-> {b}" for a, b in removed)
+            print(f"!! broke {len(removed)} cyclic prereq edge(s): {desc}")
+        return removed
+
     # ------------------------------------------------------------- traversal
 
     def ancestors(self, concept_id: str) -> list[str]:
@@ -99,11 +149,18 @@ class KnowledgeGraph:
 
         Falling back to `concept_id` itself when nothing upstream is weak would be
         wrong: "you need to relearn the thing you just got wrong" is not a diagnosis.
+
+        Only concepts the student has actually *attempted* can be a root cause. A
+        concept absent from `mastery` has no evidence either way, and treating absence
+        as failure makes this walk all the way to the first concept in the syllabus and
+        blame that -- which is both wrong and useless, since the earliest concept is
+        upstream of everything. Not-yet-covered material is the course path's job
+        (`next_concept`), not the diagnostician's.
         """
         weak = {
             cid
             for cid in self.ancestors(concept_id)
-            if mastery.get(cid, 0.0) < MASTERY_THRESHOLD
+            if cid in mastery and mastery[cid] < MASTERY_THRESHOLD
         }
         if not weak:
             return None
@@ -121,6 +178,12 @@ class KnowledgeGraph:
         """Concepts whose prerequisites are satisfied but which aren't yet mastered.
 
         This is the Duolingo mechanic: the set of things the student may start next.
+
+        Note this treats an unattempted concept as *not mastered* (default 0.0), which
+        is the opposite of `root_cause`, where absence of evidence is not treated as
+        weakness. That difference is deliberate, not an oversight: "what should you
+        study next" must include everything you have not done yet, while "why did you
+        just fail" may only cite things we actually observed you failing.
         """
         ready = []
         for c in self.concepts.values():
