@@ -1,0 +1,37 @@
+{
+  "name": "rn-motionfold",
+  "version": "0.1.0",
+  "description": "React Native port of motionfold's key animation patterns — DepthTunnel, GlowBorder, StaggerReveal, ParallaxScroll, CurtainReveal, StrokeDraw.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": ["src", "README.md"],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-native": ">=0.70",
+    "react-native-reanimated": ">=3",
+    "react-native-svg": ">=13",
+    "expo-linear-gradient": ">=12"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "react": "^19.2.5",
+    "react-native": "^0.85.0",
+    "react-native-reanimated": "^4.3.0",
+    "react-native-svg": "15",
+    "expo-linear-gradient": "^14.1.4",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "react-native",
+    "animation",
+    "motionfold",
+    "depth-tunnel",
+    "parallax",
+    "glow",
+    "reanimated"
+  ],
+  "license": "MIT"
+}

@@ -2,54 +2,85 @@
   "expo": {
     "name": "Sensei",
     "slug": "sensei",
-    "scheme": "sensei",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#0B0F14",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4F46E5"
+    },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "life.sensei.tutor",
       "infoPlist": {
-        "NSCameraUsageDescription": "Sensei reads a photo of your handwritten work to find where you slipped. The photo is sent only to your own Sensei box and never leaves your network.",
-        "NSPhotoLibraryUsageDescription": "Pick a photo of your handwritten work for the tutor to read.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
         }
       }
     },
     "android": {
-      "package": "life.sensei.tutor",
       "adaptiveIcon": {
-        "backgroundColor": "#0B0F14",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#4F46E5"
       },
-      "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA"]
+      "package": "life.sensei.tutor",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#0f172a",
+      "barStyle": "light-content",
+      "translucent": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-router",
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/HindSiliguri-Regular.ttf",
-            "./assets/fonts/HindSiliguri-Bold.ttf"
-          ]
+          "fonts": []
+        }
+      ],
+      "expo-asset",
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ],
+      "expo-document-picker",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Sensei needs microphone access for voice input",
+          "speechRecognitionPermission": "Sensei needs speech recognition to convert your voice to text"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Pick a photo of your handwritten work for the tutor to read.",
-          "cameraPermission": "Sensei reads a photo of your handwritten work to find where you slipped. The photo never leaves your network."
+          "photosPermission": "Sensei needs photo access so you can share your work with the tutor.",
+          "cameraPermission": "Sensei needs camera access so you can photograph your handwritten work."
         }
       ]
-    ]
+    ],
+    "scheme": "sensei",
+    "extra": {
+      "router": {}
+    }
   }
 }

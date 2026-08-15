@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Sensei",
+    "slug": "sensei",
+    "scheme": "sensei",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0F14",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "life.sensei.tutor",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Sensei reads a photo of your handwritten work to find where you slipped. The photo is sent only to your own Sensei box and never leaves your network.",
+        "NSPhotoLibraryUsageDescription": "Pick a photo of your handwritten work for the tutor to read.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "life.sensei.tutor",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0F14",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/HindSiliguri-Regular.ttf",
+            "./assets/fonts/HindSiliguri-Bold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Pick a photo of your handwritten work for the tutor to read.",
+          "cameraPermission": "Sensei reads a photo of your handwritten work to find where you slipped. The photo never leaves your network."
+        }
+      ]
+    ],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "experiments": {
+      "baseUrl": "/sensei"
+    }
+  }
+}

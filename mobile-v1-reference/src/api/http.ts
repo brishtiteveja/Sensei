@@ -48,9 +48,19 @@ export function normalizeBaseUrl(raw: string): string {
   const m = /^(https?:\/\/)([^/]+)(\/.*)?$/i.exec(s);
   if (!m) return s;
   const [, scheme, authority, path = ''] = m;
-  // Bare host with no port: the backend listens on 8080. Only ever appended to the
-  // authority -- appending it to a path would produce a silently dead URL.
-  const withPort = /:\d+$/.test(authority) ? authority : `${authority}:8080`;
+
+  // Default the port to 8080 only for a bare LAN host -- the common case, where
+  // someone types `192.168.1.42` and means the box.
+  //
+  // Do NOT default it when the URL is https or carries a path. Both indicate a
+  // deliberate address, typically the nginx-proxied web deployment at
+  // `https://host/sensei/api`. Appending :8080 there yields a URL that resolves,
+  // reaches the wrong service, and fails looking exactly like a dead backend.
+  const hasPath = path !== '' && path !== '/';
+  const isHttps = /^https:/i.test(scheme);
+  const explicitPort = /:\d+$/.test(authority);
+  const withPort =
+    explicitPort || hasPath || isHttps ? authority : `${authority}:8080`;
   return scheme + withPort + path;
 }
 
