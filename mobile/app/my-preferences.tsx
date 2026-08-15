@@ -8,14 +8,25 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SlidersHorizontal } from 'lucide-react-native';
+import {
+  Check,
+  ChevronRight,
+  Cloud,
+  Cpu,
+  SlidersHorizontal,
+  TriangleAlert,
+} from 'lucide-react-native';
 import { AppHeader } from '@/components/app-header';
 import { Placeholder } from '@/components/placeholder';
-import { getApiErrorMessage, questionBankApi } from '@/api';
+import { ModelSelectorModal } from '@/components/model-selector-modal';
+import { adminApi, getApiErrorMessage, questionBankApi } from '@/api';
+import type { ModelCatalog, SetModelResult } from '@/api/admin';
+import { LANGUAGE_OPTIONS } from '@/constants/languages';
 import { useAuth } from '@/contexts/auth-context';
 import { usePreferences } from '@/contexts/preferences-context';
 import { showAppToast } from '@/feedback/toast';
 import { useI18n } from '@/i18n/i18n-context';
+import type { Language } from '@/i18n/translations';
 import { useTheme } from '@/contexts/theme-context';
 import { useAppTheme } from '@/theme';
 import type { SemanticTokens } from '@/theme/tokens';
@@ -100,8 +111,43 @@ function Section({
   );
 }
 
+/**
+ * Full-width row for the language list and the model picker trigger. It lives in
+ * the same Section card as the chips and reuses the chip's selected/idle colours
+ * so it reads as part of the existing screen.
+ */
+function SettingRow({
+  selected = false,
+  disabled = false,
+  theme,
+  onPress,
+  children,
+}: {
+  selected?: boolean;
+  disabled?: boolean;
+  theme: SemanticTokens;
+  onPress: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.82}
+      className="w-full rounded-2xl border px-4 py-3"
+      style={{
+        opacity: disabled ? 0.6 : 1,
+        borderColor: selected ? theme.accent : theme.borderStrong,
+        backgroundColor: selected ? theme.accentSoft : theme.surface,
+      }}
+    >
+      <View className="flex-row items-center gap-3">{children}</View>
+    </TouchableOpacity>
+  );
+}
+
 export default function MyPreferencesScreen() {
-  const { t } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const { isDark } = useTheme();
   const theme = useAppTheme();
   const { isAuthenticated } = useAuth();
@@ -118,9 +164,76 @@ export default function MyPreferencesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [modelCatalog, setModelCatalog] = useState<ModelCatalog | null>(null);
+  const [modelLoading, setModelLoading] = useState(true);
+  const [modelError, setModelError] = useState('');
+  const [modelModalVisible, setModelModalVisible] = useState(false);
+  const [modelWarning, setModelWarning] = useState<string | null>(null);
 
   const preferencesRef = useRef(preferences);
   preferencesRef.current = preferences;
+
+  /**
+   * The model catalogue is optional: it lives on SenseiClaw, not the REST
+   * backend. A failure must land on a disabled section with a retry, never on a
+   * spinner that never resolves (the bug this screen already had once).
+   */
+  const loadModelCatalog = useCallback(async () => {
+    setModelLoading(true);
+    setModelError('');
+    try {
+      const catalog = await adminApi.getModelCatalog();
+      setModelCatalog(catalog);
+    } catch (err) {
+      setModelCatalog(null);
+      setModelError(getApiErrorMessage(err));
+    } finally {
+      setModelLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadModelCatalog();
+  }, [loadModelCatalog]);
+
+  const handleLanguageSelect = useCallback(
+    (code: Language) => {
+      if (code === language) return;
+      // Persisted by the i18n provider; curriculum/question fetches key off
+      // `language`, so the content re-fetches itself in the new language.
+      setLanguage(code);
+      showAppToast({
+        type: 'success',
+        title: t('languageSettings.changedTitle'),
+        message: t('languageSettings.changedMessage'),
+      });
+    },
+    [language, setLanguage, t],
+  );
+
+  const handleModelSwitched = useCallback(
+    (result: SetModelResult) => {
+      setModelWarning(result.warning);
+      setModelCatalog((prev) =>
+        prev
+          ? {
+              ...prev,
+              current: { mode: result.mode, model: result.model },
+              // A local switch leaves the new model resident in memory.
+              residentLocalModel:
+                result.mode === 'local' ? result.model : prev.residentLocalModel,
+            }
+          : prev,
+      );
+      setModelModalVisible(false);
+      showAppToast({
+        type: result.warning ? 'info' : 'success',
+        title: t('modelSelector.switchedTitle'),
+        message: result.warning ?? t('modelSelector.switchedMessage', { model: result.model }),
+      });
+    },
+    [t],
+  );
 
   const loadData = useCallback(
     async (asRefresh = false) => {
@@ -211,6 +324,31 @@ export default function MyPreferencesScreen() {
       }),
     );
   }, [universities]);
+
+  const currentModelLabel = useMemo(() => {
+    if (!modelCatalog) return '';
+    const { mode, model } = modelCatalog.current;
+    const list = mode === 'local' ? modelCatalog.local : modelCatalog.cloud;
+    return list.find((entry) => entry.id === model)?.label || model;
+  }, [modelCatalog]);
+
+  const currentModelSubtitle = useMemo(() => {
+    if (!modelCatalog) return '';
+    const { mode, model } = modelCatalog.current;
+    const parts = [
+      mode === 'local' ? t('modelSelector.modeLocal') : t('modelSelector.modeCloud'),
+    ];
+    if (mode === 'local') {
+      const entry = modelCatalog.local.find((item) => item.id === model);
+      if (entry) {
+        parts.push(entry.vision ? t('modelSelector.vision') : t('modelSelector.textOnly'));
+      }
+      if (modelCatalog.residentLocalModel === model) {
+        parts.push(t('modelSelector.loadedNoWait'));
+      }
+    }
+    return parts.join(' · ');
+  }, [modelCatalog, t]);
 
   const initialSnapshot = useMemo(
     () => JSON.stringify({
@@ -366,11 +504,123 @@ export default function MyPreferencesScreen() {
             refreshing={refreshing}
             onRefresh={() => {
               void loadData(true);
+              void loadModelCatalog();
             }}
             tintColor={theme.accentStrong}
           />
         }
       >
+        <Section title={t('languageSettings.title')} theme={theme}>
+          <Text
+            className="mb-1 w-full text-[11px] font-space"
+            style={{ color: theme.textMuted }}
+          >
+            {t('languageSettings.description')}
+          </Text>
+          {LANGUAGE_OPTIONS.map((option) => {
+            const isActive = language === option.code;
+            return (
+              <SettingRow
+                key={option.code}
+                selected={isActive}
+                theme={theme}
+                onPress={() => handleLanguageSelect(option.code)}
+              >
+                <Text style={{ fontSize: 22 }}>{option.flag}</Text>
+                <View className="flex-1">
+                  <Text
+                    className="text-sm font-space-semibold"
+                    style={{ color: isActive ? theme.accent : theme.text }}
+                  >
+                    {option.nativeName}
+                  </Text>
+                  {option.nativeName !== option.englishName ? (
+                    <Text
+                      className="mt-0.5 text-[11px] font-space"
+                      style={{ color: theme.textMuted }}
+                    >
+                      {option.englishName}
+                    </Text>
+                  ) : null}
+                </View>
+                {isActive ? <Check size={18} color={theme.accent} /> : null}
+              </SettingRow>
+            );
+          })}
+        </Section>
+
+        <Section title={t('modelSelector.title')} theme={theme}>
+          {modelLoading ? (
+            <View className="w-full flex-row items-center gap-2 py-2">
+              <ActivityIndicator size="small" color={theme.accentStrong} />
+              <Text className="text-xs font-space" style={{ color: theme.textMuted }}>
+                {t('modelSelector.loading')}
+              </Text>
+            </View>
+          ) : !modelCatalog ? (
+            <View className="w-full gap-2">
+              <View className="flex-row items-center gap-2">
+                <TriangleAlert size={16} color={theme.warningText} />
+                <Text
+                  className="flex-1 text-sm font-space-semibold"
+                  style={{ color: theme.textSoft }}
+                >
+                  {t('modelSelector.unavailable')}
+                </Text>
+              </View>
+              <Text className="text-[11px] font-space" style={{ color: theme.textMuted }}>
+                {modelError || t('modelSelector.unavailableHint')}
+              </Text>
+              <View className="flex-row">
+                <SelectableChip
+                  label={t('common.retry')}
+                  selected={false}
+                  theme={theme}
+                  onPress={() => {
+                    void loadModelCatalog();
+                  }}
+                />
+              </View>
+            </View>
+          ) : (
+            <>
+              <SettingRow theme={theme} onPress={() => setModelModalVisible(true)}>
+                {modelCatalog.current.mode === 'local' ? (
+                  <Cpu size={18} color={theme.accent} />
+                ) : (
+                  <Cloud size={18} color={theme.accent} />
+                )}
+                <View className="flex-1">
+                  <Text className="text-sm font-space-semibold" style={{ color: theme.text }}>
+                    {currentModelLabel}
+                  </Text>
+                  <Text
+                    className="mt-0.5 text-[11px] font-space"
+                    style={{ color: theme.textMuted }}
+                  >
+                    {currentModelSubtitle}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={theme.textMuted} />
+              </SettingRow>
+              {modelWarning ? (
+                <View
+                  className="w-full flex-row items-start gap-2 rounded-2xl p-3"
+                  style={{ backgroundColor: theme.warningBg }}
+                >
+                  <TriangleAlert size={16} color={theme.warningText} />
+                  <Text
+                    className="flex-1 text-[11px] font-space"
+                    style={{ color: theme.warningText }}
+                  >
+                    {modelWarning}
+                  </Text>
+                </View>
+              ) : null}
+            </>
+          )}
+        </Section>
+
         <Section title={t('preferences.learningGoal')} theme={theme}>
           {goalOptions.map((option) => (
             <SelectableChip
@@ -497,6 +747,13 @@ export default function MyPreferencesScreen() {
           </View>
         </TouchableOpacity>
       </ScrollView>
+
+      <ModelSelectorModal
+        visible={modelModalVisible}
+        catalog={modelCatalog}
+        onClose={() => setModelModalVisible(false)}
+        onSwitched={handleModelSwitched}
+      />
     </SafeAreaView>
   );
 }

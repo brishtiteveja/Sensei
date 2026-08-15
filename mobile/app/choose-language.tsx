@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Animated, { FadeIn, FadeInUp, FadeOut, ZoomIn } from 'react-native-reanimated';
 import { useI18n } from '@/i18n/i18n-context';
+import { LANGUAGE_REGIONS } from '@/constants/languages';
 import { useAppTheme } from '@/theme';
 import {
   MathIllustration,
@@ -17,17 +18,8 @@ import {
   WelcomeIllustration,
 } from '@/illustrations';
 
-const COUNTRIES = [
-  { id: 'bd', flag: '🇧🇩', name: 'বাংলাদেশ', nameEn: 'Bangladesh', lang: 'bn' },
-  { id: 'in', flag: '🇮🇳', name: 'भारत', nameEn: 'India', lang: 'hi' },
-  { id: 'cn', flag: '🇨🇳', name: '中国', nameEn: 'China', lang: 'zh' },
-  { id: 'gb', flag: '🇬🇧', name: 'United Kingdom', nameEn: 'United Kingdom', lang: 'en' },
-  { id: 'es', flag: '🇪🇸', name: 'España', nameEn: 'Spain', lang: 'es' },
-  { id: 'idn', flag: '🇮🇩', name: 'Indonesia', nameEn: 'Indonesia', lang: 'id' },
-  { id: 'my', flag: '🇲🇾', name: 'Malaysia', nameEn: 'Malaysia', lang: 'ms' },
-  { id: 'ng', flag: '🇳🇬', name: 'Nigeria', nameEn: 'Nigeria', lang: 'ha' },
-  { id: 'other', flag: '🌍', name: 'Other', nameEn: 'Other', lang: 'en' },
-];
+// Shared with the language section in Settings so both lists stay identical.
+const COUNTRIES = LANGUAGE_REGIONS;
 
 const LANGUAGE_CHOSEN_KEY = 'language_chosen';
 const SPLASH_DURATION = 2800;
