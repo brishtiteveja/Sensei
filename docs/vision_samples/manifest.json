@@ -1,0 +1,584 @@
+[
+  {
+    "id": "c00_print_clean",
+    "file": "c00_print_clean.png",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c01_hand_clean",
+    "file": "c01_hand_clean.png",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c02_hand_clean_indie",
+    "file": "c02_hand_clean_indie.png",
+    "problem": "fraction",
+    "lines": [
+      "1/2 + 1/3",
+      "= (1+1)/(2+3)",
+      "= 2/5"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds numerators and denominators instead of using an LCD",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c03_hand_rot3",
+    "file": "c03_hand_rot3.png",
+    "problem": "kinematics",
+    "lines": [
+      "v = u + at",
+      "u = 20,  a = -9.8,  t = 3",
+      "v = 20 + (-9.8)(3)",
+      "v = 20 - 29.4",
+      "v = 9.4"
+    ],
+    "error_line": 5,
+    "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+    "script": "latin",
+    "conditions": {
+      "rot": 3.0
+    }
+  },
+  {
+    "id": "c04_hand_rot7_persp",
+    "file": "c04_hand_rot7_persp.png",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {
+      "rot": -7.0,
+      "persp": 0.06
+    }
+  },
+  {
+    "id": "c05_hand_shadow",
+    "file": "c05_hand_shadow.png",
+    "problem": "distrib",
+    "lines": [
+      "5(x - 3) = 20",
+      "5x - 15 = 20",
+      "5x = 20 - 15",
+      "5x = 5",
+      "x = 1"
+    ],
+    "error_line": 3,
+    "truth": "line 3 subtracts 15 instead of adding it",
+    "script": "latin",
+    "conditions": {
+      "light": 0.55
+    }
+  },
+  {
+    "id": "c06_hand_jpeg35",
+    "file": "c06_hand_jpeg35.jpg",
+    "problem": "fraction",
+    "lines": [
+      "1/2 + 1/3",
+      "= (1+1)/(2+3)",
+      "= 2/5"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds numerators and denominators instead of using an LCD",
+    "script": "latin",
+    "conditions": {
+      "jpeg": 35
+    }
+  },
+  {
+    "id": "c07_hand_phone_full",
+    "file": "c07_hand_phone_full.jpg",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {
+      "rot": 4.5,
+      "persp": 0.05,
+      "light": 0.5,
+      "blur": 0.7,
+      "jpeg": 30,
+      "scale": 0.75
+    }
+  },
+  {
+    "id": "c08_hand_phone_full2",
+    "file": "c08_hand_phone_full2.jpg",
+    "problem": "kinematics",
+    "lines": [
+      "v = u + at",
+      "u = 20,  a = -9.8,  t = 3",
+      "v = 20 + (-9.8)(3)",
+      "v = 20 - 29.4",
+      "v = 9.4"
+    ],
+    "error_line": 5,
+    "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+    "script": "latin",
+    "conditions": {
+      "rot": -5.5,
+      "persp": 0.06,
+      "light": 0.45,
+      "blur": 0.8,
+      "jpeg": 32,
+      "scale": 0.8
+    }
+  },
+  {
+    "id": "c09_exponent_clean",
+    "file": "c09_exponent_clean.png",
+    "problem": "exponent",
+    "lines": [
+      "A = s^2 ,  s = 4",
+      "A = (4)^2",
+      "A = 8",
+      "A = 8 cm^2"
+    ],
+    "error_line": 3,
+    "truth": "line 3 doubles 4 instead of squaring it; (4)^2 = 16",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c10_exponent_phone",
+    "file": "c10_exponent_phone.jpg",
+    "problem": "exponent",
+    "lines": [
+      "A = s^2 ,  s = 4",
+      "A = (4)^2",
+      "A = 8",
+      "A = 8 cm^2"
+    ],
+    "error_line": 3,
+    "truth": "line 3 doubles 4 instead of squaring it; (4)^2 = 16",
+    "script": "latin",
+    "conditions": {
+      "rot": 3.5,
+      "light": 0.45,
+      "blur": 0.7,
+      "jpeg": 32,
+      "scale": 0.8
+    }
+  },
+  {
+    "id": "c11_correct_clean",
+    "file": "c11_correct_clean.png",
+    "problem": "correct",
+    "lines": [
+      "2x + 7 = 15",
+      "2x = 15 - 7",
+      "2x = 8",
+      "x = 4"
+    ],
+    "error_line": null,
+    "truth": "no error; control for false positives",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c12_correct_phone",
+    "file": "c12_correct_phone.jpg",
+    "problem": "correct",
+    "lines": [
+      "2x + 7 = 15",
+      "2x = 15 - 7",
+      "2x = 8",
+      "x = 4"
+    ],
+    "error_line": null,
+    "truth": "no error; control for false positives",
+    "script": "latin",
+    "conditions": {
+      "rot": -4.0,
+      "persp": 0.05,
+      "light": 0.5,
+      "blur": 0.8,
+      "jpeg": 30,
+      "scale": 0.78
+    }
+  },
+  {
+    "id": "c13_bn_clean",
+    "file": "c13_bn_clean.png",
+    "problem": "bn_sign",
+    "lines": [
+      "২x + ৭ = ১৫",
+      "২x = ১৫ - ৭",
+      "২x = ৮",
+      "x = ৮ × ২ = ১৬"
+    ],
+    "error_line": 4,
+    "truth": "line 4 multiplies by 2 instead of dividing by 2",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "c14_bn_hand_galada",
+    "file": "c14_bn_hand_galada.png",
+    "problem": "bn_sign",
+    "lines": [
+      "২x + ৭ = ১৫",
+      "২x = ১৫ - ৭",
+      "২x = ৮",
+      "x = ৮ × ২ = ১৬"
+    ],
+    "error_line": 4,
+    "truth": "line 4 multiplies by 2 instead of dividing by 2",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "c15_bn_phone",
+    "file": "c15_bn_phone.jpg",
+    "problem": "bn_sign",
+    "lines": [
+      "২x + ৭ = ১৫",
+      "২x = ১৫ - ৭",
+      "২x = ৮",
+      "x = ৮ × ২ = ১৬"
+    ],
+    "error_line": 4,
+    "truth": "line 4 multiplies by 2 instead of dividing by 2",
+    "script": "bn",
+    "conditions": {
+      "rot": 4.0,
+      "persp": 0.05,
+      "light": 0.5,
+      "blur": 0.7,
+      "jpeg": 32,
+      "scale": 0.8
+    }
+  },
+  {
+    "id": "c16_bn_mixed_clean",
+    "file": "c16_bn_mixed_clean.png",
+    "problem": "bn_mixed",
+    "lines": [
+      "সমাধান ঃ",
+      "5(x - 3) = 20",
+      "5x - 15 = 20",
+      "5x = 20 - 15",
+      "x = 1",
+      "উত্তর : x = 1"
+    ],
+    "error_line": 4,
+    "truth": "line 4 subtracts 15 instead of adding it",
+    "script": "bn_mixed",
+    "conditions": {}
+  },
+  {
+    "id": "c17_bn_mixed_phone",
+    "file": "c17_bn_mixed_phone.jpg",
+    "problem": "bn_mixed",
+    "lines": [
+      "সমাধান ঃ",
+      "5(x - 3) = 20",
+      "5x - 15 = 20",
+      "5x = 20 - 15",
+      "x = 1",
+      "উত্তর : x = 1"
+    ],
+    "error_line": 4,
+    "truth": "line 4 subtracts 15 instead of adding it",
+    "script": "bn_mixed",
+    "conditions": {
+      "rot": -3.5,
+      "light": 0.5,
+      "blur": 0.7,
+      "jpeg": 32,
+      "scale": 0.8
+    }
+  },
+  {
+    "id": "c18_bn_correct_clean",
+    "file": "c18_bn_correct_clean.png",
+    "problem": "bn_correct",
+    "lines": [
+      "৩x = ২১",
+      "x = ২১ ÷ ৩",
+      "x = ৭"
+    ],
+    "error_line": null,
+    "truth": "no error; Bengali control for false positives",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "c19_messy_crossout",
+    "file": "c19_messy_crossout.png",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c20_messy_phone",
+    "file": "c20_messy_phone.jpg",
+    "problem": "distrib",
+    "lines": [
+      "5(x - 3) = 20",
+      "5x - 15 = 20",
+      "5x = 20 - 15",
+      "5x = 5",
+      "x = 1"
+    ],
+    "error_line": 3,
+    "truth": "line 3 subtracts 15 instead of adding it",
+    "script": "latin",
+    "conditions": {
+      "rot": 5.0,
+      "persp": 0.06,
+      "light": 0.5,
+      "blur": 0.8,
+      "jpeg": 30,
+      "scale": 0.78
+    }
+  },
+  {
+    "id": "c21_cramped",
+    "file": "c21_cramped.png",
+    "problem": "kinematics",
+    "lines": [
+      "v = u + at",
+      "u = 20,  a = -9.8,  t = 3",
+      "v = 20 + (-9.8)(3)",
+      "v = 20 - 29.4",
+      "v = 9.4"
+    ],
+    "error_line": 5,
+    "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c22_pencil_faint",
+    "file": "c22_pencil_faint.jpg",
+    "problem": "fraction",
+    "lines": [
+      "1/2 + 1/3",
+      "= (1+1)/(2+3)",
+      "= 2/5"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds numerators and denominators instead of using an LCD",
+    "script": "latin",
+    "conditions": {
+      "light": 0.4,
+      "jpeg": 40
+    }
+  },
+  {
+    "id": "c23_lowres",
+    "file": "c23_lowres.jpg",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {
+      "rot": 3.0,
+      "jpeg": 40,
+      "scale": 0.42
+    }
+  },
+  {
+    "id": "c24_scrawl_clean",
+    "file": "c24_scrawl_clean.png",
+    "problem": "distrib",
+    "lines": [
+      "5(x - 3) = 20",
+      "5x - 15 = 20",
+      "5x = 20 - 15",
+      "5x = 5",
+      "x = 1"
+    ],
+    "error_line": 3,
+    "truth": "line 3 subtracts 15 instead of adding it",
+    "script": "latin",
+    "conditions": {}
+  },
+  {
+    "id": "c25_scrawl_phone",
+    "file": "c25_scrawl_phone.jpg",
+    "problem": "sign",
+    "lines": [
+      "3x + 5 = 20",
+      "3x = 20 + 5",
+      "3x = 25",
+      "x = 25/3"
+    ],
+    "error_line": 2,
+    "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+    "script": "latin",
+    "conditions": {
+      "rot": 6.5,
+      "persp": 0.07,
+      "light": 0.5,
+      "blur": 1.0,
+      "jpeg": 28,
+      "scale": 0.72
+    }
+  },
+  {
+    "id": "c26_bn_scrawl_phone",
+    "file": "c26_bn_scrawl_phone.jpg",
+    "problem": "bn_sign",
+    "lines": [
+      "২x + ৭ = ১৫",
+      "২x = ১৫ - ৭",
+      "২x = ৮",
+      "x = ৮ × ২ = ১৬"
+    ],
+    "error_line": 4,
+    "truth": "line 4 multiplies by 2 instead of dividing by 2",
+    "script": "bn",
+    "conditions": {
+      "rot": -6.0,
+      "persp": 0.06,
+      "light": 0.5,
+      "blur": 0.9,
+      "jpeg": 30,
+      "scale": 0.75
+    }
+  },
+  {
+    "id": "c27_tiny",
+    "file": "c27_tiny.jpg",
+    "problem": "kinematics",
+    "lines": [
+      "v = u + at",
+      "u = 20,  a = -9.8,  t = 3",
+      "v = 20 + (-9.8)(3)",
+      "v = 20 - 29.4",
+      "v = 9.4"
+    ],
+    "error_line": 5,
+    "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+    "script": "latin",
+    "conditions": {
+      "rot": 3.0,
+      "jpeg": 35,
+      "scale": 0.3
+    }
+  },
+  {
+    "id": "c28_heavyblur",
+    "file": "c28_heavyblur.jpg",
+    "problem": "exponent",
+    "lines": [
+      "A = s^2 ,  s = 4",
+      "A = (4)^2",
+      "A = 8",
+      "A = 8 cm^2"
+    ],
+    "error_line": 3,
+    "truth": "line 3 doubles 4 instead of squaring it; (4)^2 = 16",
+    "script": "latin",
+    "conditions": {
+      "rot": -3.0,
+      "light": 0.45,
+      "blur": 2.4,
+      "jpeg": 35,
+      "scale": 0.8
+    }
+  },
+  {
+    "id": "d01_bn_chart_print",
+    "file": "d01_bn_chart_print.png",
+    "problem": "bn_chart",
+    "lines": [
+      "০  ১  ২  ৩  ৪",
+      "৫  ৬  ৭  ৮  ৯"
+    ],
+    "error_line": null,
+    "truth": "not a proof; a plain Bengali digit chart 0-9 in two rows",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "d02_bn_print_pristine",
+    "file": "d02_bn_print_pristine.png",
+    "problem": "bn_sign",
+    "lines": [
+      "২x + ৭ = ১৫",
+      "২x = ১৫ - ৭",
+      "২x = ৮",
+      "x = ৮ × ২ = ১৬"
+    ],
+    "error_line": 4,
+    "truth": "line 4 multiplies by 2 instead of dividing by 2",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "d03_bn_oneline_huge",
+    "file": "d03_bn_oneline_huge.png",
+    "problem": "bn_oneline",
+    "lines": [
+      "২x + ৭ = ১৫"
+    ],
+    "error_line": null,
+    "truth": "single line, Bengali numerals, nothing to solve",
+    "script": "bn",
+    "conditions": {}
+  },
+  {
+    "id": "d04_bn_chart_hand",
+    "file": "d04_bn_chart_hand.png",
+    "problem": "bn_chart",
+    "lines": [
+      "০  ১  ২  ৩  ৪",
+      "৫  ৬  ৭  ৮  ৯"
+    ],
+    "error_line": null,
+    "truth": "not a proof; a plain Bengali digit chart 0-9 in two rows",
+    "script": "bn",
+    "conditions": {}
+  }
+]

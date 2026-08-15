@@ -27,3 +27,7 @@ dist/
 # Active course is runtime state, rebuilt by POST /curriculum/build.
 # A known-good copy lives in backend/fixtures/ as demo insurance.
 backend/graph.json
+
+# Vision sweep intermediates: regenerable, and the fonts are copied system files.
+docs/vision_samples/_fonts/
+docs/vision_samples/_preproc/

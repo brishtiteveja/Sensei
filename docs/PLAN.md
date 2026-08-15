@@ -206,13 +206,53 @@ The closing move only lands if nothing reaches for the network:
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| **Real handwriting ≫ harder than rendered text.** Already saw `^2` misread. | **High** | Test genuine handwriting photos **day one**. Fallback: `qwen3-vl-32b-instruct-gguf` (better, 10 tok/s), swap cost paid once at boot. Keep a known-good sample as demo insurance. |
+| ~~Real handwriting harder than rendered text~~ — **RETIRED, tested.** | Low | 20/22 on synthetic handwriting incl. 7° rotation, keystone, shadow, JPEG q28, defocus, 0.30× downscale. The earlier `(20)^2` wobble did not reproduce (12/12). See `VISION_FINDINGS.md`. |
+| **Bengali numerals `০১২৩৪৫৬৭৮৯` are unreadable.** 0/9, confident fabrication every time. | **CRITICAL** | Demo in **Bengali prose + Latin digits** (validated: `c16`/`c17` pass under full phone degradation). Not fixable by image quality, prompting, or model choice — see below. |
+| ~~`qwen3-vl-32b` as quality fallback~~ — **DISPROVEN.** | — | It is *worse* on Latin (17/22 vs 20/22), identically broken on Bengali (0/9), and 4× slower. **Do not use.** The pin stands. |
 | Cold swap mid-demo | **High** | One pin; pre-warm; never issue a second model id |
 | Fresh GB10 ≠ dev box | **High** | Bootstrap script written and rehearsed on a clean machine, stage 0 |
 | Curriculum agent produces a bad graph | Medium | Hand-authored fallback graph for the demo subject; agent output shown as *live generation*, not the thing the rest of the demo depends on |
 | Model quality varies by language | Medium | Bengali validated. Test any second demo language before promising it on stage |
 | See track expects VSS (video-shaped) | Medium | Lead Spark. Don't claim a track we aren't really entering |
 | Conference wifi | None | Irrelevant by design — that's the point |
+
+---
+
+## ⚠️ Demo constraint: Bengali numerals
+
+Measured, not suspected. Full evidence in [`VISION_FINDINGS.md`](./VISION_FINDINGS.md).
+
+The pinned model reads Bengali **prose** perfectly — `সমাধানঃ`, `উত্তর : x = 1` came back verbatim
+even under the full phone-degradation stack. It cannot read Bengali **digits**:
+
+| Input | Expected | Got | Score |
+|---|---|---|---|
+| Printed digit chart, pristine 90px | `০১২৩৪৫৬৭৮৯` | `0627867966` | 2/10 |
+| One line, printed, pristine 110px | `২x + ৭ = ১৫` | `5x + 9 = 50` | — |
+
+~30% digit accuracy against a 10% chance baseline, on *perfect* input. This is not a
+handwriting problem, an image-quality problem, or a prompting problem — the model lacks a
+reliable internal representation of those glyphs.
+
+**Why this is worse than a plain failure:** it never hedges. On two cases where the student
+wrote `x = ৮ × ২ = ১৬` (multiplying instead of dividing), it transcribed `x = 11 / 2 = 5.5` —
+**inverting the student's actual error**. On a fully correct Bengali page it invented a mistake
+in all four variants. A tutor that confidently teaches against a problem the student never wrote
+is worse than one that says "I can't read this."
+
+**Therefore the demo writes Bengali prose with Latin digits.** `c16`/`c17` validate this path
+end to end, including under phone degradation. If that is not authentic to how HSC students
+actually write, the alternative is to demo the vision beat in a Latin-numeral language
+(Indonesian UN, Kenyan KCSE — both already in the pitch) and keep Bangla for the tutoring beat,
+which is flawless.
+
+**Also worth adopting:** the model is not deterministic even at `temperature=0`. A preprocessing
+pass (deskew → lighting flatten → autocontrast → cap 1400px) converts borderline coin-flip cases
+into deterministic passes at ~70 extra prompt tokens and no latency cost. Its value is variance
+reduction on stage, not headline accuracy.
+
+**Do not adopt** the two-pass "strict" prompt — it scored *worse* (18/22) by over-analysing
+correct lines. Only its crossed-out-work instruction is worth salvaging.
 
 ---
 
