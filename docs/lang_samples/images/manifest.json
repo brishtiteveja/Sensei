@@ -1,0 +1,265 @@
+{
+  "hindi_n01_chart_print": {
+    "lang": "hindi",
+    "kind": "chart",
+    "script": "deva",
+    "gt_digits": "0123456789",
+    "font": "NotoSerifDevanagari.ttf"
+  },
+  "hindi_n02_eq_print": {
+    "lang": "hindi",
+    "kind": "equation",
+    "script": "deva",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "NotoSerifDevanagari.ttf"
+  },
+  "hindi_n03_work_print": {
+    "lang": "hindi",
+    "kind": "work",
+    "script": "deva",
+    "gt_lines": [
+      "हल:",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "NotoSerifDevanagari.ttf"
+  },
+  "hindi_n04_chart_hand": {
+    "lang": "hindi",
+    "kind": "chart",
+    "script": "deva",
+    "gt_digits": "0123456789",
+    "font": "Kalam.ttf"
+  },
+  "arabic_n01_chart_print": {
+    "lang": "arabic",
+    "kind": "chart",
+    "script": "arab",
+    "gt_digits": "0123456789",
+    "font": "NotoNaskhArabic.ttf"
+  },
+  "arabic_n02_eq_print": {
+    "lang": "arabic",
+    "kind": "equation",
+    "script": "arab",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "NotoNaskhArabic.ttf"
+  },
+  "arabic_n03_work_print": {
+    "lang": "arabic",
+    "kind": "work",
+    "script": "arab",
+    "gt_lines": [
+      "(al-hall:)",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "NotoNaskhArabic.ttf"
+  },
+  "bengali_n01_chart_print": {
+    "lang": "bengali",
+    "kind": "chart",
+    "script": "bengali",
+    "gt_digits": "0123456789",
+    "font": "NotoSerifBengali.ttf"
+  },
+  "bengali_n02_eq_print": {
+    "lang": "bengali",
+    "kind": "equation",
+    "script": "bengali",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "NotoSerifBengali.ttf"
+  },
+  "bengali_n03_work_print": {
+    "lang": "bengali",
+    "kind": "work",
+    "script": "bengali",
+    "gt_lines": [
+      "সমাধানঃ",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "NotoSerifBengali.ttf"
+  },
+  "bengali_n04_chart_hand": {
+    "lang": "bengali",
+    "kind": "chart",
+    "script": "bengali",
+    "gt_digits": "0123456789",
+    "font": "AtmaSlab.ttf"
+  },
+  "indonesian_n01_chart_print": {
+    "lang": "indonesian",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "DejaVuSerif.ttf"
+  },
+  "indonesian_n02_eq_print": {
+    "lang": "indonesian",
+    "kind": "equation",
+    "script": "latin",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "DejaVuSerif.ttf"
+  },
+  "indonesian_n03_work_print": {
+    "lang": "indonesian",
+    "kind": "work",
+    "script": "latin",
+    "gt_lines": [
+      "Penyelesaian:",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "DejaVuSerif.ttf"
+  },
+  "indonesian_n04_chart_hand": {
+    "lang": "indonesian",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "Caveat.ttf"
+  },
+  "swahili_n01_chart_print": {
+    "lang": "swahili",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "DejaVuSerif.ttf"
+  },
+  "swahili_n02_eq_print": {
+    "lang": "swahili",
+    "kind": "equation",
+    "script": "latin",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "DejaVuSerif.ttf"
+  },
+  "swahili_n03_work_print": {
+    "lang": "swahili",
+    "kind": "work",
+    "script": "latin",
+    "gt_lines": [
+      "Suluhisho:",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "DejaVuSerif.ttf"
+  },
+  "swahili_n04_chart_hand": {
+    "lang": "swahili",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "IndieFlower-Regular.ttf"
+  },
+  "spanish_n01_chart_print": {
+    "lang": "spanish",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "DejaVuSerif.ttf"
+  },
+  "spanish_n02_eq_print": {
+    "lang": "spanish",
+    "kind": "equation",
+    "script": "latin",
+    "gt": "2x + 7 = 15",
+    "gt_digits": "2715",
+    "font": "DejaVuSerif.ttf"
+  },
+  "spanish_n03_work_print": {
+    "lang": "spanish",
+    "kind": "work",
+    "script": "latin",
+    "gt_lines": [
+      "Solución:",
+      "2x + 7 = 15",
+      "2x = 8",
+      "x = 8 x 2 = 16"
+    ],
+    "gt_error_line": 4,
+    "gt_digits": "2715288216",
+    "note": "student multiplied instead of dividing; x should be 4",
+    "font": "DejaVuSerif.ttf"
+  },
+  "spanish_n04_chart_hand": {
+    "lang": "spanish",
+    "kind": "chart",
+    "script": "latin",
+    "gt_digits": "0123456789",
+    "font": "PatrickHand-Regular.ttf"
+  },
+  "hindi_n05_random_print": {
+    "lang": "hindi",
+    "kind": "random",
+    "script": "deva",
+    "gt_digits": "479126308519726453",
+    "gt_lines": [
+      "47 91 26",
+      "30 85 19",
+      "72 64 53"
+    ],
+    "font": "NotoSerifDevanagari.ttf"
+  },
+  "arabic_n05_random_print": {
+    "lang": "arabic",
+    "kind": "random",
+    "script": "arab",
+    "gt_digits": "479126308519726453",
+    "gt_lines": [
+      "47 91 26",
+      "30 85 19",
+      "72 64 53"
+    ],
+    "font": "NotoNaskhArabic.ttf"
+  },
+  "bengali_n05_random_print": {
+    "lang": "bengali",
+    "kind": "random",
+    "script": "bengali",
+    "gt_digits": "479126308519726453",
+    "gt_lines": [
+      "47 91 26",
+      "30 85 19",
+      "72 64 53"
+    ],
+    "font": "NotoSerifBengali.ttf"
+  },
+  "spanish_n05_random_print": {
+    "lang": "spanish",
+    "kind": "random",
+    "script": "latin",
+    "gt_digits": "479126308519726453",
+    "gt_lines": [
+      "47 91 26",
+      "30 85 19",
+      "72 64 53"
+    ],
+    "font": "DejaVuSerif.ttf"
+  }
+}

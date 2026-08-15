@@ -1,0 +1,474 @@
+{
+ "c01_hand_clean": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c01_hand_clean.png",
+  "w": 1150,
+  "h": 562,
+  "bands": [
+   {
+    "y0": 101,
+    "y1": 163,
+    "x0": 146,
+    "x1": 438
+   },
+   {
+    "y0": 187,
+    "y1": 249,
+    "x0": 133,
+    "x1": 434
+   },
+   {
+    "y0": 276,
+    "y1": 335,
+    "x0": 142,
+    "x1": 349
+   },
+   {
+    "y0": 353,
+    "y1": 414,
+    "x0": 146,
+    "x1": 376
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "3x + 5 = 20",
+   "3x = 20 + 5",
+   "3x = 25",
+   "x = 25/3"
+  ],
+  "error_line": 2,
+  "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+  "skew": 0.0
+ },
+ "c02_hand_clean_indie": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c02_hand_clean_indie.png",
+  "w": 1150,
+  "h": 560,
+  "bands": [
+   {
+    "y0": 102,
+    "y1": 162,
+    "x0": 124,
+    "x1": 354
+   },
+   {
+    "y0": 181,
+    "y1": 240,
+    "x0": 135,
+    "x1": 475
+   },
+   {
+    "y0": 262,
+    "y1": 318,
+    "x0": 128,
+    "x1": 303
+   }
+  ],
+  "n_lines": 3,
+  "gt_lines": [
+   "1/2 + 1/3",
+   "= (1+1)/(2+3)",
+   "= 2/5"
+  ],
+  "error_line": 2,
+  "truth": "line 2 adds numerators and denominators instead of using an LCD",
+  "skew": 0.0
+ },
+ "c04_hand_rot7_persp": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c04_hand_rot7_persp.png",
+  "w": 1296,
+  "h": 860,
+  "bands": [
+   {
+    "y0": 258,
+    "y1": 318,
+    "x0": 250,
+    "x1": 527
+   },
+   {
+    "y0": 338,
+    "y1": 399,
+    "x0": 242,
+    "x1": 519
+   },
+   {
+    "y0": 422,
+    "y1": 484,
+    "x0": 236,
+    "x1": 440
+   },
+   {
+    "y0": 506,
+    "y1": 572,
+    "x0": 245,
+    "x1": 470
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "3x + 5 = 20",
+   "3x = 20 + 5",
+   "3x = 25",
+   "x = 25/3"
+  ],
+  "error_line": 2,
+  "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+  "skew": 8.0
+ },
+ "c05_hand_shadow": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c05_hand_shadow.png",
+  "w": 1150,
+  "h": 610,
+  "bands": [
+   {
+    "y0": 112,
+    "y1": 159,
+    "x0": 133,
+    "x1": 448
+   },
+   {
+    "y0": 182,
+    "y1": 231,
+    "x0": 135,
+    "x1": 440
+   },
+   {
+    "y0": 256,
+    "y1": 305,
+    "x0": 122,
+    "x1": 424
+   },
+   {
+    "y0": 339,
+    "y1": 382,
+    "x0": 129,
+    "x1": 325
+   },
+   {
+    "y0": 417,
+    "y1": 464,
+    "x0": 137,
+    "x1": 294
+   }
+  ],
+  "n_lines": 5,
+  "gt_lines": [
+   "5(x - 3) = 20",
+   "5x - 15 = 20",
+   "5x = 20 - 15",
+   "5x = 5",
+   "x = 1"
+  ],
+  "error_line": 3,
+  "truth": "line 3 subtracts 15 instead of adding it",
+  "skew": 0.0
+ },
+ "c07_hand_phone_full": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c07_hand_phone_full.png",
+  "w": 924,
+  "h": 543,
+  "bands": [
+   {
+    "y0": 141,
+    "y1": 184,
+    "x0": 157,
+    "x1": 366
+   },
+   {
+    "y0": 203,
+    "y1": 249,
+    "x0": 160,
+    "x1": 365
+   },
+   {
+    "y0": 266,
+    "y1": 309,
+    "x0": 151,
+    "x1": 302
+   },
+   {
+    "y0": 326,
+    "y1": 374,
+    "x0": 151,
+    "x1": 317
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "3x + 5 = 20",
+   "3x = 20 + 5",
+   "3x = 25",
+   "x = 25/3"
+  ],
+  "error_line": 2,
+  "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+  "skew": -3.5
+ },
+ "c08_hand_phone_full2": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c08_hand_phone_full2.png",
+  "w": 1012,
+  "h": 672,
+  "bands": [
+   {
+    "y0": 175,
+    "y1": 212,
+    "x0": 174,
+    "x1": 377
+   },
+   {
+    "y0": 232,
+    "y1": 279,
+    "x0": 170,
+    "x1": 570
+   },
+   {
+    "y0": 294,
+    "y1": 334,
+    "x0": 163,
+    "x1": 475
+   },
+   {
+    "y0": 361,
+    "y1": 398,
+    "x0": 163,
+    "x1": 399
+   },
+   {
+    "y0": 426,
+    "y1": 463,
+    "x0": 159,
+    "x1": 313
+   }
+  ],
+  "n_lines": 5,
+  "gt_lines": [
+   "v = u + at",
+   "u = 20,  a = -9.8,  t = 3",
+   "v = 20 + (-9.8)(3)",
+   "v = 20 - 29.4",
+   "v = 9.4"
+  ],
+  "error_line": 5,
+  "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+  "skew": 5.0
+ },
+ "c09_exponent_clean": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c09_exponent_clean.png",
+  "w": 1150,
+  "h": 562,
+  "bands": [
+   {
+    "y0": 100,
+    "y1": 163,
+    "x0": 136,
+    "x1": 472
+   },
+   {
+    "y0": 185,
+    "y1": 251,
+    "x0": 127,
+    "x1": 351
+   },
+   {
+    "y0": 269,
+    "y1": 331,
+    "x0": 135,
+    "x1": 312
+   },
+   {
+    "y0": 357,
+    "y1": 419,
+    "x0": 135,
+    "x1": 397
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "A = s^2 ,  s = 4",
+   "A = (4)^2",
+   "A = 8",
+   "A = 8 cm^2"
+  ],
+  "error_line": 3,
+  "truth": "line 3 doubles 4 instead of squaring it; (4)^2 = 16",
+  "skew": 0.0
+ },
+ "c11_correct_clean": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c11_correct_clean.png",
+  "w": 1150,
+  "h": 562,
+  "bands": [
+   {
+    "y0": 105,
+    "y1": 164,
+    "x0": 136,
+    "x1": 422
+   },
+   {
+    "y0": 184,
+    "y1": 247,
+    "x0": 136,
+    "x1": 414
+   },
+   {
+    "y0": 271,
+    "y1": 333,
+    "x0": 131,
+    "x1": 318
+   },
+   {
+    "y0": 358,
+    "y1": 420,
+    "x0": 144,
+    "x1": 310
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "2x + 7 = 15",
+   "2x = 15 - 7",
+   "2x = 8",
+   "x = 4"
+  ],
+  "error_line": null,
+  "truth": "no error; control for false positives",
+  "skew": 0.0
+ },
+ "c19_messy_crossout": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c19_messy_crossout.png",
+  "w": 1202,
+  "h": 804,
+  "bands": [
+   {
+    "y0": 117,
+    "y1": 186,
+    "x0": 188,
+    "x1": 459
+   },
+   {
+    "y0": 192,
+    "y1": 265,
+    "x0": 167,
+    "x1": 452
+   },
+   {
+    "y0": 276,
+    "y1": 336,
+    "x0": 160,
+    "x1": 358
+   },
+   {
+    "y0": 346,
+    "y1": 422,
+    "x0": 161,
+    "x1": 381
+   }
+  ],
+  "n_lines": 4,
+  "gt_lines": [
+   "3x + 5 = 20",
+   "3x = 20 + 5",
+   "3x = 25",
+   "x = 25/3"
+  ],
+  "error_line": 2,
+  "truth": "line 2 adds 5 instead of subtracting it when moving +5 across =",
+  "skew": -4.25
+ },
+ "c20_messy_phone": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c20_messy_phone.png",
+  "w": 1018,
+  "h": 729,
+  "bands": [
+   {
+    "y0": 174,
+    "y1": 222,
+    "x0": 161,
+    "x1": 410
+   },
+   {
+    "y0": 209,
+    "y1": 270,
+    "x0": 155,
+    "x1": 419
+   },
+   {
+    "y0": 257,
+    "y1": 303,
+    "x0": 153,
+    "x1": 406
+   },
+   {
+    "y0": 285,
+    "y1": 346,
+    "x0": 151,
+    "x1": 330
+   },
+   {
+    "y0": 344,
+    "y1": 385,
+    "x0": 174,
+    "x1": 291
+   }
+  ],
+  "n_lines": 5,
+  "gt_lines": [
+   "5(x - 3) = 20",
+   "5x - 15 = 20",
+   "5x = 20 - 15",
+   "5x = 5",
+   "x = 1"
+  ],
+  "error_line": 3,
+  "truth": "line 3 subtracts 15 instead of adding it",
+  "skew": -8.25
+ },
+ "c21_cramped": {
+  "file": "/home/projects/Sensei/docs/vision_samples/_frames/c21_cramped.png",
+  "w": 1150,
+  "h": 560,
+  "bands": [
+   {
+    "y0": 108,
+    "y1": 158,
+    "x0": 137,
+    "x1": 374
+   },
+   {
+    "y0": 156,
+    "y1": 217,
+    "x0": 131,
+    "x1": 591
+   },
+   {
+    "y0": 206,
+    "y1": 262,
+    "x0": 129,
+    "x1": 495
+   },
+   {
+    "y0": 258,
+    "y1": 312,
+    "x0": 130,
+    "x1": 412
+   },
+   {
+    "y0": 310,
+    "y1": 360,
+    "x0": 122,
+    "x1": 303
+   }
+  ],
+  "n_lines": 5,
+  "gt_lines": [
+   "v = u + at",
+   "u = 20,  a = -9.8,  t = 3",
+   "v = 20 + (-9.8)(3)",
+   "v = 20 - 29.4",
+   "v = 9.4"
+  ],
+  "error_line": 5,
+  "truth": "line 5 arithmetic slip: 20 - 29.4 = -9.4, not 9.4",
+  "skew": 0.0
+ }
+}

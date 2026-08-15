@@ -247,3 +247,218 @@ The 30b pin was restored to resident after the test (`/health` → `{"loaded":["
 | `docs/vision_samples/_fonts/` | handwriting + Bengali TTFs (OFL/Apache) |
 | `docs/vision_samples/_preproc/` | preprocessed versions of every image |
 | `docs/vision_runs/*.jsonl` | every raw model response, one JSON object per call |
+
+---
+---
+
+# Annotated-photo coordinates (P1 beat validation)
+
+**Date:** 2026-08-15 (second sweep, same day)
+**Question:** the sweep above validated error *detection*. This one asks a different
+question — can the model tell us **where on the image** the wrong line is, precisely
+enough to draw a red box on it?
+**Model:** `qwen3-vl-30b-a3b-gguf` only (the pin; never swapped, `/health` confirmed
+resident before and after). `temperature=0`, `max_tokens=700`.
+**Corpus:** 11 of the existing Latin samples, chosen for spread — clean ×3, 7° rotation
++ keystone, lighting gradient, full phone stack ×2, cramped spacing, crossed-out margin
+work, messy+cramped+phone, and the correct-work control. **220 calls**: 165 for the
+four coordinate formats + a production-prompt control (3 repeats each), 55 for the
+recommended pipeline (5 repeats each).
+**Reproduce:** `vision_samples/_run_coords.py` → `vision_runs/coords_30b.jsonl` and
+`coords_pipeline_30b.jsonl`; `vision_samples/_grade_coords.py` grades them.
+Line-segmentation code is `demo/annotate.py`.
+
+---
+
+## Verdict
+
+**NO-GO on asking the model for a bounding box. GO on approach #3** — the model returns
+a line *index*, we segment the image and draw the box ourselves. That path scored
+**50/50 correct line, 5/5 correct abstentions on the control, and 11/11 stable across
+five repeats**, and the segmenter found the right number of lines on **22/22** Latin
+images in the full corpus.
+
+Three reasons the direct-box route fails, in order of how badly they bite:
+
+1. **The model ignores the coordinate system you ask for.** It emitted a 0–1000
+   normalised scale on **93 of the 96** boxes it produced (the other three were the
+   correct-work control returning `[0,0,0,0]`, i.e. no box), whether the prompt asked for
+   fractions of 0–1, for absolute pixels (with the exact width and height supplied), or
+   for Qwen's own `<|box_start|>` grounding format. Taking the instruction at its word
+   puts the box **0% / 7%** on the right line. This is the trap that would have put a
+   red rectangle in the corner of the page on stage.
+2. **Detection gets worse when you ask for a box.** Every coordinate prompt scored
+   70–80% on the line index; the unchanged production prompt scored **97%** on the same
+   images in the same session. Asking for coordinates costs ~20 points of the thing that
+   actually matters.
+3. **A box can only be as right as the line the model named.** Once the coordinate
+   convention is decoded, the *grounding itself is good* — the box lands on the line the
+   model named 84/90 times and the median y-IoU is ~0.80 — but it faithfully boxes the
+   wrong line whenever the model names the wrong line. Good grounding on a bad diagnosis
+   is exactly the failure the beat cannot survive.
+
+---
+
+## Results — four ways of asking
+
+30 error cases per format (10 images × 3 repeats) plus 3 control calls. "box on GT line"
+= box centre-y falls inside the true error line's band. Boxes are graded under the
+0–1000 convention the model actually used, which is the **generous** reading.
+
+| Format asked for | Line index correct | Box on **GT** line | Box on the line the model **named** | median y-IoU (named line) | Control answered NONE |
+|---|---|---|---|---|---|
+| 1. Normalised bbox, "0–1" | 21/30 (70%) | 21/30 (70%) | **30/30 (100%)** | 0.83 | **0/3** |
+| 2. Pixel bbox, dims supplied | 24/30 (80%) | 21/30 (70%) | 27/30 (90%) | 0.80 | 3/3 |
+| 3. Line index only | 24/30 (80%) | — (we draw it) | — | — | 3/3 |
+| 4. Qwen `<\|box_start\|>` grounding | 24/30 (80%) | 21/30 (70%) | 27/30 (90%) | 0.77 | 3/3 |
+| — control: **unchanged production prompt** | **29/30 (97%)** | — | — | — | 3/3 |
+| — **recommended: production prompt + TOTAL_LINES** (5 repeats) | **50/50 (100%)** | — | — | — | **5/5** |
+
+### The coordinate convention, which is the whole story
+
+| Interpretation applied to the returned numbers | Box on GT line (n=90) |
+|---|---|
+| **0–1000 normalised** (what the model actually uses) | 63/90 (70%) |
+| 0–1 fractions (what prompt #1 asked for) | **0/90 (0%)** |
+| absolute pixels (what prompt #2 asked for, dims given) | 6/90 (7%) |
+
+93 of the 96 emitted boxes used the 0–1000 scale. The three "0–1 looking" responses were
+the control image answering `[0,0,0,0]`, i.e. no box at all. Prompt #4 did **not** produce
+literal `<|box_start|>` tokens — it printed the four numbers in the same 0–1000 scale.
+There is no configuration in which the model honours the requested units.
+
+### Grounding quality, once decoded
+
+| Format | n (model named the right line) | Box on that line | median y-IoU |
+|---|---|---|---|
+| norm_bbox | 21 | **21/21** | 0.88 |
+| pixel_bbox | 24 | 21/24 | 0.79 |
+| qwen_ground | 24 | 21/24 | 0.78 |
+
+The 6 misses are all `c20_messy_phone`, where residual page tilt makes even the
+ground-truth bands overlap each other vertically; the box sits between two lines. So the
+honest read is: **the model's vertical grounding is genuinely good on a straight page and
+degrades on a tilted one.** Horizontal extent is looser — on `c19` it stretched the box
+from the working across to the crossed-out margin scribble, 800/1000 of the page width
+for a line that occupies 375/1000.
+
+### Variance across repeats
+
+| Format | Same line index on all repeats | Byte-identical box | Max drift of box centre-y |
+|---|---|---|---|
+| norm_bbox | 11/11 | 11/11 | 0 px |
+| pixel_bbox | 11/11 | 8/11 | 1 px |
+| qwen_ground | 11/11 | 6/11 | 3 px |
+| line_index | 11/11 | — | — |
+| production prompt (control) | 10/11 | — | — |
+| **recommended pipeline (5 repeats)** | **11/11** | — | — |
+
+Coordinates are effectively deterministic here — the wobble is ≤3 px, far smaller than a
+line's height. **The nondeterminism noted in the first sweep did not reappear except
+once** (`c05_hand_shadow` under the production prompt gave `3, 3, None`), and it went
+away entirely once the image went through `prepare()`. Do not read this as "the model is
+deterministic now" — it is one 220-call session on 11 images — but the variance is not
+what kills the bbox idea. The coordinate convention and the detection drop are.
+
+---
+
+## Approach #3 in detail — this is the one to ship
+
+Pipeline, all of it in `demo/annotate.py` except the one model call:
+
+```
+photo ──prepare()──> frame ──> model (production prompt + TOTAL_LINES) ──> line index
+                       │                                                      │
+                       └──find_line_bands()──> bands ──────> annotate(frame, idx) ──> red box
+```
+
+`prepare()` is the single most important step and it is **not** the `_run_sweep.py`
+preprocessing from the first sweep. It whitens the off-page border, deskews, crops to the
+sheet and caps the long edge at 1400 px. The frame it produces is the image sent to the
+model **and** the image the box is drawn on — one coordinate frame, so nothing has to be
+mapped between spaces.
+
+**Segmentation accuracy: 22/22.** Run over every Latin image in the corpus (not just the
+11 tested with the model), `find_line_bands()` returns exactly the ground-truth number of
+lines on all 22, including 7° rotation + keystone, the full phone stack, heavy defocus,
+0.30× downscale, cramped spacing, and the messy page where it correctly excludes the
+crossed-out margin attempt, the `?? check` scribble, the red `ans` and the doodle. Every
+one of the 11 test frames was also checked by eye: the box is on the intended line in
+11/11.
+
+**Cross-check gate, free.** Asking the model for `TOTAL_LINES` alongside `FIRST_ERROR`
+cost nothing and agreed with the segmenter's line count on **88/88** calls across both
+runs. Use it as the go/no-go for drawing: if the counts disagree, or the index is outside
+the band list, **do not draw** — fall back to quoting the line as highlighted text. That
+turns "box on the wrong line" into "no box", which is the failure we can live with.
+
+**Cost:** segmentation is ~0.75 s per image (pure Pillow + numpy + one `scipy.ndimage.label`),
+model call 2.7 s median, 774 prompt tokens median. No extra inference call.
+
+### Known limits of the segmenter — read these before the demo
+
+- **Residual skew is the weak point.** On `c20_messy_phone` the deskew estimate lands
+  ~3° off, the bands end up overlapping, and the axis-aligned box clips the right-hand
+  end of the line. It is still unambiguously on the correct line, but it looks sloppy. If
+  the demo photo is visibly rotated, the box will be visibly imperfect.
+- It assumes **one column of working**. It finds the densest column and refuses to absorb
+  anything further away than 3 glyph-heights, which is what saves it on `c19`/`c20` — but
+  a genuinely two-column page would break it.
+- It assumes lines are **horizontal after deskew**. Keystone survives at k=0.06; heavier
+  perspective would smear lines together.
+- It was tuned on these 22 synthetic images. Every threshold in it is a number I chose by
+  looking at these pages.
+
+---
+
+## Recommendation
+
+**GO for the P1 beat, via approach #3 only.**
+
+1. **Do not ask the model for coordinates.** Not normalised, not pixels, not the
+   grounding format. All three routes cap at 70% on-the-right-line, and all three drag
+   detection down from 97% to 70–80%.
+2. **Keep the production prompt exactly as it is**, plus one extra field: `TOTAL_LINES`.
+   That is the only change, and it bought 100% line-index accuracy over 50 graded calls
+   with zero false accusations on the control.
+3. **Run `prepare()` on the phone capture, send that frame, draw on that frame.** Never
+   let the model's image and the annotated image be different pixels.
+4. **Gate the drawing.** Draw only if `TOTAL_LINES == len(bands)` and
+   `1 <= FIRST_ERROR <= len(bands)`. Otherwise fall back to the accepted text-quote
+   fallback. `annotate()` already returns `band=None` in that case rather than guessing.
+5. **Demo insurance:** `c07_hand_phone_full`, `c08_hand_phone_full2`, `c19_messy_crossout`
+   and `c20_messy_phone` all produce a correct red box and *look* hard on camera —
+   rotation, shadow, crossed-out work, compression. `c11_correct_clean` is the one to
+   show for "no error found, no box drawn".
+
+### What this test does not tell you
+
+- **11 images, Latin only, synthetic handwriting.** Nine of the eleven already passed the
+  first sweep, so the 100% on the recommended pipeline is on a friendly sample and should
+  be read as "no new failure mode", not as a 100% base rate. The first sweep's honest
+  number over 22 Latin images is 20/22; `c24_scrawl_clean` (the genuinely ambiguous
+  glyph) was deliberately not in this set and would still fail — it would produce a
+  confident red box around line 5 when the error is on line 3.
+- Nothing here changes the Bengali-numeral finding. Bengali numerals are still 0/9 and
+  still must not go on stage.
+- Segmentation ground truth is my own algorithm's output, validated by matching the known
+  line count on 22/22 images and by eyeballing all 11 test frames. It is not
+  hand-annotated pixel ground truth, so the y-IoU figures carry the segmenter's own error.
+
+### Files added
+
+| Path | Contents |
+|---|---|
+| `demo/annotate.py` | `prepare()`, `find_line_bands()`, `annotate()`, CLI. The demo code. |
+| `docs/vision_samples/_run_coords.py` | the 6 prompt formats + frame builder |
+| `docs/vision_samples/_grade_coords.py` | box parser, coordinate-convention grader |
+| `docs/vision_samples/_frames/` | the prepared frames + `frames.json` (bands, GT) |
+| `docs/vision_runs/coords_30b.jsonl` | 165 raw responses, four formats + control |
+| `docs/vision_runs/coords_pipeline_30b.jsonl` | 55 raw responses, recommended pipeline |
+
+```bash
+# segment and box line 2 of a photo
+python3 demo/annotate.py photo.jpg --line 2 --out boxed.png --frame-out frame.png
+# see what the segmenter found
+python3 demo/annotate.py photo.jpg --all --out debug.png
+```
