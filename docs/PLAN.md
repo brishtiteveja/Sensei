@@ -7,17 +7,49 @@ See and Do are supporting evidence, not competing storylines.
 
 ---
 
+## Positioning
+
+The closest things to Sensei are **Koji** (Brilliant.org) and **Khanmigo** (Khan Academy).
+Both are excellent, and both prove the method works: Socratic, never hands over the answer,
+meets the student where they're stuck.
+
+Both are also **cloud, subscription-gated, and English-first**.
+
+That isn't a gap in their roadmap — it's structural. A tutor that runs in someone else's
+datacenter cannot work without connectivity, cannot keep a minor's handwriting on-device, and
+inherits whatever multilingual quality the frontier lab happened to ship.
+
+**Sensei is the same method on the opposite architecture.**
+
+| | Koji / Khanmigo | Sensei |
+|---|---|---|
+| Runs | Cloud | On the box |
+| Works offline | No | **Yes — that's the demo** |
+| Student data | Leaves the device | Never leaves |
+| Language | English-first | Whatever the syllabus is in |
+| Curriculum | Their content library | Drop in any region's syllabus |
+| Cost to student | Subscription | Runs on hardware a school already owns |
+
+**How to say it on stage:** lead with "think Khanmigo, but it runs entirely on this box and
+teaches in Bangla" — that buys instant comprehension — then spend the rest of the time on what
+only local compute makes possible. Do *not* lead with "open-source Khanmigo." That frames us as
+a cheaper copy of a cloud product, and it references none of our actual advantage. We are not
+cloning them; we are reaching the students they are structurally unable to serve.
+
+---
+
 ## The one-sentence demo
 
-We hand Sensei a syllabus in a language nobody in the room reads. It builds the course live.
-A student photographs handwritten work; the tutor finds the exact step where they slipped and
-teaches from there. **Then we pull the network cable — and it keeps teaching.**
+We hand Sensei a syllabus in a language nobody in the room reads. It builds the course live —
+concepts, prerequisites, practice. A student photographs handwritten work; Sensei finds the exact
+step where they slipped, traces it back to the concept that actually caused it, and teaches from
+there. **Then we pull the network cable — and it keeps teaching.**
 
 ---
 
 ## Validated on hardware (not assumed)
 
-Both halves of the architecture were tested against `spark-e257` before writing any code.
+Both halves of the architecture were tested against a real GB10 before any code was written.
 
 | Assumption | Result |
 |---|---|
@@ -35,111 +67,161 @@ correctly. Real handwriting is harder. See Risks.
 The vllm router keeps **exactly one model resident**. Requesting a different model triggers a
 cold swap of **1–5 minutes**, served on the same HTTP call.
 
-The original pitch implied two models (a VLM for handwriting + a 27B–70B tutor). On one box that
-is a swap per interaction — on stage that reads as broken.
+A design with "a vision model for handwriting plus a separate tutor model" would swap on every
+interaction. On stage that reads as broken.
 
 **Therefore: one vision-capable multilingual model does both jobs.**
 Pinned to `qwen3-vl-30b-a3b-gguf`.
 
-Rules that fall out of this, and are non-negotiable:
+Rules that fall out of this, non-negotiable:
 - Never request a second model id at runtime. One pin, whole app.
-- Client timeout **≥ 600s** everywhere, or a cold swap aborts a good request.
-- Stream (`"stream":true`) so load progress is visible instead of a silent hang.
-- **Read `/v1/models` at boot** — do not hardcode a catalog. It has already drifted from the docs
-  (16 models live; `nemotron-3.5-lightning` was hot and isn't in the vendor list).
+- Client timeout **≥ 600s**, or a cold swap aborts a good request.
+- Stream, so load progress is visible instead of a silent hang.
+- **Read `/v1/models` at boot** — never hardcode a catalog. It has already drifted from the
+  vendor docs (16 models live; `nemotron-3.5-lightning` was hot and undocumented).
+
+---
+
+## The three pillars
+
+### 1. Knowledge graph — *why we beat a chatbot*
+
+Concepts are **nodes**; prerequisites are **edges**. Mastery attaches to nodes.
+
+This is the difference between "you got projectile motion wrong" and what a real tutor does:
+
+> You didn't fail projectile motion. You failed **vector decomposition**, two prerequisites back,
+> and it has been quietly breaking things for three topics. Let's fix that instead.
+
+A flat list of topic scores cannot express that. The graph is what turns a diagnosis into a
+*root cause*, and it's the piece Koji and Khanmigo do least well — they're strong at the
+in-the-moment turn, weaker at modelling the student across weeks.
+
+The graph powers three things at once:
+- **Root-cause diagnosis** — walk prerequisite edges backward from a failure to the weakest ancestor
+- **Course path** — topological order through the graph, gated by mastery (the Duolingo mechanic)
+- **Spaced repetition** — schedule review on *concepts*, not on questions
+
+### 2. Persistent memory — *why it's a tutor, not a session*
+
+Bloom's two-sigma comes from a tutor who remembers you. Everything persists on-box in SQLite:
+mastery per concept, the specific slips ("wrong sign on acceleration", not "62%"), exam date,
+pace. Today's lesson is built from yesterday's mistake.
+
+Specific mistakes are stored verbatim rather than rolled into a score, because "last time the
+sign of `a` slipped" is something the tutor can actually *use* in a sentence. "62% on kinematics"
+is not.
+
+### 3. Course generation — *the Do track, and the "any syllabus" claim*
+
+An agent pipeline turns a raw syllabus into a graph:
+
+```
+syllabus (PDF/text, any language)
+    → extract concepts
+    → infer prerequisite edges
+    → order into units/lessons
+    → generate practice per concept
+    → emit knowledge graph + course path
+```
+
+This is what makes "drop in Bangla HSC, Kenyan KCSE, Indonesian UN" real rather than aspirational,
+and it's a genuine multi-step agentic workflow for the Do track.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────┐         LAN          ┌──────────────────────────────┐
-│  Expo mobile    │ ───────────────────► │  GB10 (Acer Veriton GN100)   │
-│  - camera       │   SSE / multipart    │                              │
-│  - chat         │ ◄─────────────────── │  FastAPI (sensei)            │
-└─────────────────┘                      │    ├── tutor    (SSE)        │
-                                         │    ├── vision   (image→step) │
-                                         │    ├── learner  (SQLite)     │
-                                         │    └── curriculum agent      │
-                                         │           │                  │
-                                         │           ▼                  │
-                                         │  vllm router → ONE VLM       │
-                                         └──────────────────────────────┘
+┌─────────────────┐         LAN          ┌──────────────────────────────────┐
+│  Expo mobile    │ ───────────────────► │  GB10 (Acer Veriton GN100)       │
+│  - camera       │   SSE / multipart    │                                  │
+│  - chat         │ ◄─────────────────── │  FastAPI (sensei)                │
+│  - course path  │                      │    ├── tutor      (SSE)          │
+└─────────────────┘                      │    ├── vision     (image→step)   │
+                                         │    ├── graph      (concepts+prereqs)
+                                         │    ├── memory     (SQLite)       │
+                                         │    └── curriculum agent          │
+                                         │             │                    │
+                                         │             ▼                    │
+                                         │   vllm router → ONE VLM          │
+                                         └──────────────────────────────────┘
                                               zero egress at runtime
 ```
 
-**Everything is on the box.** No cloud DB, no cloud inference, no telemetry. That is the entire
-basis of the Spark-track claim, so it has to be literally true — see "Cable-pull audit".
+Everything is on the box. No cloud DB, no cloud inference, no telemetry — that is the entire
+basis of the Spark-track claim, so it has to be literally true. See "Cable-pull audit".
 
 ---
 
-## What we are building (and explicitly not)
-
-Fresh repo. No code lifted from ShikkhaDikkha/DikkhaClaw — those are Gemini-backed and
-cloud-shaped. Prior work informs the *design*, not the source.
+## Scope
 
 ### Must-have — the demo spine
-1. **Socratic tutor loop.** Streaming, multilingual, refuses to hand over answers.
-2. **Photo → error localization.** Student shoots their work; same model finds the first wrong step.
-3. **Learner model.** Persists strengths/weaknesses/exam date; next turn is built from last mistake.
-   *This is what makes it a tutor instead of a chatbot — it's the two-sigma claim.*
-4. **Offline proof.** Cable-pull works and is visibly demonstrated.
+1. **Knowledge graph** with prerequisite edges and per-concept mastery
+2. **Socratic tutor loop** — streaming, multilingual, refuses to hand over answers
+3. **Photo → error localization → root cause** via the graph
+4. **Persistent memory** — next turn is built from the last mistake
+5. **Offline proof** — cable-pull works and is visibly demonstrated
 
 ### Should-have — Do-track evidence
-5. **Curriculum agent.** Syllabus in → units/lessons/practice out. Runs as a multi-step agent.
+6. **Curriculum agent** — syllabus in, knowledge graph + course path out
+7. **Course path UI** — the Duolingo-style gated progression
 
 ### Non-goals for the weekend
 - Auth, accounts, payments, multi-tenant
-- Full question bank (seed a handful; the pitch is the *engine*, not content volume)
-- Voice, mock exams, streaks, leaderboards
+- Large content library — the pitch is the *engine*, not content volume
+- Voice, streaks, leaderboards, social
 
 ---
 
 ## Build order
 
-Each stage ends in something demoable, so we always have a fallback if time runs out.
+Each stage ends in something demoable, so there's always a fallback if time runs out.
 
 | # | Stage | Ends with |
 |---|---|---|
-| 0 | Bootstrap script for a **fresh** GB10 | Clean box → warm model, one command |
-| 1 | Provider client + `/health` + model discovery | Backend talks to the pin, streams tokens |
+| 0 | Bootstrap for a **fresh** GB10 | Clean box → warm model, one command |
+| 1 | Provider client, `/health`, model discovery | Backend streams from the pin |
 | 2 | Socratic tutor SSE + Expo chat | **Demoable:** live Bengali tutoring |
-| 3 | Learner store, injected into prompt | **Demoable:** it remembers you |
-| 4 | Photo → error step, wired into tutor | **Demoable:** the See beat |
-| 5 | Curriculum agent | **Demoable:** the Do beat |
-| 6 | Cable-pull audit + rehearsal | The closer, proven |
+| 3 | Knowledge graph + mastery, injected into prompts | **Demoable:** root-cause teaching |
+| 4 | Photo → error step → concept | **Demoable:** the See beat |
+| 5 | Curriculum agent: syllabus → graph | **Demoable:** the Do beat |
+| 6 | Course path UI | **Demoable:** the Duolingo mechanic |
+| 7 | Cable-pull audit + rehearsal | The closer, proven |
 
 ---
 
 ## Cable-pull audit (do not skip)
 
-The closing move only lands if nothing reaches for the network. Before the demo:
+The closing move only lands if nothing reaches for the network:
 - `SENSEI_OFFLINE=1` hard-fails any non-LAN host at the HTTP client layer
 - No CDN fonts/scripts in the Expo bundle; no analytics SDK
-- Model already resident (pre-warmed) — a cold swap mid-demo looks identical to a crash
+- Model already resident — a cold swap mid-demo looks identical to a crash
 - SQLite local; no hosted DB
 - **Rehearse with the cable actually out**, not just in theory
 
 ---
 
-## Risks, and what we do about them
+## Risks
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| **Real handwriting ≫ harder than rendered text.** Already saw `^2` misread. | **High** | Test on genuine photos of real handwriting early — day one, not day two. Fall back to `qwen3-vl-32b` (higher quality, 10 tok/s) *only* if the swap cost is paid once at boot. Have a known-good sample image as demo insurance. |
-| Cold swap mid-demo | **High** | Pin one model; pre-warm; never issue a second model id |
-| Fresh GB10 at the event ≠ our dev box | **High** | Bootstrap script written + rehearsed on a clean machine, stage 0 |
-| Conference wifi | Low | Irrelevant by design — that's the whole point |
+| **Real handwriting ≫ harder than rendered text.** Already saw `^2` misread. | **High** | Test genuine handwriting photos **day one**. Fallback: `qwen3-vl-32b-instruct-gguf` (better, 10 tok/s), swap cost paid once at boot. Keep a known-good sample as demo insurance. |
+| Cold swap mid-demo | **High** | One pin; pre-warm; never issue a second model id |
+| Fresh GB10 ≠ dev box | **High** | Bootstrap script written and rehearsed on a clean machine, stage 0 |
+| Curriculum agent produces a bad graph | Medium | Hand-authored fallback graph for the demo subject; agent output shown as *live generation*, not the thing the rest of the demo depends on |
 | Model quality varies by language | Medium | Bengali validated. Test any second demo language before promising it on stage |
-| See track expects VSS (video-shaped) | Medium | Lead Spark, not See. Don't claim a track we're not really entering |
+| See track expects VSS (video-shaped) | Medium | Lead Spark. Don't claim a track we aren't really entering |
+| Conference wifi | None | Irrelevant by design — that's the point |
 
 ---
 
 ## Team split (3–5 people)
 
-- **Backend / inference** — provider client, tutor loop, prompt engineering
-- **Mobile** — Expo app, camera, chat UI
-- **Curriculum agent** — syllabus → course pipeline
-- **Demo & narrative** — bootstrap, rehearsal, cable-pull audit, the pitch itself
+- **Inference / tutor** — provider client, Socratic loop, prompt engineering
+- **Graph / memory** — knowledge graph, mastery model, root-cause traversal
+- **Mobile** — Expo app, camera, chat, course path
+- **Curriculum agent** — syllabus → graph pipeline
+- **Demo & narrative** — bootstrap, rehearsal, cable-pull audit, the pitch
 
-The fourth role is not a spare. The demo is the deliverable.
+The last role is not a spare. The demo is the deliverable.

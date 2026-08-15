@@ -89,6 +89,36 @@ async def diagnose_work(
     )
 
 
+def build_root_cause_prompt(
+    graph, concept_id: str, mastery: dict[str, float], profile: LearnerProfile
+) -> str | None:
+    """Prompt fragment telling the tutor to teach the cause, not the symptom.
+
+    Returns None when prerequisites are solid, in which case the student simply needs
+    the current concept taught and there is nothing to redirect to.
+
+    The instruction to *say* the connection out loud is deliberate. A student who is
+    told "your projectile problem is really a vector problem" learns something about
+    how the subject fits together; silently redirecting them just feels like the tutor
+    changed the subject.
+    """
+    root = graph.root_cause(concept_id, mastery)
+    if root is None or root == concept_id:
+        return None
+
+    lang = profile.language
+    failed = graph.describe(concept_id, lang)
+    cause = graph.describe(root, lang)
+    score = mastery.get(root, 0.0)
+
+    return (
+        f"The student is stuck on '{failed}', but the real cause is upstream: "
+        f"'{cause}' (mastery {score:.0%}). Teach '{cause}' instead. "
+        f"Tell them plainly why you are going back there -- name the connection "
+        f"between '{cause}' and '{failed}' so it doesn't feel like a detour."
+    )
+
+
 def teach_from_diagnosis(diagnosis: str, profile: LearnerProfile) -> list[dict]:
     """Turn a diagnosis into the opening move of a tutoring exchange.
 

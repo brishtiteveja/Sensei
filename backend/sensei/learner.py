@@ -117,6 +117,37 @@ class LearnerStore:
         )
         self._conn.commit()
 
+    def mastery(self, learner_id: str) -> dict[str, float]:
+        """Per-concept mastery in [0,1], keyed by concept id.
+
+        This is what the knowledge graph consumes to find root causes and to gate the
+        course path. Recent attempts are weighted more heavily than old ones -- a
+        student who has since learned the thing should not be held to their first
+        three wrong answers, which is exactly the complaint people have about systems
+        that average over all history.
+        """
+        rows = self._conn.execute(
+            "SELECT topic, correct, created_at FROM observation "
+            "WHERE learner_id = ? ORDER BY created_at ASC",
+            (learner_id,),
+        ).fetchall()
+
+        by_topic: dict[str, list[int]] = {}
+        for r in rows:
+            by_topic.setdefault(r["topic"], []).append(r["correct"])
+
+        out: dict[str, float] = {}
+        for topic, results in by_topic.items():
+            # Exponential recency weighting: most recent attempt has weight 1, each
+            # older one decays by 0.7.
+            weight, total, hit = 1.0, 0.0, 0.0
+            for correct in reversed(results):
+                total += weight
+                hit += weight * correct
+                weight *= 0.7
+            out[topic] = hit / total if total else 0.0
+        return out
+
     def profile(self, learner_id: str, *, min_attempts: int = 2) -> LearnerProfile:
         """Roll observations up into the profile the tutor sees.
 
