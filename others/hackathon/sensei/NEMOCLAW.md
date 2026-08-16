@@ -204,3 +204,66 @@ That second one *is* the progress knowledge graph, and the topological walk
 gated by mastery is the Duolingo-style path. Backed by `graph.json` and
 `sensei.db`. The work is wiring them into SenseiClaw so progress lives
 server-side instead of in browser localStorage — not adopting Hermes.
+
+---
+
+## 7. UPDATE 16 Aug: SenseiClaw *does* run inside the sandbox
+
+§6 above was wrong, and is kept only so the reasoning is visible. It ruled out
+two paths — NemoClaw natively supervising a FastAPI service, and repointing the
+host at the gateway — and wrongly concluded the whole idea was impossible. It
+missed the third: **run the service inside the sandbox and bridge it out.**
+
+The bridge is supported and needs no firewall change:
+
+```
+openshell forward service --target-port 4050 --local 127.0.0.1:4060 sensei
+```
+
+That forwards a host port to a *sandbox-loopback* service over the gateway's
+gRPC channel. No DNAT, no published container port, no weakening of the jail.
+
+### Why the naive approach fails
+
+The sandbox is a **nested** netns. The container is `172.20.0.2`; the sandboxed
+process lives on `10.200.0.2` in an inner namespace. So a host connection to
+`172.20.0.2:4050` is *refused* even while the service is happily serving — the
+symptom looks like a dead process and is not. Do not reach for iptables; use
+`forward service`.
+
+### Standing it up
+
+```bash
+nemoclaw sensei upload <staged-repo> /sandbox/senseiclaw
+nemoclaw sensei policy add pypi -y            # open pypi ONLY to build the venv
+nemoclaw sensei exec -- python3 -m venv .venv && pip install fastapi uvicorn ...
+nemoclaw sensei policy remove pypi -y         # close it again
+scripts/sensei-sandbox-start.sh
+```
+
+Installing with the network open and then closing it is the point: the service
+keeps serving afterwards, because at runtime it only needs `inference.local`.
+
+`SENSEI_LOCAL_BASE_URL=https://inference.local/v1` is the whole trick — the
+service's inference now goes through the OPA-enforced route instead of straight
+out to the internet. Secrets go in `/sandbox/senseiclaw/sensei.env` (mode 600,
+uploaded), never on a command line.
+
+### Verified
+
+| check | result |
+|---|---|
+| `GET /tutor/health` (host → forward → sandbox) | `{"status":"ok"}` |
+| `GET /curriculum/subjects` · `/practice/subjects` | 200 |
+| `POST /tutor/query` real inference | correct answer, `qwen3-vl-30b-a3b-gguf`, 16.6 s |
+| egress to github / npm / pypi / huggingface | still fails closed |
+
+### Switching
+
+`scripts/sensei-backend.sh [pm2|nemoclaw|status]` moves which backend owns port
+4050, so nginx never has to be edited. Both stay installed; only one holds the
+port.
+
+**This is the safety claim, and now it applies to the real product**: the
+tutor backend runs confined, and its only route to the network is the local
+Spark.
