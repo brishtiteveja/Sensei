@@ -452,5 +452,20 @@
   "tour.teachTitle": "教师专用",
   "tour.teachBody": "批改一堆作业（照片或 PDF），并对照公开的手写基准测试来检验 Sensei 的表现。",
   "tour.recordTitle": "正在录制",
-  "tour.recordBody": "你的尝试过程会被记录下来，以便你回放，也方便 Sensei 了解你的思路是如何发展的。可随时暂停。"
+  "tour.recordBody": "你的尝试过程会被记录下来，以便你回放，也方便 Sensei 了解你的思路是如何发展的。可随时暂停。",
+  "tour.startHere": "我在这里能做什么？",
+  "tour.nbNoteTitle": "写下你的步骤",
+  "tour.nbNoteBody": "为每个步骤添加一个文本块。支持数学公式——输入 $x^2$ 即可正常渲染。",
+  "tour.nbSketchTitle": "绘制图表",
+  "tour.nbSketchBody": "使用线条、圆圈、三角形、箭头等形状进行绘制。它会作为图片保存到你的笔记本中。",
+  "tour.nbImageTitle": "添加照片",
+  "tour.nbImageBody": "拍下你在纸上写的手写步骤，然后直接拖放进来。",
+  "tour.nbPhoneTitle": "使用手机",
+  "tour.nbPhoneBody": "用手机扫描二维码，即可用手指绘图或拍照——它会立即显示在这里。",
+  "tour.nbGiveTitle": "交给 Sensei",
+  "tour.nbGiveBody": "当你卡壳时，把整个页面交给 Sensei。它会阅读你的解题步骤，并提出能启发你的问题。",
+  "tour.coSubjectTitle": "选择科目",
+  "tour.coSubjectBody": "每门课程都遵循真实的教学大纲——单元对应章节，并使用你的语言呈现。",
+  "tour.coProgressTitle": "你的进度",
+  "tour.coProgressBody": "Sensei 会跟踪你已掌握的内容和仍不牢固的知识点，并以此来规划下一堂课。"
 }

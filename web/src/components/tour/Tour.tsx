@@ -20,13 +20,33 @@ import { t } from '@/i18n/strings';
 
 const SEEN_KEY = 'tour.seen.v1';
 
+/** Only the app tour auto-offers; the rest are on demand. */
+
 interface Step {
   selector: string;
   title: string;
   body: string;
 }
 
-function steps(): Step[] {
+export type TourName = 'app' | 'notebook' | 'courses';
+
+function steps(name: TourName): Step[] {
+  if (name === 'notebook') {
+    return [
+      { selector: '[data-tour="nb-note"]', title: t.tour.nbNoteTitle, body: t.tour.nbNoteBody },
+      { selector: '[data-tour="nb-sketch"]', title: t.tour.nbSketchTitle, body: t.tour.nbSketchBody },
+      { selector: '[data-tour="nb-image"]', title: t.tour.nbImageTitle, body: t.tour.nbImageBody },
+      { selector: '[data-tour="nb-phone"]', title: t.tour.nbPhoneTitle, body: t.tour.nbPhoneBody },
+      { selector: '[data-tour="nb-give"]', title: t.tour.nbGiveTitle, body: t.tour.nbGiveBody },
+    ];
+  }
+  if (name === 'courses') {
+    return [
+      { selector: '[data-tour="co-subject"]', title: t.tour.coSubjectTitle, body: t.tour.coSubjectBody },
+      { selector: '[data-tour="progress"]', title: t.tour.coProgressTitle, body: t.tour.coProgressBody },
+      { selector: '#sensei-owl', title: t.tour.owlTitle, body: t.tour.owlBody },
+    ];
+  }
   return [
     { selector: '[data-tour="practice"]', title: t.tour.practiceTitle, body: t.tour.practiceBody },
     { selector: '[data-tour="notebook"]', title: t.tour.notebookTitle, body: t.tour.notebookBody },
@@ -41,11 +61,19 @@ export function hasSeenTour(): boolean {
   return readRaw(SEEN_KEY) === '1';
 }
 
-export function Tour({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function Tour({
+  open,
+  onClose,
+  name = 'app',
+}: {
+  open: boolean;
+  onClose: () => void;
+  name?: TourName;
+}) {
   // Memoised: steps() builds a new array each call, and an unstable identity
   // here re-fired the reset effect on every render, pinning the tour to step 1.
   // The whole tree remounts on a language change, so this needs no deps.
-  const all = useMemo(() => steps(), []);
+  const all = useMemo(() => steps(name), [name]);
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -89,9 +117,9 @@ export function Tour({ open, onClose }: { open: boolean; onClose: () => void }) 
   }, [open, i, all]);
 
   const finish = useCallback(() => {
-    writeRaw(SEEN_KEY, '1');
+    if (name === 'app') writeRaw(SEEN_KEY, '1');
     onClose();
-  }, [onClose]);
+  }, [onClose, name]);
 
   const next = () => {
     const found = findFrom(i + 1);

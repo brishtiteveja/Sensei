@@ -160,6 +160,7 @@ export function NotebookEditor({
         />
         {onAttach ? (
           <Button
+            data-tour="nb-give"
             onClick={() => onAttach(compileHandoff(nb))}
             disabled={!hasContent}
             className="shrink-0"
@@ -205,22 +206,28 @@ export function NotebookEditor({
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
-        <AddButton icon={<Type size={15} />} label={t.notebook.addNote} onClick={addNote} />
-        <AddButton
-          icon={<Pencil size={15} />}
-          label={t.notebook.addSketch}
-          onClick={() => setSketchTarget('new')}
-        />
-        <AddButton
-          icon={<ImageUp size={15} />}
-          label={t.notebook.addImage}
-          onClick={() => fileRef.current?.click()}
-        />
-        <AddButton
-          icon={<Smartphone size={15} />}
-          label={t.phone.usePhone}
-          onClick={() => setPhoneOpen((v) => !v)}
-        />
+        <span data-tour="nb-note"><AddButton icon={<Type size={15} />} label={t.notebook.addNote} onClick={addNote} /></span>
+        <span data-tour="nb-sketch">
+          <AddButton
+            icon={<Pencil size={15} />}
+            label={t.notebook.addSketch}
+            onClick={() => setSketchTarget('new')}
+          />
+        </span>
+        <span data-tour="nb-image">
+          <AddButton
+            icon={<ImageUp size={15} />}
+            label={t.notebook.addImage}
+            onClick={() => fileRef.current?.click()}
+          />
+        </span>
+        <span data-tour="nb-phone">
+          <AddButton
+            icon={<Smartphone size={15} />}
+            label={t.phone.usePhone}
+            onClick={() => setPhoneOpen((v) => !v)}
+          />
+        </span>
         <input
           ref={fileRef}
           type="file"

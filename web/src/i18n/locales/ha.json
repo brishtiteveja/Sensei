@@ -452,5 +452,20 @@
   "tour.teachTitle": "Don malamai",
   "tour.teachBody": "Yi wa tarin aikin gida makin — hotuna ko PDFs — kuma ka gwada Sensei da ma'aunin rubutun hannu na jama'a.",
   "tour.recordTitle": "Yin rikodi",
-  "tour.recordBody": "Ana rikodin ƙoƙarinka don ka iya sake kunna su, kuma don Sensei ya ga yadda tunaninka ya haɓaka. Dakatar da shi a kowane lokaci."
+  "tour.recordBody": "Ana rikodin ƙoƙarinka don ka iya sake kunna su, kuma don Sensei ya ga yadda tunaninka ya haɓaka. Dakatar da shi a kowane lokaci.",
+  "tour.startHere": "Me zan iya yi a nan?",
+  "tour.nbNoteTitle": "Rubuta matakanka",
+  "tour.nbNoteBody": "Ƙara sashen rubutu ga kowane mataki. Lissafi yana aiki — rubuta $x^2$ kuma zai fito yadda ya kamata.",
+  "tour.nbSketchTitle": "Zana zane",
+  "tour.nbSketchBody": "Zana siffofi — layuka, da'irori, alwatika, kibiyoyi. Zai shiga cikin littafin rubutunka a matsayin hoto.",
+  "tour.nbImageTitle": "Ƙara hoto",
+  "tour.nbImageBody": "Ɗauki hoton aikin da ka rubuta da hannu a jikin takarda sannan ka saka shi kai tsaye a nan.",
+  "tour.nbPhoneTitle": "Yi amfani da wayarka",
+  "tour.nbPhoneBody": "Yi sikanin QR da wayarka don yin zane da yatsanka ko ɗaukar hoto a can — zai bayyana a nan take.",
+  "tour.nbGiveTitle": "Mika shi ga Sensei",
+  "tour.nbGiveBody": "Idan ka tsaya, mika wa Sensei duka shafin. Zai karanta aikinka kuma ya yi maka tambayar da za ta taimake ka ka ci gaba.",
+  "tour.coSubjectTitle": "Zaɓi darasi",
+  "tour.coSubjectBody": "Kowane kwas yana bin tsarin karatu na gaske — darussa suna bin babi-babi, a cikin harshenka.",
+  "tour.coProgressTitle": "Ci gabanka",
+  "tour.coProgressBody": "Sensei yana lura da abubuwan da ka kware a kai da kuma waɗanda kake da rauni a kai, kuma yana tsara darasi na gaba daga gare su."
 }

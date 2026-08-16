@@ -452,5 +452,20 @@
   "tour.teachTitle": "Para profesores",
   "tour.teachBody": "Califica un montón de tareas (fotos o PDF) y compara a Sensei con una referencia pública de escritura a mano.",
   "tour.recordTitle": "Grabación",
-  "tour.recordBody": "Tus intentos se graban para que puedas reproducirlos y para que Sensei vea cómo se desarrolló tu pensamiento. Paúsala en cualquier momento."
+  "tour.recordBody": "Tus intentos se graban para que puedas reproducirlos y para que Sensei vea cómo se desarrolló tu pensamiento. Paúsala en cualquier momento.",
+  "tour.startHere": "¿Qué puedo hacer aquí?",
+  "tour.nbNoteTitle": "Escribe tus pasos",
+  "tour.nbNoteBody": "Agrega un bloque de texto para cada paso. Las matemáticas funcionan: escribe $x^2$ y se mostrará correctamente.",
+  "tour.nbSketchTitle": "Dibuja un diagrama",
+  "tour.nbSketchBody": "Dibuja con formas: líneas, círculos, triángulos, flechas. Se guardará en tu cuaderno como una imagen.",
+  "tour.nbImageTitle": "Agrega una foto",
+  "tour.nbImageBody": "Toma una foto de tu trabajo escrito a mano en papel y colócala directamente aquí.",
+  "tour.nbPhoneTitle": "Usa tu teléfono",
+  "tour.nbPhoneBody": "Escanea el QR con tu teléfono para dibujar con el dedo o tomar la foto desde ahí; aparecerá aquí al instante.",
+  "tour.nbGiveTitle": "Entrégaselo a Sensei",
+  "tour.nbGiveBody": "Cuando te atorres, dale la página completa a Sensei. Leerá tu trabajo y te hará la pregunta necesaria para ayudarte a avanzar.",
+  "tour.coSubjectTitle": "Elige una materia",
+  "tour.coSubjectBody": "Cada curso sigue un plan de estudios real: las unidades corresponden a los capítulos, en tu idioma.",
+  "tour.coProgressTitle": "Tu progreso",
+  "tour.coProgressBody": "Sensei registra lo que ya dominas y lo que aún te cuesta trabajo, y diseña la siguiente lección a partir de eso."
 }

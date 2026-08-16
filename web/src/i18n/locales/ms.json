@@ -452,5 +452,20 @@
   "tour.teachTitle": "Untuk guru",
   "tour.teachBody": "Nilai timbunan kerja rumah — foto atau PDF — dan bandingkan Sensei dengan penanda aras tulisan tangan awam.",
   "tour.recordTitle": "Rakaman",
-  "tour.recordBody": "Percubaan anda dirakam supaya anda boleh memainkannya semula, dan supaya Sensei dapat melihat perkembangan pemikiran anda. Jeda pada bila-bila masa."
+  "tour.recordBody": "Percubaan anda dirakam supaya anda boleh memainkannya semula, dan supaya Sensei dapat melihat perkembangan pemikiran anda. Jeda pada bila-bila masa.",
+  "tour.startHere": "Apa yang boleh saya lakukan di sini?",
+  "tour.nbNoteTitle": "Tulis langkah anda",
+  "tour.nbNoteBody": "Tambah blok teks untuk setiap langkah. Matematik juga disokong — tulis $x^2$ dan ia akan dipaparkan dengan betul.",
+  "tour.nbSketchTitle": "Lakar rajah",
+  "tour.nbSketchBody": "Lukis dengan bentuk — garisan, bulatan, segi tiga, anak panah. Ia akan dimasukkan ke dalam buku nota anda sebagai imej.",
+  "tour.nbImageTitle": "Tambah foto",
+  "tour.nbImageBody": "Ambil foto jalan kerja bertulis tangan anda di atas kertas dan masukkan terus ke sini.",
+  "tour.nbPhoneTitle": "Gunakan telefon anda",
+  "tour.nbPhoneBody": "Imbas QR dengan telefon anda untuk melukis dengan jari atau mengambil foto di sana — ia akan muncul di sini serta-merta.",
+  "tour.nbGiveTitle": "Serahkan kepada Sensei",
+  "tour.nbGiveBody": "Apabila anda buntu, serahkan seluruh halaman kepada Sensei. Ia akan membaca jalan kerja anda dan memberikan soalan yang membantu anda meneruskannya.",
+  "tour.coSubjectTitle": "Pilih subjek",
+  "tour.coSubjectBody": "Setiap kursus mengikut silibus sebenar — unit dipetakan kepada bab, dalam bahasa anda.",
+  "tour.coProgressTitle": "Kemajuan anda",
+  "tour.coProgressBody": "Sensei menjejaki perkara yang telah anda kuasai dan perkara yang masih lemah, lalu membina pelajaran seterusnya berdasarkan maklumat tersebut."
 }

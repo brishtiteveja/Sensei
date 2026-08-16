@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Layers } from 'lucide-react';
+import { useState } from 'react';
+import { HelpCircle } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Tour } from '@/components/tour/Tour';
 import { Page } from '@/components/layout/AppShell';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -15,8 +19,21 @@ export function CatalogPage() {
   const { data: subjects, status, error, reload } = useSubjects();
   const progress = useProgress();
 
+  const [tourOpen, setTourOpen] = useState(false);
+
   return (
-    <Page title={t.catalog.title} subtitle={t.catalog.subtitle} wide>
+    <>
+    <Page
+      title={t.catalog.title}
+      subtitle={t.catalog.subtitle}
+      wide
+      actions={
+        <Button variant="ghost" onClick={() => setTourOpen(true)}>
+          <HelpCircle size={15} />
+          {t.tour.startHere}
+        </Button>
+      }
+    >
       {status === 'loading' ? (
         <SkeletonCards count={6} />
       ) : status === 'error' ? (
@@ -75,7 +92,7 @@ export function CatalogPage() {
                       <ProgressRing value={percent} size={52} stroke={5} />
                     </div>
 
-                    <h2 className="mt-5 text-lg font-semibold tracking-[-0.015em] text-ink">
+                    <h2 data-tour="co-subject" className="mt-5 text-lg font-semibold tracking-[-0.015em] text-ink">
                       {s.title || humanize(s.id)}
                     </h2>
                     {/* No title_bn subtitle: `title` already arrives in the chosen
@@ -125,5 +142,7 @@ export function CatalogPage() {
         </div>
       )}
     </Page>
+    <Tour open={tourOpen} onClose={() => setTourOpen(false)} name="courses" />
+    </>
   );
 }

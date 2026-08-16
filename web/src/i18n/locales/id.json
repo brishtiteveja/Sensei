@@ -452,5 +452,20 @@
   "tour.teachTitle": "Untuk guru",
   "tour.teachBody": "Nilai tumpukan PR — foto atau PDF — dan bandingkan Sensei dengan tolok ukur tulisan tangan publik.",
   "tour.recordTitle": "Perekaman",
-  "tour.recordBody": "Upayamu direkam agar bisa diputar ulang, dan agar Sensei bisa melihat perkembangan caramu berpikir. Jeda kapan saja."
+  "tour.recordBody": "Upayamu direkam agar bisa diputar ulang, dan agar Sensei bisa melihat perkembangan caramu berpikir. Jeda kapan saja.",
+  "tour.startHere": "Apa yang bisa saya lakukan di sini?",
+  "tour.nbNoteTitle": "Tulis langkah-langkahmu",
+  "tour.nbNoteBody": "Tambahkan blok teks untuk setiap langkah. Rumus matematika juga bisa — tulis $x^2$ dan akan muncul dengan benar.",
+  "tour.nbSketchTitle": "Gambar diagram",
+  "tour.nbSketchBody": "Menggambar dengan bentuk — garis, lingkaran, segitiga, panah. Gambar ini akan masuk ke buku catatanmu.",
+  "tour.nbImageTitle": "Tambahkan foto",
+  "tour.nbImageBody": "Foto hasil kerjamu di kertas dan masukkan langsung ke sini.",
+  "tour.nbPhoneTitle": "Gunakan ponselmu",
+  "tour.nbPhoneBody": "Pindai QR dengan ponselmu untuk menggambar dengan jari atau mengambil foto di sana — foto akan langsung muncul di sini.",
+  "tour.nbGiveTitle": "Berikan ke Sensei",
+  "tour.nbGiveBody": "Saat kamu buntu, berikan seluruh halaman ke Sensei. Sensei akan membaca hasil kerjamu dan memberikan pertanyaan yang membantumu keluar dari kebuntuan.",
+  "tour.coSubjectTitle": "Pilih mata pelajaran",
+  "tour.coSubjectBody": "Setiap kursus mengikuti silabus nyata — unit dipetakan ke bab, dalam bahasamu.",
+  "tour.coProgressTitle": "Kemajuanmu",
+  "tour.coProgressBody": "Sensei melacak apa yang sudah kamu kuasai dan apa yang masih kurang, lalu menyusun pelajaran berikutnya berdasarkan hal tersebut."
 }
