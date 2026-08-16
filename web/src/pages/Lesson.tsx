@@ -458,7 +458,7 @@ function StepCard({
             {label}
           </span>
           {active ? (
-            <span className="text-2xs font-medium text-accent">Sensei is here</span>
+            <span className="text-2xs font-medium text-accent">{t.lesson.stepActive}</span>
           ) : null}
         </div>
         <p className="mt-1.5 text-[14px] leading-relaxed text-ink-soft">{step.prompt}</p>

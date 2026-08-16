@@ -90,7 +90,7 @@ export function CourseSidebar({
             <button
               type="button"
               onClick={() => setQuery('')}
-              aria-label="Clear filter"
+              aria-label={t.course.clearFilter}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-faint hover:text-ink"
             >
               <X size={13} />

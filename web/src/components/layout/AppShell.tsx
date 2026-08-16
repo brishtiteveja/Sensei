@@ -8,7 +8,6 @@ import {
   Moon,
   Settings as SettingsIcon,
   ShieldCheck,
-  Sparkles,
   Sun,
   Target,
   TrendingUp,
@@ -16,18 +15,28 @@ import {
 import { IconButton } from '@/components/ui/Button';
 import { Aurora } from '@/components/art/Aurora';
 import { HeaderArcs, HeaderSpark } from '@/components/art/Flourish';
+import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { useSettings } from '@/state/settings';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
-const NAV = [
-  { to: '/', label: t.nav.dashboard, icon: LayoutDashboard, end: true, group: 'learn' },
-  { to: '/courses', label: t.nav.catalog, icon: BookOpen, group: 'learn' },
-  { to: '/practice', label: t.nav.practice, icon: Target, group: 'learn' },
-  { to: '/tutor', label: t.nav.tutor, icon: Sparkles, group: 'learn' },
-  { to: '/progress', label: t.nav.progress, icon: TrendingUp, group: 'you' },
-  { to: '/settings', label: t.nav.settings, icon: SettingsIcon, group: 'you' },
-] as const;
+/**
+ * Built per render, not hoisted to a module constant: `t` resolves against the
+ * active locale, so a constant would freeze whichever language happened to be
+ * selected when this module was first imported.
+ */
+function navItems() {
+  return [
+    { to: '/', label: t.nav.dashboard, icon: LayoutDashboard, end: true, group: 'learn' },
+    { to: '/courses', label: t.nav.catalog, icon: BookOpen, group: 'learn' },
+    { to: '/practice', label: t.nav.practice, icon: Target, group: 'learn' },
+    // The owl stands in for the tutor everywhere it speaks -- nav, chat avatar,
+    // empty state -- so "Ask Sensei" reads as asking a character, not a feature.
+    { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn' },
+    { to: '/progress', label: t.nav.progress, icon: TrendingUp, group: 'you' },
+    { to: '/settings', label: t.nav.settings, icon: SettingsIcon, group: 'you' },
+  ] as const;
+}
 
 export function AppShell() {
   const { sidebarCollapsed, toggleSidebar, isDark, setTheme } = useSettings();
@@ -38,6 +47,7 @@ export function AppShell() {
     document.getElementById('s-main')?.scrollTo({ top: 0 });
   }, [location.pathname]);
 
+  const nav = navItems();
   const groups: Array<{ key: string; label: string }> = [
     { key: 'learn', label: t.nav.sectionLearn },
     { key: 'you', label: t.nav.sectionYou },
@@ -105,7 +115,7 @@ export function AppShell() {
                 </p>
               ) : null}
               <ul className="space-y-1">
-                {NAV.filter((n) => n.group === g.key).map((item) => (
+                {nav.filter((n) => n.group === g.key).map((item) => (
                   <li key={item.to}>
                     <NavLink
                       to={item.to}
@@ -172,7 +182,7 @@ export function AppShell() {
               <div className="min-w-0">
                 <p className="text-2xs font-semibold text-success-text">{t.app.offlineBadge}</p>
                 <p className="mt-0.5 text-2xs leading-snug text-success-text/80">
-                  No third-party requests
+                  {t.app.offlineCaption}
                 </p>
               </div>
             </div>
@@ -202,34 +212,14 @@ export function AppShell() {
   );
 }
 
+/** The phone app's launcher icon, at sidebar size. */
 function Logo() {
   return (
     <span
-      className="s-gradient-fill relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-white shadow-glow-sm"
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-glow-sm"
       aria-hidden="true"
     >
-      {/* orbit ghosted behind the mark */}
-      <svg viewBox="0 0 32 32" className="absolute inset-0 h-full w-full" fill="none">
-        <circle cx="26" cy="6" r="11" fill="#fff" fillOpacity="0.18" />
-        <ellipse
-          cx="16"
-          cy="16"
-          rx="15"
-          ry="6.5"
-          stroke="#fff"
-          strokeOpacity="0.3"
-          strokeWidth="1"
-          transform="rotate(-28 16 16)"
-        />
-      </svg>
-      <svg viewBox="0 0 32 32" className="relative h-5 w-5" fill="none">
-        <path
-          d="M10 21.5c3 1.9 10.5 2 10.5-1.9 0-4-9.3-2.6-9.3-6.6 0-3.7 7-3.7 9.8-1.7"
-          stroke="currentColor"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-        />
-      </svg>
+      <SenseiOwl size={36} />
     </span>
   );
 }

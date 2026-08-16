@@ -5,13 +5,6 @@ import { TutorChat } from '@/components/tutor/TutorChat';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { t } from '@/i18n/strings';
 
-const FALLBACK_PROMPTS = [
-  'I have an exam in three weeks — where should I start?',
-  'Explain why dimensional analysis catches wrong equations.',
-  'I keep getting sign errors in kinematics. Help me find the pattern.',
-  'Give me one hard question and do not tell me the answer.',
-];
-
 /** Free-form Socratic session, not bound to a lesson. */
 export function TutorPage() {
   const [searchParams] = useSearchParams();
@@ -20,12 +13,15 @@ export function TutorPage() {
   const ask = searchParams.get('ask');
 
   const suggestions = useMemo(() => {
+    const fallback = t.tutor.prompts;
     const list = subjects.data ?? [];
-    if (!list.length) return FALLBACK_PROMPTS;
+    if (!list.length) return fallback;
+    // `title` arrives already localised, so the interpolated prompt stays in
+    // one language rather than mixing a translated subject into English.
     return [
-      ...FALLBACK_PROMPTS.slice(0, 2),
-      `What is the hardest idea in ${list[0].title} and why?`,
-      ...FALLBACK_PROMPTS.slice(2, 3),
+      ...fallback.slice(0, 2),
+      t.tutor.promptHardest(list[0].title),
+      ...fallback.slice(2, 3),
     ];
   }, [subjects.data]);
 

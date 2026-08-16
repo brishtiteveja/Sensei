@@ -6,13 +6,13 @@ import {
   RefreshCw,
   RotateCcw,
   Send,
-  Sparkles,
   Square,
   TriangleAlert,
 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { RichText } from '@/components/ui/RichText';
 import { ConstellationMark } from '@/components/art/HeroArt';
+import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { HandwritingPanel } from './HandwritingPanel';
 import { useTutorChat } from '@/hooks/useTutorChat';
 import type { ChatMessage } from '@/hooks/useTutorChat';
@@ -114,8 +114,8 @@ export function TutorChat({
       {/* header */}
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="s-gradient-fill relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-glow-sm">
-            <Sparkles size={17} />
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-glow-sm">
+            <SenseiOwl size={36} />
             {busy ? (
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-success ring-2 ring-surface" />
             ) : null}
@@ -146,9 +146,7 @@ export function TutorChat({
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-2 text-center">
             <ConstellationMark className="h-24 w-32 opacity-90" />
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent ring-1 ring-inset ring-accent/20">
-              <Sparkles size={22} />
-            </span>
+            <SenseiOwl size={52} className="shadow-glow-sm rounded-2xl" />
             <div className="max-w-xs space-y-1.5">
               <p className="text-sm font-semibold text-ink">{t.tutor.emptyTitle}</p>
               <p className="text-[13px] leading-relaxed text-ink-muted">{emptyBody}</p>
@@ -257,7 +255,7 @@ export function TutorChat({
           )}
         </form>
         <div className="mt-2 flex items-center justify-between gap-3 text-2xs text-ink-faint">
-          <span>Enter to send · Shift+Enter for a new line</span>
+          <span>{t.tutor.composerHint}</span>
           {chat.model ? (
             <span className="truncate font-mono" title={`${t.tutor.modelLabel}: ${chat.model}`}>
               {chat.model}
@@ -313,7 +311,7 @@ function Bubble({ message, onRetry }: { message: ChatMessage; onRetry: () => voi
   return (
     <div className="animate-fade-up">
       <div className="mb-1.5 flex items-center gap-1.5">
-        <Sparkles size={12} className="text-accent" />
+        <SenseiOwlGlyph size={13} className="text-accent" />
         <span className="text-2xs font-semibold uppercase tracking-wide text-ink-faint">
           {t.tutor.sensei}
         </span>

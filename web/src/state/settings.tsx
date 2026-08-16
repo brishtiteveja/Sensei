@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { setLocale } from '@/i18n/strings';
 import { readRaw, writeRaw } from '@/lib/storage';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -32,6 +33,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(
     () => readRaw('sidebar') === 'collapsed',
   );
+
+  // Point `t` at the active locale during render, not in an effect: children
+  // read `t` as they render, so an effect would let one paint of the previous
+  // language through first.
+  setLocale(language);
 
   // Keep <html class="dark"> in sync, including live OS changes in system mode.
   useEffect(() => {

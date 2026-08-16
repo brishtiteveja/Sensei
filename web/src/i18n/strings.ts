@@ -1,299 +1,384 @@
 /**
- * Every user-facing string in the app lives here.
+ * Every user-facing string in the app.
  *
- * Keep it a flat-ish object of plain strings (or simple functions for
- * interpolation) so a second locale is a matter of adding a sibling file and a
- * lookup — no component changes.
+ * The strings themselves live in `locales/*.json` as a flat map of dotted keys
+ * to templates (`"common.minutes": "{n} min"`). English is the source of truth
+ * and every other locale is generated from it by `scripts/gen-locales.mjs`.
+ *
+ * This module turns the flat dictionary back into the nested, typed shape the
+ * components read (`t.common.minutes(5)`), so adding a locale never touches a
+ * call site. Anything a locale is missing falls back to the English template
+ * rather than rendering a raw key.
+ *
+ * All locales are bundled eagerly. That costs a few tens of KB gzipped and buys
+ * a synchronous `t` with no loading state and no network — which is the whole
+ * promise of an app that claims to run on-device.
  */
 
-export const strings = {
-  app: {
-    name: 'Sensei',
-    tagline: 'Your personal tutor, in every language',
-    offlineBadge: 'Runs on-device',
-    offlineTooltip:
-      'Sensei runs on local hardware. Nothing in this page is loaded from a third party.',
-  },
+import bn from './locales/bn.json';
+import en from './locales/en.json';
+import es from './locales/es.json';
+import ha from './locales/ha.json';
+import hi from './locales/hi.json';
+import id from './locales/id.json';
+import ms from './locales/ms.json';
+import zh from './locales/zh.json';
 
-  nav: {
-    dashboard: 'Dashboard',
-    catalog: 'Courses',
-    practice: 'Practice',
-    progress: 'Progress',
-    settings: 'Settings',
-    tutor: 'Ask Sensei',
-    sectionLearn: 'Learn',
-    sectionYou: 'You',
-    collapse: 'Collapse sidebar',
-    expand: 'Expand sidebar',
-    toggleTheme: 'Toggle dark mode',
-  },
+export type MessageKey = keyof typeof en;
+type Dict = Partial<Record<MessageKey, string>>;
 
-  common: {
-    retry: 'Try again',
-    cancel: 'Cancel',
-    confirm: 'Confirm',
-    close: 'Close',
-    back: 'Back',
-    next: 'Next',
-    previous: 'Previous',
-    continue: 'Continue',
-    start: 'Start',
-    startLesson: 'Start lesson',
-    resume: 'Resume',
-    done: 'Done',
-    loading: 'Loading…',
-    minutes: (n: number) => `${n} min`,
-    lessons: (n: number) => (n === 1 ? '1 lesson' : `${n} lessons`),
-    units: (n: number) => (n === 1 ? '1 unit' : `${n} units`),
-    of: 'of',
-    complete: 'complete',
-    completed: 'Completed',
-    inProgress: 'In progress',
-    notStarted: 'Not started',
-    locked: 'Locked',
-    optional: 'Optional',
-    beta: 'Beta',
-    comingSoon: 'Not yet connected',
-  },
+/** Keyed by the same codes the backend returns from `/curriculum/languages`. */
+const DICTS: Record<string, Dict> = { en, bn, hi, zh, es, id, ms, ha };
 
-  errors: {
-    title: 'Something went wrong',
-    generic: 'We could not load this. The tutor server may be unreachable.',
-    offline: 'Cannot reach the Sensei server.',
-    offlineHint: (url: string) => `Tried ${url}. Check the box is running and on the network.`,
-    notFoundTitle: 'Page not found',
-    notFoundBody: 'That route does not exist in Sensei.',
-    subjectNotFound: 'That subject is not in the curriculum.',
-    lessonNotFound: 'That lesson could not be found.',
-  },
+export const LOCALE_CODES = Object.keys(DICTS);
 
-  empty: {
-    subjects: 'No subjects yet',
-    subjectsBody: 'The curriculum on this box is empty. Load a syllabus to get started.',
-    lessons: 'No lessons in this unit yet',
-    questions: 'No practice questions found',
-    questionsBody: 'Try a different subject, or widen the filters.',
-    lessonContent: 'This lesson has no written material yet',
-    lessonContentBody:
-      'The curriculum entry exists but the teaching content has not been generated. You can still ask Sensei about it.',
-    progress: 'Nothing tracked yet',
-    progressBody: 'Finish a lesson or a practice question and your mastery shows up here.',
-  },
+function build(dict: Dict) {
+  /** Look up a template, falling back to English, then to the key itself. */
+  const s = (key: MessageKey): string => dict[key] ?? en[key] ?? key;
 
-  dashboard: {
-    greetingMorning: 'Good morning',
-    greetingAfternoon: 'Good afternoon',
-    greetingEvening: 'Good evening',
-    subtitle: 'Pick up where you left off, or start something new.',
-    continueLearning: 'Continue learning',
-    continueEmpty: 'Start your first lesson',
-    continueEmptyBody:
-      'Choose a subject and Sensei will guide you through it one question at a time.',
-    browseCourses: 'Browse courses',
-    overallProgress: 'Overall progress',
-    lessonsCompleted: 'Lessons completed',
-    streak: 'Day streak',
-    streakBody: (n: number) => (n > 0 ? `${n} days in a row` : 'Start one today'),
-    minutesLearned: 'Minutes learned',
-    masteryBySubject: 'Mastery by subject',
-    nextUp: 'Next up',
-    nextUpBody: 'Recommended from where you are in the curriculum.',
-    quickPractice: 'Quick practice',
-    quickPracticeBody: 'Five past-exam questions, immediate feedback.',
-    askAnything: 'Ask anything',
-    askAnythingBody: 'Open a free-form Socratic session with Sensei.',
-  },
+  /** `fill('Step {n}', {n: 3})` -> `'Step 3'`. Unknown tokens are left alone. */
+  const fill = (template: string, vars: Record<string, string | number>): string =>
+    template.replace(/\{(\w+)\}/g, (whole, name: string) =>
+      name in vars ? String(vars[name]) : whole,
+    );
 
-  catalog: {
-    title: 'Courses',
-    subtitle: 'Curriculum loaded on this box. Every unit maps to a syllabus chapter.',
-    exams: 'Targets',
-    open: 'Open course',
-  },
+  /**
+   * English-style one/other. Locales without a singular/plural split simply
+   * carry the same text in both slots, which reads correctly for bn, zh, id,
+   * ms and ha alike.
+   */
+  const plural = (base: string, n: number): string =>
+    fill(s(`${base}.${n === 1 ? 'one' : 'other'}` as MessageKey), { n });
 
-  course: {
-    unitsTitle: 'Units',
-    overview: 'Overview',
-    aboutThisCourse: 'About this course',
-    aboutBody:
-      'Sensei teaches this course Socratically — it will not hand over answers. Each lesson runs five teaching steps, from first intuition to mastery check.',
-    chapter: 'Chapter',
-    class: 'Class',
-    selectLesson: 'Select a lesson',
-    selectLessonBody: 'Pick a lesson from the left to see its objectives and start tutoring.',
-    yourProgress: 'Your progress',
-    practiceThisSubject: 'Practice this subject',
-    searchPlaceholder: 'Filter lessons…',
-    noMatches: 'No lessons match that filter.',
-  },
+  return {
+    app: {
+      name: s('app.name'),
+      tagline: s('app.tagline'),
+      offlineBadge: s('app.offlineBadge'),
+      offlineCaption: s('app.offlineCaption'),
+      offlineTooltip: s('app.offlineTooltip'),
+    },
 
-  lesson: {
-    objectives: 'Learning objectives',
-    steps: 'How Sensei will teach this',
-    keyFormulas: 'Key formulas',
-    commonMistakes: 'Common mistakes',
-    realWorld: 'In the real world',
-    concepts: 'Concepts',
-    markComplete: 'Mark as complete',
-    markedComplete: 'Lesson complete',
-    nextLesson: 'Next lesson',
-    prevLesson: 'Previous lesson',
-    backToCourse: 'Back to course',
-    stepLabel: (n: number) => `Step ${n}`,
-    stepTypes: {
-      intro: 'Intro',
-      concept: 'Concept',
-      teach: 'Teach',
-      practice: 'Practice',
-      mastery: 'Mastery',
-    } as Record<string, string>,
-    stepHints: {
-      intro: 'Sensei opens with a question to find what you already believe.',
-      concept: 'The idea itself, built from your answer rather than recited at you.',
-      teach: 'The mechanics — notation, units, the standard form.',
-      practice: 'You do one. Sensei watches where you hesitate.',
-      mastery: 'A harder, exam-style check that the idea actually stuck.',
-    } as Record<string, string>,
-    tutorPanelTitle: 'Sensei',
-    tutorPanelSubtitle: 'Grounded in this lesson',
-    resizeHandle: 'Drag to resize the tutor panel',
-  },
+    nav: {
+      dashboard: s('nav.dashboard'),
+      catalog: s('nav.catalog'),
+      practice: s('nav.practice'),
+      progress: s('nav.progress'),
+      settings: s('nav.settings'),
+      tutor: s('nav.tutor'),
+      sectionLearn: s('nav.sectionLearn'),
+      sectionYou: s('nav.sectionYou'),
+      collapse: s('nav.collapse'),
+      expand: s('nav.expand'),
+      toggleTheme: s('nav.toggleTheme'),
+    },
 
-  tutor: {
-    title: 'Ask Sensei',
-    subtitle: 'Socratic tutoring. It will guide you, not answer for you.',
-    placeholder: 'Ask about this lesson…',
-    placeholderFree: 'What are you working on?',
-    send: 'Send',
-    stop: 'Stop',
-    clear: 'New session',
-    thinking: 'Sensei is thinking…',
-    loadingModel: 'Loading the local model — this can take a few minutes…',
-    suggestedPrompts: 'Try asking',
-    emptyTitle: 'Sensei never hands over the answer',
-    emptyBody: 'It asks the question that gets you to it. Start anywhere below.',
-    emptyBodyLesson: 'Ask about anything in this lesson, or start with one of these.',
-    you: 'You',
-    sensei: 'Sensei',
-    errorPrefix: 'Tutor error',
-    retryTurn: 'Retry',
-    sessionLabel: 'Session',
-    modelLabel: 'Model',
-    stopped: 'Stopped.',
-    attach: 'Upload handwritten work',
-    scrollToLatest: 'Jump to latest',
-  },
+    common: {
+      retry: s('common.retry'),
+      cancel: s('common.cancel'),
+      confirm: s('common.confirm'),
+      close: s('common.close'),
+      back: s('common.back'),
+      next: s('common.next'),
+      previous: s('common.previous'),
+      continue: s('common.continue'),
+      start: s('common.start'),
+      startLesson: s('common.startLesson'),
+      resume: s('common.resume'),
+      done: s('common.done'),
+      loading: s('common.loading'),
+      minutes: (n: number) => fill(s('common.minutes'), { n }),
+      lessons: (n: number) => plural('common.lessons', n),
+      units: (n: number) => plural('common.units', n),
+      of: s('common.of'),
+      complete: s('common.complete'),
+      completed: s('common.completed'),
+      inProgress: s('common.inProgress'),
+      notStarted: s('common.notStarted'),
+      locked: s('common.locked'),
+      optional: s('common.optional'),
+      beta: s('common.beta'),
+      comingSoon: s('common.comingSoon'),
+    },
 
-  handwriting: {
-    title: 'Show your work',
-    subtitle: 'Photograph or scan a page and Sensei finds the step where you slipped.',
-    drop: 'Drop an image here',
-    or: 'or',
-    browse: 'choose a file',
-    accepted: 'PNG, JPG or WebP, up to 8 MB',
-    remove: 'Remove image',
-    tooLarge: 'That image is over 8 MB. Try a smaller photo.',
-    wrongType: 'That is not an image file.',
-    notWiredTitle: 'Image reading is not wired up on this server',
-    notWiredBody:
-      'This build of the Sensei API exposes only a JSON tutor endpoint — there is no image or multipart route yet, so the photo is not sent anywhere. The tutor still receives your typed question. Once the backend adds a vision route this panel sends the image with it.',
-    notWiredShort: 'Not sent — no image endpoint on this server yet',
-    sendAnyway: 'Ask about it in text',
-    requiresVision: 'Also needs a vision-capable model — see Settings.',
-  },
+    errors: {
+      title: s('errors.title'),
+      generic: s('errors.generic'),
+      offline: s('errors.offline'),
+      offlineHint: (url: string) => fill(s('errors.offlineHint'), { url }),
+      notFoundTitle: s('errors.notFoundTitle'),
+      notFoundBody: s('errors.notFoundBody'),
+      subjectNotFound: s('errors.subjectNotFound'),
+      lessonNotFound: s('errors.lessonNotFound'),
+    },
 
-  practice: {
-    title: 'Practice',
-    subtitle: 'Real past-exam questions. One at a time, with immediate feedback.',
-    subject: 'Subject',
-    allSubjects: 'All subjects',
-    count: 'Questions',
-    startSet: 'Start practice set',
-    newSet: 'New set',
-    questionOf: (a: number, b: number) => `Question ${a} of ${b}`,
-    check: 'Check answer',
-    nextQuestion: 'Next question',
-    finish: 'Finish',
-    correct: 'Correct',
-    incorrect: 'Not quite',
-    correctBody: 'That is the one. Here is why it holds.',
-    incorrectBody: 'Close — the reasoning slipped somewhere. Let Sensei find where.',
-    correctAnswerWas: (opt: string) => `The correct answer is ${opt}.`,
-    askWhy: 'Ask Sensei why',
-    askWhyShort: 'Ask why',
-    yourAnswer: 'Your answer',
-    resultsTitle: 'Set complete',
-    resultsScore: (a: number, b: number) => `${a} of ${b} correct`,
-    resultsAgain: 'Practice again',
-    resultsReview: 'Review answers',
-    source: 'Source',
-    exitSet: 'Exit set',
-  },
+    empty: {
+      subjects: s('empty.subjects'),
+      subjectsBody: s('empty.subjectsBody'),
+      lessons: s('empty.lessons'),
+      questions: s('empty.questions'),
+      questionsBody: s('empty.questionsBody'),
+      lessonContent: s('empty.lessonContent'),
+      lessonContentBody: s('empty.lessonContentBody'),
+      progress: s('empty.progress'),
+      progressBody: s('empty.progressBody'),
+    },
 
-  progress: {
-    title: 'Progress',
-    subtitle: 'What you have mastered, and what is still shaky.',
-    overall: 'Overall',
-    bySubject: 'By subject',
-    byConcept: 'Concept mastery',
-    conceptHint: 'Concepts are tagged on each lesson. Finishing a lesson raises its concepts.',
-    practiceAccuracy: 'Practice accuracy',
-    questionsAnswered: 'Questions answered',
-    lessonsDone: 'Lessons done',
-    timeSpent: 'Time on lessons',
-    strongest: 'Strongest',
-    weakest: 'Needs work',
-    reset: 'Reset all progress',
-    resetConfirmTitle: 'Reset progress?',
-    resetConfirmBody:
-      'This clears every completed lesson, streak and practice result stored in this browser. It cannot be undone.',
-    localOnlyNote:
-      'Progress is stored in this browser only — the Sensei API on this box has no learner endpoint yet.',
-  },
+    dashboard: {
+      greetingMorning: s('dashboard.greetingMorning'),
+      greetingAfternoon: s('dashboard.greetingAfternoon'),
+      greetingEvening: s('dashboard.greetingEvening'),
+      subtitle: s('dashboard.subtitle'),
+      continueLearning: s('dashboard.continueLearning'),
+      continueEmpty: s('dashboard.continueEmpty'),
+      continueEmptyBody: s('dashboard.continueEmptyBody'),
+      browseCourses: s('dashboard.browseCourses'),
+      overallProgress: s('dashboard.overallProgress'),
+      lessonsCompleted: s('dashboard.lessonsCompleted'),
+      streak: s('dashboard.streak'),
+      streakBody: (n: number) =>
+        n > 0 ? fill(s('dashboard.streakBody.some'), { n }) : s('dashboard.streakBody.zero'),
+      minutesLearned: s('dashboard.minutesLearned'),
+      masteryBySubject: s('dashboard.masteryBySubject'),
+      nextUp: s('dashboard.nextUp'),
+      nextUpBody: s('dashboard.nextUpBody'),
+      quickPractice: s('dashboard.quickPractice'),
+      quickPracticeBody: s('dashboard.quickPracticeBody'),
+      askAnything: s('dashboard.askAnything'),
+      askAnythingBody: s('dashboard.askAnythingBody'),
+    },
 
-  settings: {
-    title: 'Settings',
-    subtitle: 'Language, model and appearance.',
-    language: 'Language',
-    languageBody: 'Curriculum and tutoring switch to this language.',
-    appearance: 'Appearance',
-    appearanceBody: 'Dark mode is easier for long evening sessions.',
-    themeLight: 'Light',
-    themeDark: 'Dark',
-    themeSystem: 'System',
-    model: 'Tutor model',
-    modelBody: 'Which model answers you. Cloud is fast; local never leaves the box.',
-    cloudModels: 'Cloud',
-    localModels: 'On this box',
-    current: 'Active',
-    resident: 'Loaded — instant',
-    noSwap: 'No swap needed',
-    refresh: 'Refresh',
-    coldSwap: 'Cold swap 1–5 min',
-    vision: 'Reads handwriting',
-    noVision: 'Text only',
-    noVisionWarning: 'Text-only models cannot read handwritten work.',
-    swapWarningTitle: 'This swaps the loaded model',
-    swapWarningBody: (model: string) =>
-      `Only one local model stays resident. Loading ${model} takes 1–5 minutes, blocks this request, and affects everyone using this box.`,
-    swapConfirm: 'Load it anyway',
-    swapping: 'Loading model…',
-    swappingBody:
-      'The router is swapping the resident model. Keep this tab open — this can take up to five minutes.',
-    swapFailed: 'Could not switch model',
-    swapSucceeded: (model: string) => `Now using ${model}.`,
-    server: 'Server',
-    serverBody: 'The Sensei API this client talks to.',
-    serverStatusOk: 'Reachable',
-    serverStatusDown: 'Unreachable',
-    serverCheck: 'Check again',
-    engines: (n: number) => (n === 1 ? '1 engine' : `${n} engines`),
-    privacy: 'Privacy',
-    privacyBody:
-      'This page loads no fonts, scripts, images or analytics from third parties. The only host it ever contacts is the Sensei server above.',
-  },
-} as const;
+    catalog: {
+      title: s('catalog.title'),
+      subtitle: s('catalog.subtitle'),
+      exams: s('catalog.exams'),
+      open: s('catalog.open'),
+    },
 
-export type Strings = typeof strings;
-export const t = strings;
+    course: {
+      unitsTitle: s('course.unitsTitle'),
+      overview: s('course.overview'),
+      aboutThisCourse: s('course.aboutThisCourse'),
+      aboutBody: s('course.aboutBody'),
+      chapter: s('course.chapter'),
+      class: s('course.class'),
+      selectLesson: s('course.selectLesson'),
+      selectLessonBody: s('course.selectLessonBody'),
+      yourProgress: s('course.yourProgress'),
+      practiceThisSubject: s('course.practiceThisSubject'),
+      searchPlaceholder: s('course.searchPlaceholder'),
+      noMatches: s('course.noMatches'),
+      clearFilter: s('course.clearFilter'),
+    },
+
+    lesson: {
+      objectives: s('lesson.objectives'),
+      steps: s('lesson.steps'),
+      keyFormulas: s('lesson.keyFormulas'),
+      commonMistakes: s('lesson.commonMistakes'),
+      realWorld: s('lesson.realWorld'),
+      concepts: s('lesson.concepts'),
+      markComplete: s('lesson.markComplete'),
+      markedComplete: s('lesson.markedComplete'),
+      nextLesson: s('lesson.nextLesson'),
+      prevLesson: s('lesson.prevLesson'),
+      backToCourse: s('lesson.backToCourse'),
+      stepLabel: (n: number) => fill(s('lesson.stepLabel'), { n }),
+      stepActive: s('lesson.stepActive'),
+      stepTypes: {
+        intro: s('lesson.stepTypes.intro'),
+        concept: s('lesson.stepTypes.concept'),
+        teach: s('lesson.stepTypes.teach'),
+        practice: s('lesson.stepTypes.practice'),
+        mastery: s('lesson.stepTypes.mastery'),
+      } as Record<string, string>,
+      stepHints: {
+        intro: s('lesson.stepHints.intro'),
+        concept: s('lesson.stepHints.concept'),
+        teach: s('lesson.stepHints.teach'),
+        practice: s('lesson.stepHints.practice'),
+        mastery: s('lesson.stepHints.mastery'),
+      } as Record<string, string>,
+      tutorPanelTitle: s('lesson.tutorPanelTitle'),
+      tutorPanelSubtitle: s('lesson.tutorPanelSubtitle'),
+      resizeHandle: s('lesson.resizeHandle'),
+    },
+
+    tutor: {
+      title: s('tutor.title'),
+      subtitle: s('tutor.subtitle'),
+      placeholder: s('tutor.placeholder'),
+      placeholderFree: s('tutor.placeholderFree'),
+      send: s('tutor.send'),
+      stop: s('tutor.stop'),
+      clear: s('tutor.clear'),
+      thinking: s('tutor.thinking'),
+      loadingModel: s('tutor.loadingModel'),
+      suggestedPrompts: s('tutor.suggestedPrompts'),
+      emptyTitle: s('tutor.emptyTitle'),
+      emptyBody: s('tutor.emptyBody'),
+      emptyBodyLesson: s('tutor.emptyBodyLesson'),
+      you: s('tutor.you'),
+      sensei: s('tutor.sensei'),
+      errorPrefix: s('tutor.errorPrefix'),
+      retryTurn: s('tutor.retryTurn'),
+      sessionLabel: s('tutor.sessionLabel'),
+      modelLabel: s('tutor.modelLabel'),
+      stopped: s('tutor.stopped'),
+      attach: s('tutor.attach'),
+      scrollToLatest: s('tutor.scrollToLatest'),
+      composerHint: s('tutor.composerHint'),
+      /**
+       * Openers the student sends, so they have to be in the student's
+       * language -- an English suggestion chip under a Chinese UI would put
+       * the tutor into the wrong language on the very first turn.
+       */
+      prompts: [s('tutor.prompt1'), s('tutor.prompt2'), s('tutor.prompt3'), s('tutor.prompt4')],
+      promptHardest: (subject: string) => fill(s('tutor.promptHardest'), { subject }),
+    },
+
+    handwriting: {
+      title: s('handwriting.title'),
+      subtitle: s('handwriting.subtitle'),
+      drop: s('handwriting.drop'),
+      or: s('handwriting.or'),
+      browse: s('handwriting.browse'),
+      accepted: s('handwriting.accepted'),
+      remove: s('handwriting.remove'),
+      tooLarge: s('handwriting.tooLarge'),
+      wrongType: s('handwriting.wrongType'),
+      notWiredTitle: s('handwriting.notWiredTitle'),
+      notWiredBody: s('handwriting.notWiredBody'),
+      notWiredShort: s('handwriting.notWiredShort'),
+      sendAnyway: s('handwriting.sendAnyway'),
+      requiresVision: s('handwriting.requiresVision'),
+    },
+
+    practice: {
+      title: s('practice.title'),
+      subtitle: s('practice.subtitle'),
+      subject: s('practice.subject'),
+      allSubjects: s('practice.allSubjects'),
+      count: s('practice.count'),
+      startSet: s('practice.startSet'),
+      newSet: s('practice.newSet'),
+      questionOf: (a: number, b: number) => fill(s('practice.questionOf'), { a, b }),
+      check: s('practice.check'),
+      nextQuestion: s('practice.nextQuestion'),
+      finish: s('practice.finish'),
+      correct: s('practice.correct'),
+      incorrect: s('practice.incorrect'),
+      correctBody: s('practice.correctBody'),
+      incorrectBody: s('practice.incorrectBody'),
+      correctAnswerWas: (opt: string) => fill(s('practice.correctAnswerWas'), { opt }),
+      askWhy: s('practice.askWhy'),
+      askWhyShort: s('practice.askWhyShort'),
+      yourAnswer: s('practice.yourAnswer'),
+      resultsTitle: s('practice.resultsTitle'),
+      resultsScore: (a: number, b: number) => fill(s('practice.resultsScore'), { a, b }),
+      resultsAgain: s('practice.resultsAgain'),
+      resultsReview: s('practice.resultsReview'),
+      source: s('practice.source'),
+      exitSet: s('practice.exitSet'),
+    },
+
+    progress: {
+      title: s('progress.title'),
+      subtitle: s('progress.subtitle'),
+      overall: s('progress.overall'),
+      bySubject: s('progress.bySubject'),
+      byConcept: s('progress.byConcept'),
+      conceptHint: s('progress.conceptHint'),
+      practiceAccuracy: s('progress.practiceAccuracy'),
+      questionsAnswered: s('progress.questionsAnswered'),
+      lessonsDone: s('progress.lessonsDone'),
+      timeSpent: s('progress.timeSpent'),
+      strongest: s('progress.strongest'),
+      weakest: s('progress.weakest'),
+      reset: s('progress.reset'),
+      resetConfirmTitle: s('progress.resetConfirmTitle'),
+      resetConfirmBody: s('progress.resetConfirmBody'),
+      localOnlyNote: s('progress.localOnlyNote'),
+    },
+
+    settings: {
+      title: s('settings.title'),
+      subtitle: s('settings.subtitle'),
+      language: s('settings.language'),
+      languageBody: s('settings.languageBody'),
+      appearance: s('settings.appearance'),
+      appearanceBody: s('settings.appearanceBody'),
+      themeLight: s('settings.themeLight'),
+      themeDark: s('settings.themeDark'),
+      themeSystem: s('settings.themeSystem'),
+      model: s('settings.model'),
+      modelBody: s('settings.modelBody'),
+      cloudModels: s('settings.cloudModels'),
+      localModels: s('settings.localModels'),
+      current: s('settings.current'),
+      resident: s('settings.resident'),
+      noSwap: s('settings.noSwap'),
+      refresh: s('settings.refresh'),
+      coldSwap: s('settings.coldSwap'),
+      vision: s('settings.vision'),
+      noVision: s('settings.noVision'),
+      noVisionWarning: s('settings.noVisionWarning'),
+      swapWarningTitle: s('settings.swapWarningTitle'),
+      swapWarningBody: (model: string) => fill(s('settings.swapWarningBody'), { model }),
+      swapConfirm: s('settings.swapConfirm'),
+      swapping: s('settings.swapping'),
+      swappingBody: s('settings.swappingBody'),
+      swapFailed: s('settings.swapFailed'),
+      swapSucceeded: (model: string) => fill(s('settings.swapSucceeded'), { model }),
+      server: s('settings.server'),
+      serverBody: s('settings.serverBody'),
+      serverStatusOk: s('settings.serverStatusOk'),
+      serverStatusDown: s('settings.serverStatusDown'),
+      serverCheck: s('settings.serverCheck'),
+      engines: (n: number) => plural('settings.engines', n),
+      privacy: s('settings.privacy'),
+      privacyBody: s('settings.privacyBody'),
+    },
+  };
+}
+
+export type Strings = ReturnType<typeof build>;
+
+const CACHE = new Map<string, Strings>([['en', build(en)]]);
+let activeCode = 'en';
+
+function stringsFor(code: string): Strings {
+  const key = code in DICTS ? code : 'en';
+  let built = CACHE.get(key);
+  if (!built) {
+    built = build(DICTS[key]);
+    CACHE.set(key, built);
+  }
+  return built;
+}
+
+/**
+ * Point `t` at a locale. Called by SettingsProvider during render, before any
+ * consumer reads `t`, so a language change and the strings it produces land in
+ * the same commit.
+ */
+export function setLocale(code: string): void {
+  activeCode = code in DICTS ? code : 'en';
+}
+
+/**
+ * A live view of the active locale.
+ *
+ * It stays a module singleton rather than a hook because ~250 call sites read
+ * it as plain data (`t.nav.dashboard`), including a few outside React. The
+ * proxy resolves each read against whatever `setLocale` last selected; the
+ * tree is remounted on language change (see `App.tsx`) so nothing keeps a
+ * stale group object across locales.
+ */
+export const t: Strings = new Proxy({} as Strings, {
+  get: (_target, prop) => stringsFor(activeCode)[prop as keyof Strings],
+  has: (_target, prop) => prop in stringsFor(activeCode),
+  ownKeys: () => Reflect.ownKeys(stringsFor(activeCode)),
+  getOwnPropertyDescriptor: (_target, prop) =>
+    Object.getOwnPropertyDescriptor(stringsFor(activeCode), prop),
+});

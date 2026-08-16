@@ -16,6 +16,7 @@ import { LinkButton } from '@/components/ui/Button';
 import { ProgressBar, ProgressRing } from '@/components/ui/Progress';
 import { EmptyState, ErrorState, Skeleton, SkeletonCards } from '@/components/ui/States';
 import { ConstellationMark, HeroConstellation } from '@/components/art/HeroArt';
+import { SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { SubjectArt, SubjectTile } from '@/components/art/SubjectArt';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { useProgress } from '@/state/progress';
@@ -198,7 +199,7 @@ export function DashboardPage() {
             />
             <QuickLink
               to="/tutor"
-              icon={<Sparkles size={15} />}
+              icon={<SenseiOwlGlyph size={15} />}
               title={t.dashboard.askAnything}
               body={t.dashboard.askAnythingBody}
             />
