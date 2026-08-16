@@ -62,10 +62,15 @@ export function SenseiOwl({
       <circle cx="120" cy="82" r="20" fill={INDIGO} />
       <circle cx="80" cy="82" r="14" stroke={CYAN} strokeWidth="2.5" fill="none" />
       <circle cx="120" cy="82" r="14" stroke={CYAN} strokeWidth="2.5" fill="none" />
-      <circle cx="80" cy="82" r="7" fill={CYAN} />
-      <circle cx="120" cy="82" r="7" fill={CYAN} />
-      <circle cx="77" cy="79" r="2.5" fill={CREAM} opacity="0.8" />
-      <circle cx="117" cy="79" r="2.5" fill={CREAM} opacity="0.8" />
+      {/* The pupils sit in their own group so a caller can make them follow the
+          cursor by setting --gaze-x / --gaze-y on any ancestor. Unset reads as
+          0, so every other owl on the page just looks straight ahead. */}
+      <g className="s-owl-gaze">
+        <circle cx="80" cy="82" r="7" fill={CYAN} />
+        <circle cx="120" cy="82" r="7" fill={CYAN} />
+        <circle cx="77" cy="79" r="2.5" fill={CREAM} opacity="0.8" />
+        <circle cx="117" cy="79" r="2.5" fill={CREAM} opacity="0.8" />
+      </g>
 
       {/* beak */}
       <polygon points="100,98 93,110 107,110" fill={GOLD} />

@@ -200,6 +200,20 @@
     );
   }
 
+  /* The owl's pupils drift toward whatever the student is doing. The floating
+     owl writes --gaze-x/--gaze-y (each -1..1) each frame; the transition does
+     the smoothing, so the JS side only has to write a number. */
+  .s-owl-gaze {
+    transform: translate(calc(var(--gaze-x, 0) * 4.5px), calc(var(--gaze-y, 0) * 3.5px));
+    transition: transform 160ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .s-owl-gaze {
+      transform: none;
+    }
+  }
+
   /* One-shot light sweep across a hero surface on mount. */
   .s-sheen {
     position: absolute;

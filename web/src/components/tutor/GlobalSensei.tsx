@@ -24,11 +24,43 @@ import { cn } from '@/lib/utils';
  * "Look at my work" is the shortcut that matters: it snapshots whatever surface
  * is currently registered and runs the two-stage pipeline, dropping the reading
  * into this thread so the follow-up conversation already knows what is on the page.
+ *
+ * It also *behaves* like a presence: the pupils track the cursor and the whole
+ * mark leans toward it, trailing colour as it moves. That is not decoration --
+ * a tutor that visibly watches you work is the difference between a help button
+ * and someone sitting beside you. See the animation loop below.
  */
 
 const POS_KEY = 'owl.pos';
 const PANEL_W = 352;
 const PANEL_H = 416;
+
+/** How far the owl will lean sideways out of its margin, in px. */
+const MAX_LEAN = 34;
+/** Keeps the travelling owl clear of the very top and bottom edges. */
+const HOME_MARGIN = 56;
+/** How far off the cursor line the owl settles, in px. */
+const STANDOFF = 76;
+/**
+ * Come this close and it stops travelling and waits to be clicked. Without
+ * this the standoff turns it into a button that dodges the cursor reaching
+ * for it, which is maddening.
+ */
+const APPROACH_HOLD = 116;
+/** Comet length. Each node is one past position, oldest last. */
+const TRAIL = 9;
+/** Brand palette, head to tail: indigo into cyan into gold. */
+const TRAIL_COLORS = [
+  '#4F46E5',
+  '#5B5BEA',
+  '#6366F1',
+  '#22D3EE',
+  '#06B6D4',
+  '#22D3EE',
+  '#F4C542',
+  '#F4C542',
+  '#4F46E5',
+];
 
 export function GlobalSensei() {
   const { language } = useSettings();
@@ -52,6 +84,17 @@ export function GlobalSensei() {
   });
   const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
   const owlRef = useRef<HTMLButtonElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const leanRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<(HTMLSpanElement | null)[]>([]);
+  /** The live follow offset, shared between the animation loop and dragging. */
+  const offsetRef = useRef({ x: 0, y: 0 });
+  /** Set whenever the owl's home moves, so the loop re-measures it once. */
+  const homeDirty = useRef(true);
+  // Read by the animation loop without restarting it.
+  const openRef = useRef(open);
+  openRef.current = open;
+  const excitedRef = useRef(0);
 
   useEffect(() => onSurfaceChange(setSurface), []);
 
@@ -70,16 +113,178 @@ export function GlobalSensei() {
   useEffect(() => {
     const bob = () => {
       setNudge(true);
+      excitedRef.current = 1;
       window.setTimeout(() => setNudge(false), 700);
     };
     window.addEventListener('sensei:activity', bob);
     return () => window.removeEventListener('sensei:activity', bob);
   }, []);
 
+  /**
+   * Follow, watch, and trail colour.
+   *
+   * One rAF loop drives all three, writing straight to the DOM -- a per-frame
+   * setState here would re-render the whole conversation sixty times a second.
+   *
+   * It travels *vertically* with the cursor and only leans sideways, so it
+   * keeps you company down the page while staying in the margin: a companion
+   * that wandered across the problem would be an obstacle. The lag is
+   * deliberate — it arrives a beat after you, which is what makes it read as
+   * following rather than as a cursor decoration.
+   *
+   * The trail is a ring buffer of past centres, so it stretches into a comet
+   * exactly when the owl is moving and collapses to nothing when it is parked
+   * -- no permanent smear behind a still button.
+   */
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const pointer = { x: -1, y: -1 };
+    const lean = offsetRef.current;
+    const path = Array.from({ length: TRAIL + 1 }, () => ({ x: -999, y: -999 }));
+    let glow = 0;
+    let raf = 0;
+
+    const onMove = (e: PointerEvent) => {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+
+    /*
+     * The home centre, cached. The host is fixed and never transformed, so its
+     * box only moves when the owl is dropped somewhere new or the window is
+     * resized — measuring it every frame would force a layout flush sixty
+     * times a second for a number that almost never changes.
+     */
+    let home = { x: 0, y: 0 };
+    const measure = () => {
+      const host = hostRef.current;
+      if (!host) return;
+      const r = host.getBoundingClientRect();
+      home = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    window.addEventListener('resize', measure);
+
+    const frame = () => {
+      raf = requestAnimationFrame(frame);
+      const host = hostRef.current;
+      const el = leanRef.current;
+      if (!host || !el) return;
+
+      // Mid-drag the home moves with the finger, so it is re-read every frame;
+      // otherwise only after it has been dropped somewhere new.
+      if (drag.current || homeDirty.current) {
+        measure();
+        homeDirty.current = false;
+      }
+      const cx = home.x;
+      const cy = home.y;
+
+      // Reasons to hold position: being dragged; the panel is open (it is
+      // placed against the owl and would drift away from it); a tour is
+      // spotlighting it; or you are reaching for it.
+      const reaching =
+        pointer.x >= 0 &&
+        Math.hypot(pointer.x - (cx + lean.x), pointer.y - (cy + lean.y)) < APPROACH_HOLD;
+      if (!drag.current && !openRef.current && !document.body.dataset.tour && !reaching) {
+        let tx = 0;
+        let ty = 0;
+        if (pointer.x >= 0) {
+          // Sideways it only *leans* -- capped, so it never leaves its margin
+          // and crosses the work. Vertically it travels the whole viewport,
+          // gliding along beside whatever line you are on. That is the bit
+          // that reads as company rather than as a button.
+          const dx = pointer.x - cx;
+          tx = Math.max(-MAX_LEAN, Math.min(MAX_LEAN, dx * 0.12));
+          // Alongside you, never underneath: it holds a standoff on its home
+          // side of the cursor, so it can't end up swallowing a click meant
+          // for the page.
+          const away = cy >= pointer.y ? 1 : -1;
+          const wantY = Math.max(
+            HOME_MARGIN,
+            Math.min(window.innerHeight - HOME_MARGIN, pointer.y + away * STANDOFF),
+          );
+          ty = wantY - cy;
+        }
+        lean.x += (tx - lean.x) * 0.085;
+        // Lazier than the lean, so it arrives a beat after you do and draws a
+        // longer tail on the way.
+        lean.y += (ty - lean.y) * 0.055;
+        el.style.transform = `translate3d(${lean.x.toFixed(2)}px, ${lean.y.toFixed(2)}px, 0)`;
+      }
+
+      const nx = cx + lean.x;
+      const ny = cy + lean.y;
+
+      // Gaze is measured from where the owl actually *is*, not from its home --
+      // otherwise it stares off at an angle the whole time it is travelling.
+      if (pointer.x >= 0) {
+        const gx = Math.max(-1, Math.min(1, (pointer.x - nx) / 220));
+        const gy = Math.max(-1, Math.min(1, (pointer.y - ny) / 220));
+        host.style.setProperty('--gaze-x', gx.toFixed(3));
+        host.style.setProperty('--gaze-y', gy.toFixed(3));
+      }
+
+      const head = path[0];
+      const speed = Math.hypot(nx - head.x, ny - head.y);
+      path.pop();
+      path.unshift({ x: nx, y: ny });
+
+      // Brightness follows speed, with a floor while something just happened --
+      // that is the owl reacting to you rather than to the mouse.
+      const target = Math.min(1, speed / 4) * 0.9 + excitedRef.current * 0.4;
+      glow += (Math.min(1, target) - glow) * (target > glow ? 0.35 : 0.08);
+      excitedRef.current *= 0.94;
+
+      for (let i = 0; i < TRAIL; i++) {
+        const node = trailRef.current[i];
+        if (!node) continue;
+        const p = path[i + 1];
+        const age = 1 - i / TRAIL;
+        node.style.transform =
+          `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0) ` +
+          `translate(-50%, -50%) scale(${(0.3 + age * 0.75).toFixed(3)})`;
+        node.style.opacity = (glow * age * 0.8).toFixed(3);
+      }
+    };
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
   // ---- dragging -------------------------------------------------------------
   const onPointerDown = (e: React.PointerEvent) => {
     const el = e.currentTarget as HTMLElement;
     el.setPointerCapture(e.pointerId);
+
+    /*
+     * Grabbing a *travelling* owl: fold however far it has followed you into
+     * its home and zero the offset, so from here on the drag is plain
+     * arithmetic on one number. Written straight to the DOM as well as to
+     * state, because a frame rendered with the new home and the old offset
+     * would flash the owl across the screen and back.
+     */
+    const host = hostRef.current;
+    const o = offsetRef.current;
+    if (host && (o.x || o.y)) {
+      const hr = host.getBoundingClientRect();
+      const x = hr.left + o.x;
+      const y = hr.top + o.y;
+      host.style.right = '';
+      host.style.bottom = '';
+      host.style.left = `${x}px`;
+      host.style.top = `${y}px`;
+      o.x = 0;
+      o.y = 0;
+      if (leanRef.current) leanRef.current.style.transform = 'translate3d(0px, 0px, 0)';
+      setPos({ x, y });
+    }
+
     const r = el.getBoundingClientRect();
     drag.current = { dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
   };
@@ -174,6 +379,10 @@ export function GlobalSensei() {
     return () => window.removeEventListener('sensei:insert', onInsert as EventListener);
   }, [language, chat]);
 
+  useEffect(() => {
+    homeDirty.current = true;
+  }, [pos]);
+
   const style: React.CSSProperties =
     pos.x < 0 ? { right: 20, bottom: 20 } : { left: pos.x, top: pos.y };
 
@@ -207,107 +416,129 @@ export function GlobalSensei() {
   }, [open, pos]);
 
   return (
-    <div id="sensei-owl" className="pointer-events-none fixed z-[60]" style={style}>
-      {open ? (
-        <div
-          className="pointer-events-auto fixed flex flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-lift backdrop-blur"
-          style={panelStyle}
-        >
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex shrink-0 items-center gap-2 border-b border-line px-3 py-2">
-              <SenseiOwl size={22} />
-              <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
-                {surface?.label ?? t.tutor.title}
-              </p>
-              <IconButton label={t.common.close} onClick={() => setOpen(false)}>
-                <X size={14} />
-              </IconButton>
-            </div>
+    <>
+      {/* The comet, under the owl and out of every hit-test. Positions are
+          viewport coordinates written by the loop, so this layer is fixed and
+          full-bleed rather than anchored to the owl. */}
+      <div className="pointer-events-none fixed inset-0 z-[59] overflow-hidden" aria-hidden="true">
+        {TRAIL_COLORS.slice(0, TRAIL).map((color, i) => (
+          <span
+            key={i}
+            ref={(node) => {
+              trailRef.current[i] = node;
+            }}
+            className="absolute left-0 top-0 h-10 w-10 rounded-full opacity-0 blur-[7px] will-change-transform"
+            style={{ background: `radial-gradient(circle, ${color} 0%, transparent 68%)` }}
+          />
+        ))}
+      </div>
 
-            <div className="s-scroll min-h-0 flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
-              {!chat.messages.length ? (
-                <p className="py-6 text-center text-[13px] text-ink-muted">{t.coach.threadEmpty}</p>
-              ) : (
-                chat.messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      'max-w-[92%] rounded-xl px-3 py-2 text-[13px] leading-relaxed',
-                      m.role === 'user'
-                        ? 's-gradient-fill ml-auto text-white'
-                        : 'bg-surface-alt text-ink-soft',
-                    )}
-                  >
-                    <RichText className="text-[13px]">{m.text || '…'}</RichText>
-                  </div>
-                ))
-              )}
-              {busy ? (
-                <p className="flex items-center gap-1.5 text-2xs text-ink-muted">
-                  <Loader2 size={11} className="animate-spin" />
-                  {t.coach.looking}
+      <div ref={hostRef} className="pointer-events-none fixed z-[60]" style={style}>
+        {open ? (
+          <div
+            className="pointer-events-auto fixed flex flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-lift backdrop-blur"
+            style={panelStyle}
+          >
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 items-center gap-2 border-b border-line px-3 py-2">
+                <SenseiOwl size={22} />
+                <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
+                  {surface?.label ?? t.tutor.title}
                 </p>
-              ) : null}
-            </div>
+                <IconButton label={t.common.close} onClick={() => setOpen(false)}>
+                  <X size={14} />
+                </IconButton>
+              </div>
 
-            <div className="shrink-0 space-y-2 border-t border-line px-3 py-2.5">
-              <Button
-                variant="secondary"
-                className="h-8 w-full text-2xs"
-                onClick={() => void lookAtWork()}
-                disabled={busy || !surface?.getImage}
-              >
-                <Eye size={13} />
-                {surface?.getImage
-                  ? t.coach.lookAtMyWork
-                  : surface
-                    ? t.coach.noWorkSurface
-                    : t.coach.noSurface}
-              </Button>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  send(input);
-                }}
-                className="flex items-center gap-1.5"
-              >
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={t.tutor.placeholderFree}
-                  className="h-8 min-w-0 flex-1 rounded-lg border border-line bg-surface-alt px-2.5 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
-                />
-                <Button type="submit" className="h-8 w-8 px-0" disabled={!input.trim() || busy}>
-                  <Send size={13} />
+              <div className="s-scroll min-h-0 flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
+                {!chat.messages.length ? (
+                  <p className="py-6 text-center text-[13px] text-ink-muted">{t.coach.threadEmpty}</p>
+                ) : (
+                  chat.messages.map((m) => (
+                    <div
+                      key={m.id}
+                      className={cn(
+                        'max-w-[92%] rounded-xl px-3 py-2 text-[13px] leading-relaxed',
+                        m.role === 'user'
+                          ? 's-gradient-fill ml-auto text-white'
+                          : 'bg-surface-alt text-ink-soft',
+                      )}
+                    >
+                      <RichText className="text-[13px]">{m.text || '…'}</RichText>
+                    </div>
+                  ))
+                )}
+                {busy ? (
+                  <p className="flex items-center gap-1.5 text-2xs text-ink-muted">
+                    <Loader2 size={11} className="animate-spin" />
+                    {t.coach.looking}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="shrink-0 space-y-2 border-t border-line px-3 py-2.5">
+                <Button
+                  variant="secondary"
+                  className="h-8 w-full text-2xs"
+                  onClick={() => void lookAtWork()}
+                  disabled={busy || !surface?.getImage}
+                >
+                  <Eye size={13} />
+                  {surface?.getImage
+                    ? t.coach.lookAtMyWork
+                    : surface
+                      ? t.coach.noWorkSurface
+                      : t.coach.noSurface}
                 </Button>
-              </form>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    send(input);
+                  }}
+                  className="flex items-center gap-1.5"
+                >
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={t.tutor.placeholderFree}
+                    className="h-8 min-w-0 flex-1 rounded-lg border border-line bg-surface-alt px-2.5 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+                  />
+                  <Button type="submit" className="h-8 w-8 px-0" disabled={!input.trim() || busy}>
+                    <Send size={13} />
+                  </Button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      <div className="pointer-events-auto">
-        <button
-          ref={owlRef}
-          type="button"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          aria-label={t.coach.ask}
-          title={t.coach.dragHint}
-          className={cn(
-            'relative cursor-grab touch-none rounded-2xl transition-transform duration-500 ease-smooth active:cursor-grabbing',
-            'hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-            nudge && 'animate-float',
-          )}
+        <div
+          id="sensei-owl"
+          ref={leanRef}
+          className="pointer-events-auto will-change-transform"
         >
-          <SenseiOwl size={56} className="shadow-glow-sm rounded-2xl" />
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white shadow-soft">
-            {busy ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
-          </span>
-        </button>
+          <button
+            ref={owlRef}
+            type="button"
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            aria-label={t.coach.ask}
+            title={t.coach.dragHint}
+            className={cn(
+              'relative cursor-grab touch-none rounded-2xl transition-transform duration-500 ease-smooth active:cursor-grabbing',
+              'hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+              nudge && 'animate-float',
+            )}
+          >
+            <SenseiOwl size={56} className="shadow-glow-sm rounded-2xl" />
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white shadow-soft">
+              {busy ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+            </span>
+          </button>
+          </div>
       </div>
-    </div>
+    </>
   );
 }
 

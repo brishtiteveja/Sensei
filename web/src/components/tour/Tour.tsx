@@ -133,6 +133,16 @@ export function Tour({
     };
   }, [open, i, all]);
 
+  // Tells the floating owl to hold position: a step that spotlights it measures
+  // its rect once, and a travelling owl would glide out of its own ring.
+  useEffect(() => {
+    if (!open) return;
+    document.body.dataset.tour = '1';
+    return () => {
+      delete document.body.dataset.tour;
+    };
+  }, [open]);
+
   const finish = useCallback(() => {
     if (name === 'app') writeRaw(SEEN_KEY, '1');
     onClose();
