@@ -162,17 +162,45 @@ It is not. Hermes memory is **single-user and agent-scoped** — `MEMORY.md` /
 `journey` commands render a Star Map of *the agent's own skills*, not a
 learner's. It has no notion of many students.
 
-We already have the right thing, unwired:
+So the split is by scope, and both halves are now built:
 
-| file | what it does |
-|---|---|
-| `backend/sensei/learner.py` | per-student SQLite memory (mastery, attempts, language, exam) |
-| `backend/sensei/graph.py` | concepts as nodes, prerequisites as edges; cycle-safe traversal, root-cause diagnosis, mastery-gated topological walk |
+| memory | scope | where |
+|---|---|---|
+| what **a student** knows | per-learner | SQLite + concept graph, inside SenseiClaw |
+| **how to teach** well | agent-wide | Hermes `MEMORY.md`, read each turn |
 
-That second one *is* the progress knowledge graph, and the topological walk
-gated by mastery is the Duolingo-style path. Backed by `graph.json` and
-`sensei.db`. The work is wiring them into SenseiClaw so progress lives
-server-side instead of in browser localStorage — not adopting Hermes.
+**Per-student** (SenseiClaw `2daa9dc`). `clawpy/progress/` — ported from
+`backend/sensei`, where both modules already existed but were never wired up.
+`learner.py` keeps mastery **recency-weighted** (each older attempt decays
+x0.7), so a student is not judged forever on their first three wrong answers.
+`graph.py` is the progress knowledge graph: concepts as nodes, prerequisites as
+edges, cycle-safe traversal, and a mastery-gated topological walk — the
+Duolingo-style path. Its real value is **root-cause diagnosis**: on a wrong
+answer the graph names the *upstream* concept actually missing, so the tutor
+teaches the cause rather than the symptom.
+
+Exposed as `POST/GET /learner/{id}`, `POST /learner/{id}/observation` and
+`GET /learner/{id}/path`, and injected into `/tutor/stream` as a prompt section
+telling the tutor to teach as though it remembers, not to recite the profile
+back.
+
+**Hermes** (SenseiClaw `f28efeb`) gets the job it is actually built for. It runs
+on this same box, so the two share a file rather than a socket: every turn folds
+the tail of `~/.hermes/MEMORY.md` in as accumulated teaching craft — which
+explanation lands, which misconception recurs — with the instruction that if a
+note contradicts the student in front of it, the student wins.
+`GET /teaching/notes` exposes what is being drawn on, so the claim is
+inspectable rather than asserted. Absent or empty memory reads as no section, so
+nothing depends on Hermes having run.
+
+Proven end to end: a learner with three correct vectors and two failed
+projectiles, asked what to revise, got *"Focus on projectile motion — especially
+signs of acceleration due to gravity and component breakdown. You've already got
+vectors down, so use that strength."* Both recorded slips, the known strength,
+and still a question rather than an answer.
+
+Full detail, including the one outstanding sandbox sync, is in
+`MEMORY_HANDOFF.md`.
 
 ---
 
