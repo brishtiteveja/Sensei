@@ -319,6 +319,7 @@ function build(dict: Dict) {
       sayLook: s('owl.sayLook'),
       sayWhy: s('owl.sayWhy'),
       sayPick: s('owl.sayPick'),
+      jumpTo: s('owl.jumpTo'),
     },
     slides: {
       skip: s('slides.skip'),

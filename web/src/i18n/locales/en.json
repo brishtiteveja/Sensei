@@ -483,5 +483,6 @@
   "owl.startMoving": "Follow me around",
   "owl.sayLook": "Want me to read what you've written so far?",
   "owl.sayWhy": "Stuck? Ask me why — not just what.",
-  "owl.sayPick": "Pick a problem and I'll follow along."
+  "owl.sayPick": "Pick a problem and I'll follow along.",
+  "owl.jumpTo": "Jump to"
 }

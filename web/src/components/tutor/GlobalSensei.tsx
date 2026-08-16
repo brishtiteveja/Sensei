@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, Loader2, Move, Pin, Send, Sparkles, X } from 'lucide-react';
 import { SenseiOwl } from '@/components/art/SenseiOwl';
 import { RichText } from '@/components/ui/RichText';
@@ -48,10 +49,12 @@ const STANDOFF = 76;
  * for it, which is maddening.
  */
 const APPROACH_HOLD = 116;
+/** The mark itself. Big enough to read as a character, not a chat bubble. */
+const OWL_SIZE = 68;
 /** First wander, after the page settles. Early enough to be noticed. */
-const FIRST_ROAM_MS = 11_000;
+const FIRST_ROAM_MS = 7_000;
 /** And roughly every this often after that, jittered. */
-const ROAM_EVERY_MS = 42_000;
+const ROAM_EVERY_MS = 21_000;
 /** How long it stays put once it has arrived and said its piece. */
 const ROAM_HOLD_MS = 9_000;
 /** Comet length. Each node is one past position, oldest last. */
@@ -71,12 +74,17 @@ const TRAIL_COLORS = [
 
 export function GlobalSensei() {
   const { language } = useSettings();
+  const navigate = useNavigate();
   const [surface, setSurface] = useState<Surface | null>(activeSurface);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [looking, setLooking] = useState(false);
   const [nudge, setNudge] = useState(false);
-  const [says, setSays] = useState<{ text: string; left: boolean } | null>(null);
+  const [says, setSays] = useState<{
+    title?: string;
+    text: string;
+    left: boolean;
+  } | null>(null);
   /**
    * The knob. On by default, but off out of the box for anyone whose system
    * asks for reduced motion -- who can still switch it on, which an
@@ -111,6 +119,10 @@ export function GlobalSensei() {
   const homeDirty = useRef(true);
   /** Where it has wandered off to, and until when it stays there. */
   const roamRef = useRef<{ x: number; y: number; until: number } | null>(null);
+  /** The feature it is currently pointing at, and the last one it showed. */
+  const spotRef = useRef<HTMLElement | null>(null);
+  const lastSpotRef = useRef<string | null>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
   const movesRef = useRef(moves);
   movesRef.current = moves;
   // Read by the animation loop without restarting it.
@@ -165,9 +177,11 @@ export function GlobalSensei() {
     let glow = 0;
     let raf = 0;
 
+    let lastMoveAt = 0;
     const onMove = (e: PointerEvent) => {
       pointer.x = e.clientX;
       pointer.y = e.clientY;
+      lastMoveAt = performance.now();
     };
     window.addEventListener('pointermove', onMove, { passive: true });
 
@@ -243,6 +257,16 @@ export function GlobalSensei() {
           );
           ty = wantY - cy;
         }
+        // A slow drift so it is never perfectly still -- wider when you have
+        // stopped moving the mouse, which is exactly when a motionless owl
+        // stops reading as alive.
+        if (!parked) {
+          const idle = performance.now() - lastMoveAt > 2500;
+          const swing = idle ? 15 : 4;
+          const ms = performance.now() / 1000;
+          tx += Math.sin(ms * 0.8) * swing;
+          ty += Math.cos(ms * 0.62) * swing * 0.7;
+        }
         lean.x += (tx - lean.x) * easeX;
         lean.y += (ty - lean.y) * easeY;
         el.style.transform = `translate3d(${lean.x.toFixed(2)}px, ${lean.y.toFixed(2)}px, 0)`;
@@ -270,6 +294,21 @@ export function GlobalSensei() {
       const target = parked ? 0 : Math.min(1, speed / 4) * 0.9 + excitedRef.current * 0.4;
       glow += (Math.min(1, target) - glow) * (target > glow ? 0.35 : 0.08);
       excitedRef.current *= 0.94;
+
+      // Ring whatever it is pointing at, tracked live so it survives scrolling.
+      const ring = ringRef.current;
+      const spot = spotRef.current;
+      if (ring) {
+        if (spot && !parked) {
+          const b = spot.getBoundingClientRect();
+          ring.style.transform = `translate3d(${(b.left - 7).toFixed(1)}px, ${(b.top - 7).toFixed(1)}px, 0)`;
+          ring.style.width = `${b.width + 14}px`;
+          ring.style.height = `${b.height + 14}px`;
+          ring.style.opacity = '1';
+        } else {
+          ring.style.opacity = '0';
+        }
+      }
 
       for (let i = 0; i < TRAIL; i++) {
         const node = trailRef.current[i];
@@ -304,25 +343,81 @@ export function GlobalSensei() {
   const roamNow = useCallback(() => {
     const host = hostRef.current;
     if (!host) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    /*
+     * What it can show you. These are the same anchors the tour uses and the
+     * same copy, so there is one description of each feature rather than two
+     * that drift apart. Built per call, never hoisted: `t` is a live proxy and
+     * a module constant would freeze the first language chosen.
+     */
+    const catalogue = [
+      { sel: '[data-tour="le-solve"]', title: t.tour.leNotebookTitle, body: t.tour.leNotebookBody },
+      { sel: '[data-tour="le-ask"]', title: t.tour.leCheckTitle, body: t.tour.leCheckBody },
+      { sel: '[data-tour="le-add"]', title: t.tour.leAddTitle, body: t.tour.leAddBody },
+      { sel: '[data-tour="le-special"]', title: t.tour.leSpecialTitle, body: t.tour.leSpecialBody },
+      { sel: '[data-tour="nb-sketch"]', title: t.tour.nbSketchTitle, body: t.tour.nbSketchBody },
+      { sel: '[data-tour="nb-image"]', title: t.tour.nbImageTitle, body: t.tour.nbImageBody },
+      { sel: '[data-tour="nb-phone"]', title: t.tour.nbPhoneTitle, body: t.tour.nbPhoneBody },
+      { sel: '[data-tour="nb-give"]', title: t.tour.nbGiveTitle, body: t.tour.nbGiveBody },
+      { sel: '[data-tour="co-subject"]', title: t.tour.coSubjectTitle, body: t.tour.coSubjectBody },
+      { sel: '[data-tour="notebook"]', title: t.tour.notebookTitle, body: t.tour.notebookBody },
+      { sel: '[data-tour="tutor"]', title: t.tour.tutorTitle, body: t.tour.tutorBody },
+      { sel: '[data-tour="teach"]', title: t.tour.teachTitle, body: t.tour.teachBody },
+      { sel: '[data-tour="record"]', title: t.tour.recordTitle, body: t.tour.recordBody },
+      { sel: '[data-tour="practice"]', title: t.tour.practiceTitle, body: t.tour.practiceBody },
+    ];
+    const visible = catalogue
+      .map((c) => ({ ...c, el: document.querySelector(c.sel) as HTMLElement | null }))
+      .filter((c) => {
+        if (!c.el || c.sel === lastSpotRef.current) return false;
+        const b = c.el.getBoundingClientRect();
+        return b.width > 0 && b.top >= 0 && b.bottom <= vh && b.left >= 0 && b.right <= vw;
+      });
+
+    if (visible.length) {
+      const pick = visible[Math.floor(Math.random() * visible.length)];
+      lastSpotRef.current = pick.sel;
+      const b = pick.el!.getBoundingClientRect();
+      // Stands off the feature rather than on it, below where there is room so
+      // that its bubble -- which opens upward -- lands clear of what it is
+      // pointing at.
+      const below = b.bottom + 130 < vh - HOME_MARGIN;
+      const x = Math.max(76, Math.min(vw - 76, b.left + b.width / 2));
+      const y = below ? b.bottom + 112 : Math.max(HOME_MARGIN, b.top - 96);
+      roamRef.current = { x, y, until: Date.now() + ROAM_HOLD_MS };
+      spotRef.current = pick.el;
+      window.setTimeout(
+        () => setSays({ title: pick.title, text: pick.body, left: x > vw / 2 }),
+        1200,
+      );
+      window.setTimeout(() => {
+        setSays(null);
+        spotRef.current = null;
+      }, ROAM_HOLD_MS - 300);
+      return;
+    }
+
     const r = host.getBoundingClientRect();
     const here = r.left + r.width / 2 + offsetRef.current.x;
-    const goLeft = here > window.innerWidth / 2;
+    const goLeft = here > vw / 2;
     // Perching on the nav would cover the links, so the left post starts
     // wherever the sidebar ends -- which is nothing at all on a phone.
     const aside = document.querySelector('aside')?.getBoundingClientRect();
     const leftPost = Math.max(76, (aside?.right ?? 0) + 56);
     const rightPost = window.innerWidth - 76;
-    const x = goLeft ? Math.min(leftPost, window.innerWidth / 2) : rightPost;
+    const x = goLeft ? Math.min(leftPost, vw / 2) : rightPost;
     roamRef.current = {
       x,
-      y: HOME_MARGIN + 60 + Math.random() * Math.max(60, window.innerHeight - HOME_MARGIN * 2 - 180),
+      y: HOME_MARGIN + 60 + Math.random() * Math.max(60, vh - HOME_MARGIN * 2 - 180),
       until: Date.now() + ROAM_HOLD_MS,
     };
     const surf = activeSurface();
     const text = surf?.getImage ? t.owl.sayLook : surf ? t.owl.sayWhy : t.owl.sayPick;
     // Said on arrival, not on departure -- a bubble that flies across the
     // screen is unreadable -- and opening away from the nearest edge.
-    window.setTimeout(() => setSays({ text, left: x > window.innerWidth / 2 }), 1500);
+    window.setTimeout(() => setSays({ text, left: x > vw / 2 }), 1500);
     window.setTimeout(() => setSays(null), ROAM_HOLD_MS - 300);
   }, []);
 
@@ -390,8 +485,8 @@ export function GlobalSensei() {
     if (!d) return;
     d.moved = true;
     setPos({
-      x: Math.min(Math.max(0, e.clientX - d.dx), window.innerWidth - 72),
-      y: Math.min(Math.max(0, e.clientY - d.dy), window.innerHeight - 72),
+      x: Math.min(Math.max(0, e.clientX - d.dx), window.innerWidth - OWL_SIZE - 12),
+      y: Math.min(Math.max(0, e.clientY - d.dy), window.innerHeight - OWL_SIZE - 12),
     });
   };
   const onPointerUp = () => {
@@ -530,6 +625,13 @@ export function GlobalSensei() {
         ))}
       </div>
 
+      {/* What the owl is pointing at. Driven from the loop, never re-rendered. */}
+      <div
+        ref={ringRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed left-0 top-0 z-[58] rounded-xl border-2 border-accent opacity-0 shadow-glow-sm transition-opacity duration-500"
+      />
+
       <div ref={hostRef} className="pointer-events-none fixed z-[60]" style={style}>
         {open ? (
           <div
@@ -555,7 +657,36 @@ export function GlobalSensei() {
 
               <div className="s-scroll min-h-0 flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
                 {!chat.messages.length ? (
-                  <p className="py-6 text-center text-[13px] text-ink-muted">{t.coach.threadEmpty}</p>
+                  <div className="py-4">
+                    <p className="text-center text-[13px] text-ink-muted">{t.coach.threadEmpty}</p>
+                    {/* Somewhere to go, for the student who opened the owl
+                        without a question in mind. */}
+                    <p className="mt-5 px-1 text-2xs font-medium uppercase tracking-wide text-ink-faint">
+                      {t.owl.jumpTo}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {[
+                        { to: '/practice', label: t.nav.practice },
+                        { to: '/courses', label: t.nav.catalog },
+                        { to: '/notebook', label: t.nav.notebook },
+                        { to: '/tutor', label: t.nav.tutor },
+                        { to: '/teach', label: t.nav.teach },
+                      ].map((s) => (
+                        <button
+                          key={s.to}
+                          type="button"
+                          onClick={() => {
+                            observe('owl.jump', { to: s.to });
+                            setOpen(false);
+                            navigate(s.to);
+                          }}
+                          className="rounded-lg border border-line bg-surface-alt px-2.5 py-1.5 text-[12.5px] font-medium text-ink-soft transition-colors hover:border-accent/50 hover:text-ink"
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   chat.messages.map((m) => (
                     <div
@@ -630,12 +761,15 @@ export function GlobalSensei() {
                 setOpen(true);
               }}
               className={cn(
-                'absolute bottom-full mb-2 w-max max-w-[210px] animate-fade-up rounded-xl',
+                'absolute bottom-full mb-2 w-max max-w-[248px] animate-fade-up rounded-xl',
                 'border border-line bg-surface px-3 py-2 text-left text-[12.5px] leading-snug',
                 'text-ink-soft shadow-lift hover:border-accent/50 hover:text-ink',
                 says.left ? 'right-0' : 'left-0',
               )}
             >
+              {says.title ? (
+                <span className="mb-0.5 block font-semibold text-ink">{says.title}</span>
+              ) : null}
               {says.text}
             </button>
           ) : null}
@@ -653,9 +787,9 @@ export function GlobalSensei() {
               nudge && 'animate-float',
             )}
           >
-            <SenseiOwl size={56} className="shadow-glow-sm rounded-2xl" />
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white shadow-soft">
-              {busy ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+            <SenseiOwl size={OWL_SIZE} className="shadow-glow-sm rounded-2xl" />
+            <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white shadow-soft">
+              {busy ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
             </span>
           </button>
           </div>

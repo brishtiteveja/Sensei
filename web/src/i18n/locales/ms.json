@@ -483,5 +483,6 @@
   "owl.startMoving": "Ikut saya",
   "owl.sayLook": "Mahu saya baca apa yang anda tulis setakat ini?",
   "owl.sayWhy": "Buntu? Tanya kenapa, bukan sekadar apa.",
-  "owl.sayPick": "Pilih satu soalan, saya temani."
+  "owl.sayPick": "Pilih satu soalan, saya temani.",
+  "owl.jumpTo": "Terus ke"
 }

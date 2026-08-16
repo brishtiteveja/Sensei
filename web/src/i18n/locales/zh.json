@@ -483,5 +483,6 @@
   "owl.startMoving": "跟着我走",
   "owl.sayLook": "要我看看你写到哪儿了吗？",
   "owl.sayWhy": "卡住了？问我\"为什么\"，别只问\"是什么\"。",
-  "owl.sayPick": "挑一道题，我陪你做。"
+  "owl.sayPick": "挑一道题，我陪你做。",
+  "owl.jumpTo": "快速前往"
 }

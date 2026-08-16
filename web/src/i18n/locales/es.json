@@ -483,5 +483,6 @@
   "owl.startMoving": "Acompáñame",
   "owl.sayLook": "¿Quieres que lea lo que llevas escrito?",
   "owl.sayWhy": "¿Atascado? Pregúntame por qué, no solo qué.",
-  "owl.sayPick": "Elige un problema y te acompaño."
+  "owl.sayPick": "Elige un problema y te acompaño.",
+  "owl.jumpTo": "Ir a"
 }
