@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
  */
 
 const POS_KEY = 'owl.pos';
+const PANEL_W = 352;
+const PANEL_H = 416;
 
 export function GlobalSensei() {
   const { language } = useSettings();
@@ -49,6 +51,7 @@ export function GlobalSensei() {
     return { x: -1, y: -1 };
   });
   const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
+  const owlRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => onSurfaceChange(setSurface), []);
 
@@ -174,11 +177,43 @@ export function GlobalSensei() {
   const style: React.CSSProperties =
     pos.x < 0 ? { right: 20, bottom: 20 } : { left: pos.x, top: pos.y };
 
+  /**
+   * Place the panel against the owl but inside the viewport. The owl can be
+   * dragged to any edge, so a panel laid out relative to it runs off-screen in
+   * the corners; this measures the owl and clamps, flipping above/below
+   * depending on which side has room.
+   */
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
+  useEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const r = owlRef.current?.getBoundingClientRect();
+      if (!r) return;
+      const w = Math.min(PANEL_W, window.innerWidth - 16);
+      const h = Math.min(PANEL_H, window.innerHeight - 16);
+      const above = r.top >= h + 16;
+      setPanelStyle({
+        width: w,
+        height: h,
+        left: Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8),
+        top: above
+          ? r.top - h - 10
+          : Math.min(r.bottom + 10, window.innerHeight - h - 8),
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    return () => window.removeEventListener('resize', place);
+  }, [open, pos]);
+
   return (
     <div id="sensei-owl" className="pointer-events-none fixed z-[60]" style={style}>
-      <div className="pointer-events-auto flex flex-col items-end gap-2">
-        {open ? (
-          <div className="flex h-[26rem] w-[22rem] flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-lift backdrop-blur">
+      {open ? (
+        <div
+          className="pointer-events-auto fixed flex flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-lift backdrop-blur"
+          style={panelStyle}
+        >
+          <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex shrink-0 items-center gap-2 border-b border-line px-3 py-2">
               <SenseiOwl size={22} />
               <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
@@ -244,9 +279,12 @@ export function GlobalSensei() {
               </form>
             </div>
           </div>
-        ) : null}
+        </div>
+      ) : null}
 
+      <div className="pointer-events-auto">
         <button
+          ref={owlRef}
           type="button"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
