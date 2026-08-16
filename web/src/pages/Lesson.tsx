@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Globe2,
   ListChecks,
+  NotebookPen,
   Sigma,
   Sparkles,
   Target,
@@ -19,6 +20,7 @@ import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/components/ui/
 import { SectionRule } from '@/components/art/Flourish';
 import { SubjectArt } from '@/components/art/SubjectArt';
 import { TutorChat } from '@/components/tutor/TutorChat';
+import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { useAsync } from '@/hooks/useAsync';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSplitPane } from '@/hooks/useSplitPane';
@@ -62,6 +64,7 @@ export function LessonPage() {
   const next = entry ? outline.flat[entry.ordinal + 1] : undefined;
 
   const [activeStep, setActiveStep] = useState<number | undefined>(undefined);
+  const [notebookOpen, setNotebookOpen] = useState(false);
   const split = useSplitPane({ storageKey: 'lesson.split' });
   // Below 1024px the two panes stack instead of sitting side by side.
   const isSplit = useMediaQuery('(min-width: 1024px)');
@@ -150,6 +153,10 @@ export function LessonPage() {
               {subject?.title ?? t.lesson.backToCourse}
             </Link>
             <div className="flex items-center gap-1.5">
+              <Button variant="ghost" onClick={() => setNotebookOpen(true)} className="h-8 px-2.5">
+                <NotebookPen size={15} />
+                <span className="hidden sm:inline">{t.notebook.open}</span>
+              </Button>
               <LessonNavButton to={prev ? `/courses/${subjectId}/lessons/${prev.lesson.id}` : null} dir="prev" />
               <LessonNavButton to={next ? `/courses/${subjectId}/lessons/${next.lesson.id}` : null} dir="next" />
             </div>
@@ -383,6 +390,18 @@ export function LessonPage() {
           emptyBody={t.tutor.emptyBodyLesson}
         />
       </div>
+
+      {lessonId ? (
+        <NotebookSheet
+          open={notebookOpen}
+          onClose={() => setNotebookOpen(false)}
+          context={{
+            kind: 'lesson',
+            id: lessonId,
+            label: content?.title ?? entry?.lesson.title,
+          }}
+        />
+      ) : null}
     </div>
   );
 }

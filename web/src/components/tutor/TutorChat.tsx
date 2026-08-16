@@ -4,6 +4,7 @@ import {
   ArrowDown,
   Calculator as CalculatorIcon,
   ImageUp,
+  NotebookPen,
   PenLine,
   RefreshCw,
   RotateCcw,
@@ -18,6 +19,8 @@ import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { HandwritingPanel } from './HandwritingPanel';
 import { CalculatorPanel } from './CalculatorPanel';
 import { ScratchpadPanel } from './ScratchpadPanel';
+import { NotebookSheet } from '@/components/notebook/NotebookSheet';
+import { FREE_DEFAULT, type NotebookContext } from '@/lib/notebook';
 import { useTutorChat } from '@/hooks/useTutorChat';
 import type { ChatMessage } from '@/hooks/useTutorChat';
 import { useSettings } from '@/state/settings';
@@ -55,8 +58,16 @@ export function TutorChat({
   const { language } = useSettings();
   const chat = useTutorChat({ contextType, contextData, language });
   const [input, setInput] = useState('');
-  const [openTool, setOpenTool] = useState<null | 'image' | 'calc' | 'scratch'>(null);
+  const [openTool, setOpenTool] = useState<null | 'image' | 'calc' | 'scratch' | 'notebook'>(null);
   const [pinned, setPinned] = useState(true);
+
+  // Bind the tutor's notebook to whatever problem this chat is about, so the
+  // notebook opened here is the same one used on the lesson or practice question.
+  const notebookContext: NotebookContext = contextData.lesson_id
+    ? { kind: 'lesson', id: String(contextData.lesson_id) }
+    : contextData.question_id
+      ? { kind: 'practice', id: String(contextData.question_id) }
+      : FREE_DEFAULT;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -234,6 +245,11 @@ export function TutorChat({
             label={t.tools.image}
             onClick={() => setOpenTool('image')}
           />
+          <ToolChip
+            icon={<NotebookPen size={14} />}
+            label={t.notebook.open}
+            onClick={() => setOpenTool('notebook')}
+          />
         </div>
         <form
           onSubmit={(e) => {
@@ -304,6 +320,14 @@ export function TutorChat({
         open={openTool === 'image'}
         onClose={() => setOpenTool(null)}
         onAskInText={(msg) => submit(msg)}
+      />
+      <NotebookSheet
+        open={openTool === 'notebook'}
+        onClose={() => setOpenTool(null)}
+        context={notebookContext}
+        // Attach pulls the working into the composer but leaves the notebook
+        // open, so the student can keep jotting while they talk it through.
+        onAttach={(msg) => insertText(msg)}
       />
     </section>
   );

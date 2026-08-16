@@ -9,6 +9,7 @@ import {
   Trophy,
   X as XIcon,
 } from 'lucide-react';
+import { NotebookPen } from 'lucide-react';
 import { Page } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -18,6 +19,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
 import { Modal } from '@/components/ui/Modal';
 import { CorrectBurst, ScoreBurst } from '@/components/art/Burst';
 import { TutorChat } from '@/components/tutor/TutorChat';
+import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { useAsync } from '@/hooks/useAsync';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { getPracticeQuestions } from '@/lib/api';
@@ -54,6 +56,7 @@ export function PracticePage() {
   const [answers, setAnswers] = useState<Record<string, { picked: string; correct: boolean }>>({});
   const [finished, setFinished] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
+  const [notebookOpen, setNotebookOpen] = useState(false);
 
   const resetSet = useCallback(() => {
     setIndex(0);
@@ -240,6 +243,10 @@ export function PracticePage() {
               <span className="text-2xs tabular-nums text-ink-faint">
                 {answered ? `${score}/${answered}` : ''}
               </span>
+              <Button variant="ghost" onClick={() => setNotebookOpen(true)} className="h-8 px-2.5">
+                <NotebookPen size={15} />
+                <span className="hidden sm:inline">{t.notebook.open}</span>
+              </Button>
             </div>
           </div>
           <ProgressBar value={pct(index, total)} className="mb-8" label="Set progress" />
@@ -372,6 +379,18 @@ export function PracticePage() {
           />
         </div>
       </Modal>
+
+      {question ? (
+        <NotebookSheet
+          open={notebookOpen}
+          onClose={() => setNotebookOpen(false)}
+          context={{
+            kind: 'practice',
+            id: question.id,
+            label: question.question.slice(0, 80),
+          }}
+        />
+      ) : null}
     </Page>
   );
 }

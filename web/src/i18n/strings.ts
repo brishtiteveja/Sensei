@@ -319,6 +319,17 @@ function build(dict: Dict) {
       clearAll: s('notebook.clearAll'),
       clearConfirm: s('notebook.clearConfirm'),
       saved: s('notebook.saved'),
+      library: s('notebook.library'),
+      librarySubtitle: s('notebook.librarySubtitle'),
+      libraryEmptyBody: s('notebook.libraryEmptyBody'),
+      newPage: s('notebook.newPage'),
+      untitled: s('notebook.untitled'),
+      blockCount: (n: number) => plural('notebook.blockCount', n),
+      fromLesson: s('notebook.fromLesson'),
+      fromPractice: s('notebook.fromPractice'),
+      freePage: s('notebook.freePage'),
+      open: s('notebook.open'),
+      openForProblem: s('notebook.openForProblem'),
     },
 
     practice: {
