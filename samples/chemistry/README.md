@@ -1,8 +1,22 @@
 # Chemistry: the mistakes students actually make
 
-Demo data for `/tutor/diagnose`. Three ready-to-photograph samples, one per difficulty. Each one carries **exactly one** deliberate error, and every line after that error is arithmetically consistent with it. That is on purpose: with two errors in an image, a diagnosis that names the second one first is not wrong, so the sample cannot be graded.
+Demo data for `/tutor/diagnose`, laid out as:
+
+```
+samples/chemistry/
+  basic/      easy/  medium/  hard/
+  advanced/   redox_magnesium/  oxidation_ethanol/    <- both carry figures
+```
+
+Every `bad_N` carries **exactly one** deliberate error, and every line after that error is consistent with it. That is on purpose: with two errors in an image, a diagnosis that names the second one first is not wrong, so the sample cannot be graded.
+
+The `good_N` images are not filler. **A tutor that finds an error in correct work is worse than one that misses an error**, because it teaches the student out of something they already had right.
 
 Text and numbers come from `scripts/render_samples.py`. Change a number there and change it here too.
+
+The student work is rendered in a **handwriting font with per-character jitter**, so it is a closer proxy for the photos you will actually shoot. `ques.png` stays in a printed font: it is the worksheet, not the student.
+
+**Figures never contain answers.** Every figure carries only what the question supplies (given lengths, masses, species, structures) plus symbols for the unknowns (`d`, `h`, `H`, `R`, `F_E`). Nothing a student has to work out appears on the diagram. This matters twice over: a label like a functional-group name would answer the question for the student, and it would let a model catch a `bad_N` by spotting two lines that disagree rather than by knowing the subject.
 
 **The images carry no line numbers**, because students do not number their steps and a photo of real handwriting will not either. Line numbers below are a reading aid for you, not something the model can see. Grade a diagnosis on **which line's content** it flags, not on the integer it prints.
 
@@ -33,7 +47,7 @@ Mistakes 4 to 7 are real and well documented. They are left out only because thr
 
 ## Easy: balanced by changing a subscript
 
-**File:** `samples/chemistry/easy/ques.png`
+**Files:** `samples/chemistry/basic/easy/ques.png` (problem) and `samples/chemistry/basic/easy/bad_1.png` (the work below)
 
 **Problem:** Balance `H2 + O2 -> H2O`
 
@@ -63,7 +77,7 @@ This sample also tests something specific about the model. The error is chemical
 
 ## Medium: limiting reagent chosen by raw moles
 
-**File:** `samples/chemistry/medium/ques.png`
+**Files:** `samples/chemistry/basic/medium/ques.png` (problem) and `samples/chemistry/basic/medium/bad_1.png` (the work below)
 
 **Problem:** `2 H2 + O2 -> 2 H2O`. 6.0 g of H2 reacts with 64 g of O2. What mass of water forms?
 
@@ -95,7 +109,7 @@ Note the trap in the numbers: H2 has *more* moles but is still the limiting reag
 
 ## Hard: Celsius used in the gas law
 
-**File:** `samples/chemistry/hard/ques.png`
+**Files:** `samples/chemistry/basic/hard/ques.png` (problem) and `samples/chemistry/basic/hard/bad_1.png` (the work below)
 
 **Problem:** `CaCO3 -> CaO + CO2`. 25.0 g of CaCO3 decomposes completely. Find the volume of CO2 at 25 C and 1.00 atm. R = 0.0821 L atm / mol K.
 
@@ -125,6 +139,101 @@ V = 0.513 L
 
 ---
 
+# Advanced set
+
+Grade 12, both with **figures**. `redox_magnesium/` carries a particle diagram of the beaker before and after; `oxidation_ethanol/` carries the three displayed structural formulas with the oxidation arrows between them.
+
+The particle diagram is atom-balanced across the two rows (`Mg + 2H+ + 2Cl- -> Mg2+ + 2Cl- + H2`), so nothing appears or vanishes between "Before" and "After". A chemistry-literate model checking the picture against the equation will find them consistent.
+
+| Directory | Correct answer |
+|---|---|
+| `redox_magnesium/` | `Mg + 2HCl -> MgCl2 + H2`, `n(H2) = 0.20 mol` |
+| `oxidation_ethanol/` | hydroxyl, aldehyde, carboxylic acid; water in step 1 only |
+
+---
+
+## Magnesium and hydrochloric acid
+
+**Problem:** Mg reacts with excess HCl. Balance the equation, give both half-equations, and find the moles of H2 from 4.8 g of Mg. `M(Mg) = 24.0`.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **0.20 mol** | none | balanced, both half-equations charge-balanced, 1:1 ratio |
+| `bad_1.png` | 0.20 mol | line 2 | `Mg -> Mg2+ + e-`, one electron instead of two |
+| `bad_2.png` | 0.40 mol | line 5 | read the 2 in `2HCl` as the H2 ratio |
+| `bad_3.png` | 115.2 mol | line 4 | multiplied by the molar mass instead of dividing |
+
+📌📌📌📌 **`bad_1` is the one that will separate models.** The arithmetic is untouched and the final answer, 0.20 mol, is **correct**. The only fault is `Mg -> Mg2+ + e-`: charge is 0 on the left and +1 on the right, so it does not balance. A model that checks numbers will pass this page. Catching it requires reading the chemistry, and the figure deliberately does not state the electron count. 📌📌📌📌
+
+**`bad_2`** is the trap the problem is built around. The `2` in `2HCl` is the acid's coefficient, not hydrogen's; Mg to H2 stays 1:1. Doubling to 0.40 mol is one of the most common stoichiometry errors there is, and the number looks entirely reasonable.
+
+**`bad_3`** gives 115 mol of gas from 4.8 g of metal, which is not physically possible. Same shape as the optimization and gravitation samples: no step is miscalculated, the answer is just absurd.
+
+---
+
+## Oxidising ethanol
+
+**Problem:** ethanol is oxidised to ethanal, then to ethanoic acid. Name each functional group and write both equations.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **correct** | none | water in step 1 only |
+| `bad_1.png` | names a ketone | line 2 | `-CHO` on a chain end is an aldehyde |
+| `bad_2.png` | step 1 unbalanced | line 4 | water dropped from the first equation |
+| `bad_3.png` | step 2 unbalanced | line 5 | water added to the second equation |
+
+**`bad_1`** calls `-CHO` a ketone. A ketone has its `C=O` between two carbons, which needs at least three; ethanal has two. Purely a naming error, with every equation on the page correct, so it tests whether the model reads chemistry rather than checking arithmetic.
+
+**`bad_2` and `bad_3` are a matched pair.** One drops the water that belongs in step 1; the other adds water to step 2 where none belongs, by symmetry with step 1. Both are visible by counting atoms: `bad_2` has 6 H on the left and 4 on the right, `bad_3` has 4 on the left and 6 on the right. Together they check whether a model balances equations or just recognises their shape.
+
+---
+
+---
+
+## Figure errors: `bad_4`
+
+Every question that carries a diagram has one extra variant, `bad_4`, where **the drawing is wrong and the working underneath is completely correct**. That is the realistic case: the student draws their own figure, so the figure is part of their answer and can be the only thing they got wrong.
+
+Its working is copied verbatim from `good_1` by the render script, so the text is provably correct and the two cannot drift apart.
+
+| Directory | What is wrong in the drawing | Working below |
+|---|---|---|
+| `math/advanced/circle_geometry/` | the foot of the perpendicular is drawn well off the midpoint, so `AM != MB` | correct, and says `AM = MB = 8` |
+| `math/advanced/cone/` | `6 cm` marked right across the base, as a diameter rather than a radius | correct |
+| `physics/advanced/projectile_cliff/` | the `v_x` and `v_y` labels swapped, so `v_x` names the vertical arrow | correct, and says `vOx = 25 cos35` |
+| `physics/advanced/gravitation/` | both force arrows drawn toward the Moon | correct, and says they oppose |
+| `chemistry/advanced/redox_magnesium/` | the ion drawn `Mg+` with one chloride, so an atom is lost and the charge is wrong | correct, and says `Mg -> Mg2+ + 2e-` |
+| `chemistry/advanced/oxidation_ethanol/` | ethanal drawn keeping the `-OH`, giving that carbon five bonds | correct |
+
+A second figure-error variant, `bad_5`, does the same again with a different drawing mistake:
+
+| Directory | What is wrong in the `bad_5` drawing |
+|---|---|
+| `math/advanced/circle_geometry/` | the chord drawn tilted, so the line from O plainly is not perpendicular to it, yet the right-angle tick is still marked |
+| `math/advanced/cone/` | the right angle marked at the **apex**, where there is none |
+| `physics/advanced/projectile_cliff/` | the arc drawn landing back at cliff height, as if the 20 m drop were not there |
+| `physics/advanced/gravitation/` | the satellite drawn a third of the way out, contradicting its own `3.0` of `3.84` labels |
+| `chemistry/advanced/redox_magnesium/` | magnesium drawn already as `Mg2+` in the **Before** row, i.e. the product state before the reaction |
+| `chemistry/advanced/oxidation_ethanol/` | ethanol's methyl carbon drawn with one H missing, leaving it with three bonds |
+
+Both variants take their working verbatim from `good_1`.
+
+**Expected diagnosis:** every written line is right, so a model that only checks the working will return `FIRST_ERROR: NONE` and pass the page. Catching these requires reading the picture and comparing it with the text. No other sample in the kit tests that.
+
+The `ques.png` for these questions carries **no diagram**, because the question asks the student to draw one.
+
+
+---
+
+## Grading conventions
+
+Some samples have more than one defensible right answer. These rules exist so a good diagnosis is not scored wrong.
+
+- **Figure errors (`bad_4`, `bad_5`): grade on "did the model flag the drawing", not on whether it named the exact fault.** A wrong drawing often has several true descriptions at once. Tilting a chord also moves its endpoints; shifting the foot of a perpendicular also makes it non-perpendicular. Any of those is a fair thing for a tutor to point at.
+- **When an error spans a formula line and its substitution line, accept a box on either.** The student wrote one mistake across two lines.
+- **Grade on the flagged line's content, not the integer the model prints.** The images carry no line numbers.
+
+
 ## Running them
 
 Paths below are relative to the repo root, so run these from there.
@@ -132,7 +241,7 @@ Paths below are relative to the repo root, so run these from there.
 ```bash
 curl -s -F learner_id=demo \
      -F "problem=Balance H2 + O2 -> H2O" \
-     -F image=@samples/chemistry/easy/ques.png \
+     -F image=@samples/chemistry/basic/easy/bad_1.png \
      http://localhost:8080/tutor/diagnose | jq
 ```
 

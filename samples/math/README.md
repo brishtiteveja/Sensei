@@ -1,16 +1,25 @@
 # Math: the mistakes students actually make
 
-Demo data for `/tutor/diagnose`. Three questions, one per difficulty, each in its own directory:
+Demo data for `/tutor/diagnose`. Two sets of questions, each question in its own directory:
 
 ```
-easy/   ques.png     the problem alone, no working
-        good_1.png   a student who solved it correctly
-        bad_1.png    a student who made one realistic mistake
-        bad_2.png    a different student, a different mistake
-        bad_3.png    ...
+samples/math/
+  basic/          grade 9 to 12
+    easy/  medium/  hard/
+  advanced/       grade 12 and first year
+    area_between_curves/  optimization/  trig_equation/
+    circle_geometry/      cone/            <- these two carry figures
+
+inside each:  ques.png     the problem alone, no working, printed
+              good_1.png   a student who solved it correctly
+              bad_1.png    a student who made one realistic mistake
+              bad_2.png    a different student, a different mistake
+              bad_3.png    ...
 ```
 
-Only `easy/` has its full solution set so far. `medium/` and `hard/` still bundle the question and one wrong attempt into `ques.png`, and get split the same way once the easy set is signed off.
+`basic/` fails in one shape: one wrong line, everything after it consistent. `advanced/` is where each question fails differently. Every `advanced/` topic and `basic/easy/` have full `good_1` + `bad_1..3` coverage; `basic/medium/` and `basic/hard/` have `bad_1` only.
+
+`scripts/render_samples.py` derives the band from the topic name, so `easy`, `medium` and `hard` land in `basic/` and everything else in `advanced/`. Adding a topic cannot put it in the wrong place.
 
 Every `bad_N` carries **exactly one** deliberate error, and every line after that error is arithmetically consistent with it. That is on purpose: with two errors in an image, a diagnosis that names the second one first is not wrong, so the sample cannot be graded.
 
@@ -18,7 +27,15 @@ The `good_N` images are not filler. **A tutor that finds an error in correct wor
 
 Text and numbers come from `scripts/render_samples.py`. Change a number there and change it here too.
 
+The student work is rendered in a **handwriting font with per-character jitter**, and each student gets a different hand, so the tutor cannot be tuned to one. `ques.png` stays in a printed font: it is the worksheet, not the student. Fonts are vendored in `assets/fonts/`.
+
+**Figures never contain answers.** Every figure carries only what the question supplies (given lengths, masses, species, structures) plus symbols for the unknowns (`d`, `h`, `H`, `R`, `F_E`). Nothing a student has to work out appears on the diagram. This matters twice over: the same figure is drawn on `ques.png`, so a label like a functional-group name would make the worksheet answer its own question, and it would let a model catch a `bad_N` by spotting two lines that disagree rather than by knowing the subject.
+
 **The images carry no line numbers**, because students do not number their steps and a photo of real handwriting will not either. Line numbers below are a reading aid for you, not something the model can see. Grade a diagnosis on **which line's content** it flags, not on the integer it prints.
+
+---
+
+# School set
 
 ## How these three were chosen
 
@@ -47,7 +64,7 @@ Mistakes 4 to 7 are real and well documented. They are left out only because thr
 
 ## Easy: the negative was not distributed
 
-**Directory:** `samples/math/easy/` &nbsp; **Problem:** Solve `5 - (2x - 4) = 11` &nbsp; **Correct answer:** `x = -1`
+**Directory:** `samples/math/basic/easy/` &nbsp; **Problem:** Solve `5 - (2x - 4) = 11` &nbsp; **Correct answer:** `x = -1`
 
 | File | Answer | First error | The mistake |
 |---|---|---|---|
@@ -137,7 +154,7 @@ x = -2
 
 ## Medium: squaring a sum term by term
 
-**File:** `samples/math/medium/ques.png`
+**Files:** `samples/math/basic/medium/ques.png` (problem) and `samples/math/basic/medium/bad_1.png` (the work below)
 
 **Problem:** Solve `(x + 3)^2 = 25`
 
@@ -167,7 +184,7 @@ Give the student credit for line 3: they kept both roots, which is itself a comm
 
 ## Hard: chain rule, inner derivative forgotten
 
-**File:** `samples/math/hard/ques.png`
+**Files:** `samples/math/basic/hard/ques.png` (problem) and `samples/math/basic/hard/bad_1.png` (the work below)
 
 **Problem:** Differentiate `y = sin(3x^2)` and find `dy/dx` at `x = 1`.
 
@@ -193,6 +210,184 @@ At x = 1:   dy/dx = cos(3)
 
 ---
 
+# Advanced set
+
+Grade 12 and first-year. These exist because the school set only ever fails in one shape, which is easy for a diagnosis prompt. Each of these fails differently.
+
+| Directory | Correct answer | The failure shape it tests |
+|---|---|---|
+| `area_between_curves/` | `9/2` | wrong **setup**, right execution |
+| `optimization/` | `x = (25 - 5*sqrt7)/3 = 3.92 cm` | right execution, **impossible answer** left unchecked |
+| `trig_equation/` | `60.68, 164.32, 240.68, 344.32` degrees | **every line correct, answer incomplete** |
+
+All values were verified symbolically with sympy, not by hand.
+
+---
+
+## Area between curves
+
+**Problem:** The curves `y = x^2 - 4x + 3` and `y = x - 1` intersect at two points. Find the exact area enclosed between them. **Correct answer:** `9/2`.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **9/2** | none | checks which curve is on top before subtracting |
+| `bad_1.png` | -9/2 | line 4 | subtracted the wrong way round |
+| `bad_2.png` | 10/3 | line 1 | used the parabola's own roots as the limits |
+| `bad_3.png` | 5/6 | line 7 | subtracted a negative as if it were positive |
+
+**`bad_1`** integrates `(parabola - line)` and reports a **negative area**. Four correct lines follow the bad one. The tutor should not need calculus to catch this: an area cannot be negative, and saying so is the whole lesson.
+
+**`bad_2`** solves `x^2 - 4x + 3 = 0` instead of setting the two curves equal, so it finds where the **parabola** meets the x-axis (`x = 1, 3`) rather than where the curves meet (`x = 1, 4`). Everything after is correct integration over the wrong interval. Very common confusion.
+
+**`bad_3`** is correct through six lines. `F(1) = -11/6`, and the student writes `A = (8/3) - (11/6)`, dropping the sign. Tests localization deep in a long solution.
+
+**Expected diagnosis for `good_1`:** `FIRST_ERROR: NONE`.
+
+---
+
+## Optimization
+
+**Problem:** A 30 cm x 20 cm sheet, squares of side `x` cut from each corner, sides folded up. Find `x` that maximizes volume. **Correct answer:** `x = (25 - 5*sqrt7)/3 = 3.92 cm`, giving `V = 1056.3 cm^3`.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **3.92 cm** | none | rejects the out-of-range root and runs the second-derivative test |
+| `bad_1.png` | 7.85 cm | line 1 | `V = x(30 - x)(20 - x)`, forgetting both ends are cut |
+| `bad_2.png` | 12.74 cm | line 7 | keeps the root outside the domain |
+| `bad_3.png` | 3 cm | line 2 | lost the `(-2x)(-2x) = 4x^2` term when expanding |
+
+**`bad_1`** is the classic setup error: a square is cut from **each** corner, so each side loses `2x`, not `x`. The calculus that follows is flawless. The root cause is modelling, not differentiation, and a tutor that responds by reviewing the product rule has missed the point entirely.
+
+📌📌📌📌 **`bad_2` is the one to watch.** Every number on the page is correct. The quadratic is solved right, both roots are right. The student then picks `x = 12.74` because a bigger cut sounds like a bigger box. But `20 - 2(12.74) = -5.48`, so the box has a **negative side**. Nothing is arithmetically wrong; the answer is physically impossible. This tests whether the tutor sanity-checks a result or only re-derives it. 📌📌📌📌
+
+**`bad_3`** expands `(30 - 2x)(20 - 2x)` as `600 - 60x - 40x = 600 - 100x`, dropping the `4x^2` term. It produces a clean, believable `x = 3`, which is exactly why the student never doubts it.
+
+---
+
+## Trigonometric equation
+
+**Problem:** Solve `2 sin^2 x - 3 sin x cos x - cos^2 x = 0` for `0 <= x <= 360` degrees. **Correct answer:** `x = 60.68, 164.32, 240.68, 344.32` degrees.
+
+The method: `cos x = 0` gives `2 = 0`, so it can be ruled out, and dividing through by `cos^2 x` turns the equation into `2 tan^2 x - 3 tan x - 1 = 0`, whose roots are `tan x = (3 ± sqrt17)/4`.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **all four** | none | rules out `cos x = 0`, then takes both branches of each tangent |
+| `bad_1.png` | two of four | **none** | stopped at the principal values |
+| `bad_2.png` | 26.57, 45, 206.57, 225 | line 3 | discriminant `9 - 8` instead of `9 + 8` |
+| `bad_3.png` | 45, 153.43, 225, 333.43 | line 2 | invented a factorization that does not expand back |
+
+📌📌📌📌 **`bad_1` is the most valuable image in the entire kit, and it will probably break the current prompt.** The student writes `tan x = 1.7808`, `arctan(1.7808) = 60.68`, and stops. Then `arctan(-0.2808) = -15.68`, so `x = 164.32`. **Every one of those statements is true.** There is no wrong line to find. The mistake is the two solutions they never wrote: `240.68` and `344.32`.
+
+`DIAGNOSIS_SYSTEM` in `backend/sensei/tutor.py` asks for "the line number where the first genuine mistake appears, or NONE". Against this image it should return `NONE`, and pass incomplete work as correct. If it does, the prompt needs a completeness check, not just a line-by-line check. Run this one first. 📌📌📌📌
+
+**`bad_2`** computes the discriminant as `9 - 8 = 1`, forgetting that `-4ac` with `c = -1` **adds**. It gives suspiciously clean angles (`45`, `26.57`), and it takes both branches correctly, so the only fault is the arithmetic on line 3.
+
+**`bad_3`** guess-factors as `(2 sin x + cos x)(sin x - cos x)`. That expands to a middle term of `-1 sin x cos x`, not `-3`. Everything after the bad factorization is handled correctly, including all four branches. Tests whether the tutor multiplies the factorization back out to check it.
+
+---
+
+# Geometry set
+
+Grade 12. These are the only samples with a **figure**, so they test something nothing else in the kit does: whether the model can read a diagram and connect it to the working. The figures are drawn to scale from the real geometry, so the chord genuinely sits at `0.6r` and the cone is genuinely a 6-8-10 triangle. A model that measures the picture instead of reading the numbers still gets the right answer.
+
+| Directory | Correct answer |
+|---|---|
+| `circle_geometry/` | `d = 6 cm`, `angle AOB = 106.26 deg` |
+| `cone/` | `h = 8 cm`, area `96 pi cm^2`, volume `96 pi cm^3` |
+
+Both verified symbolically. The two `96 pi` in the cone problem are a genuine coincidence of these numbers, not a typo.
+
+---
+
+## Circle geometry
+
+**Problem:** circle of radius 10 cm, chord `AB = 16 cm`. Find the perpendicular distance from the centre to the chord, and the angle the chord subtends at the centre.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **d = 6, AOB = 106.26** | none | bisects the chord, then `sin(AOM) = 8/10`, then doubles |
+| `bad_1.png` | d = 12.8 | line 3 | Pythagoras added instead of subtracted |
+| `bad_2.png` | AOB = 53.13 | last line | answered the half-angle |
+| `bad_3.png` | d = 5.83 | line 5 | `100 - 64` read as `34` |
+
+**`bad_1`** writes `OM^2 = OA^2 + AM^2`, giving `d = 12.8 cm`. The chord is inside a circle of radius 10, so a distance of 12.8 cm from the centre is **impossible**. Like the optimization sample, this tests whether the tutor sanity-checks a result rather than only re-deriving it. The angle work below the error is untouched and still correct.
+
+**`bad_2`** is correct in every line until the last. The student computes `AOM = 53.13` and reports that as `AOB`, forgetting the perpendicular splits the angle in two. Extremely common, and the answer looks entirely plausible.
+
+**`bad_3`** is a pure arithmetic slip in the middle of correct method. The tutor should fix the subtraction and leave the geometry alone.
+
+📌📌📌📌 **There is a trap in this problem worth knowing about.** In right triangle `OMA` the right angle is at `M`, so for the angle **at O** the side `AM` is opposite, not adjacent: `sin(AOM) = 8/10`, giving `53.13 deg`. Writing `cos(AOM) = 8/10` returns `36.87 deg`, which is the angle at **A**. Both are angles in the same triangle and both look reasonable, so the wrong one does not announce itself. No sample uses this error yet; it would make a good extra variant if you want a harder one. (`bad_4` and `bad_5` are already taken by the drawing errors.) 📌📌📌📌
+
+---
+
+## Cone
+
+**Problem:** right circular cone, radius 6 cm, slant height 10 cm. Find the vertical height, the total surface area, and the volume.
+
+| File | Answer | First error | The mistake |
+|---|---|---|---|
+| `good_1.png` | **h = 8, 96 pi, 96 pi** | none | all three parts correct |
+| `bad_1.png` | area = 60 pi | line 3 | "total" area given as the curved area only |
+| `bad_2.png` | V = 120 pi | line 6 | slant height used in the volume |
+| `bad_3.png` | h = 11.66 | line 1 | slant height treated as a leg, not the hypotenuse |
+
+**`bad_1`** omits the base. `pi r l` is the curved surface; the question asks for the *total*, which needs `+ pi r^2`. The height above it and the volume below it are both correct, so the error sits in the middle of good work.
+
+**`bad_2`** uses `l = 10` where the volume formula needs `h = 8`. This is the most common cone error there is, because both numbers are on the diagram and the student has just finished writing `10` several times.
+
+**`bad_3`** fails on the very first line: it writes `h^2 = 10^2 + 6^2`. The slant height is the hypotenuse, so it cannot be a leg. Everything downstream is consistent with that wrong height.
+
+---
+
+---
+
+## Figure errors: `bad_4`
+
+Every question that carries a diagram has one extra variant, `bad_4`, where **the drawing is wrong and the working underneath is completely correct**. That is the realistic case: the student draws their own figure, so the figure is part of their answer and can be the only thing they got wrong.
+
+Its working is copied verbatim from `good_1` by the render script, so the text is provably correct and the two cannot drift apart.
+
+| Directory | What is wrong in the drawing | Working below |
+|---|---|---|
+| `math/advanced/circle_geometry/` | the foot of the perpendicular is drawn well off the midpoint, so `AM != MB` | correct, and says `AM = MB = 8` |
+| `math/advanced/cone/` | `6 cm` marked right across the base, as a diameter rather than a radius | correct |
+| `physics/advanced/projectile_cliff/` | the `v_x` and `v_y` labels swapped, so `v_x` names the vertical arrow | correct, and says `vOx = 25 cos35` |
+| `physics/advanced/gravitation/` | both force arrows drawn toward the Moon | correct, and says they oppose |
+| `chemistry/advanced/redox_magnesium/` | the ion drawn `Mg+` with one chloride, so an atom is lost and the charge is wrong | correct, and says `Mg -> Mg2+ + 2e-` |
+| `chemistry/advanced/oxidation_ethanol/` | ethanal drawn keeping the `-OH`, giving that carbon five bonds | correct |
+
+A second figure-error variant, `bad_5`, does the same again with a different drawing mistake:
+
+| Directory | What is wrong in the `bad_5` drawing |
+|---|---|
+| `math/advanced/circle_geometry/` | the chord drawn tilted, so the line from O plainly is not perpendicular to it, yet the right-angle tick is still marked |
+| `math/advanced/cone/` | the right angle marked at the **apex**, where there is none |
+| `physics/advanced/projectile_cliff/` | the arc drawn landing back at cliff height, as if the 20 m drop were not there |
+| `physics/advanced/gravitation/` | the satellite drawn a third of the way out, contradicting its own `3.0` of `3.84` labels |
+| `chemistry/advanced/redox_magnesium/` | magnesium drawn already as `Mg2+` in the **Before** row, i.e. the product state before the reaction |
+| `chemistry/advanced/oxidation_ethanol/` | ethanol's methyl carbon drawn with one H missing, leaving it with three bonds |
+
+Both variants take their working verbatim from `good_1`.
+
+**Expected diagnosis:** every written line is right, so a model that only checks the working will return `FIRST_ERROR: NONE` and pass the page. Catching these requires reading the picture and comparing it with the text. No other sample in the kit tests that.
+
+The `ques.png` for these questions carries **no diagram**, because the question asks the student to draw one.
+
+
+---
+
+## Grading conventions
+
+Some samples have more than one defensible right answer. These rules exist so a good diagnosis is not scored wrong.
+
+- **Figure errors (`bad_4`, `bad_5`): grade on "did the model flag the drawing", not on whether it named the exact fault.** A wrong drawing often has several true descriptions at once. Tilting a chord also moves its endpoints; shifting the foot of a perpendicular also makes it non-perpendicular. Any of those is a fair thing for a tutor to point at.
+- **When an error spans a formula line and its substitution line, accept a box on either.** The student wrote one mistake across two lines.
+- **Grade on the flagged line's content, not the integer the model prints.** The images carry no line numbers.
+- **`advanced/trig_equation/bad_1` has two correct answers. Accept either.** Every written line is true and the answer is incomplete, so `FIRST_ERROR: NONE` with `answer_complete: false` is right. But the final line `x = 60.68 and 164.32 degrees` is also false *as an answer* to "solve for all x", so flagging it is right too, and a model that boxes it and asks "are those the only ones?" is giving the best tutoring response available. For the bounding box: either no box, or a box on that final line.
+- **`advanced/area_between_curves/bad_1`: accept line 4 or line 8.** Line 4 is the first false statement (the reversed subtraction) and is the better answer because it names the cause. Line 8, `A = -9/2`, is the louder symptom and the one the lesson is written around.
+
+
 ## Running them
 
 Paths below are relative to the repo root, so run these from there. Send a `good_N` or `bad_N` image, never `ques.png`, which has no working to diagnose.
@@ -200,7 +395,7 @@ Paths below are relative to the repo root, so run these from there. Send a `good
 ```bash
 curl -s -F learner_id=demo \
      -F "problem=Solve 5 - (2x - 4) = 11" \
-     -F image=@samples/math/easy/bad_1.png \
+     -F image=@samples/math/basic/easy/bad_1.png \
      http://localhost:8080/tutor/diagnose | jq
 ```
 
