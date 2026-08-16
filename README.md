@@ -17,6 +17,39 @@ the exact step where they slipped. The tutor picks up from there.
 
 ---
 
+## ▶ See it in 20 seconds
+
+<p align="center">
+  <a href="https://htmlpreview.github.io/?https://github.com/brishtiteveja/Sensei/blob/main/docs/intro/index.html">
+    <img src="docs/intro/poster.png" width="720" alt="Sensei — every student's personal tutor, in every language">
+  </a>
+  <br>
+  <strong><a href="https://htmlpreview.github.io/?https://github.com/brishtiteveja/Sensei/blob/main/docs/intro/index.html">▶ Play the animated intro</a></strong>
+  <br>
+  <sub>20 s · five scenes · no fonts, no network, no dependencies</sub>
+</p>
+
+<table>
+<tr>
+<td width="50%"><img src="docs/intro/scene-check-work.png" alt="Sensei reading a student's handwritten working and marking the slipped step"></td>
+<td width="50%"><img src="docs/intro/scene-offline.png" alt="Offline: no cloud, just us"></td>
+</tr>
+<tr>
+<td><b>It reads your actual working.</b> Finds the line where you slipped — and asks about it rather than correcting it.</td>
+<td><b>No cloud. Just us.</b> The tutor model runs on the Spark, and the backend is network-confined to it.</td>
+</tr>
+</table>
+
+The intro is a single self-contained HTML file — [`docs/intro/index.html`](docs/intro/index.html)
+— with no external fonts, images, or requests, which is the same claim the product makes.
+Open it locally with any browser, or embed it:
+
+```html
+<iframe src="docs/intro/index.html" style="width:100%;height:640px;border:0" title="What is Sensei"></iframe>
+```
+
+---
+
 ## Why the Spark
 
 Small models are fine for English chat. They fall apart at multilingual math tutoring — a 7B
