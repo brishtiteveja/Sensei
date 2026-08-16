@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, ImageUp, Trash2, Upload } from 'lucide-react';
+import { AlertTriangle, ImageUp, Smartphone, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
 import { fileToDownscaledDataUri } from '@/lib/image';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,7 @@ export function HandwritingPanel({
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState('');
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -174,8 +176,35 @@ export function HandwritingPanel({
               className="sr-only"
               onChange={(e) => accept(e.target.files?.[0])}
             />
+            {/* The page being photographed is usually next to the phone, not
+                the laptop, so offer the phone as the camera. */}
+            <button
+              type="button"
+              onClick={() => setPhoneOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 text-2xs font-medium text-accent underline underline-offset-2"
+            >
+              <Smartphone size={12} />
+              {t.phone.usePhone}
+            </button>
           </div>
         )}
+
+        {phoneOpen ? (
+          <PhoneHandoff
+            mode="photo"
+            onClose={() => setPhoneOpen(false)}
+            onImage={(dataUri) => {
+              setPhoneOpen(false);
+              if (onInsert) {
+                onInsert(dataUri, 'phone-photo.jpg');
+                onClose();
+              } else {
+                // No insert path here (older callers) — at least show it.
+                setPreviewUrl(dataUri);
+              }
+            }}
+          />
+        ) : null}
 
         {error ? (
           <p role="alert" className="text-[13px] font-medium text-danger-text">

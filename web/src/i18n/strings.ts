@@ -303,6 +303,27 @@ function build(dict: Dict) {
       zoomFit: s('scratch.zoomFit'),
     },
 
+    phone: {
+      usePhone: s('phone.usePhone'),
+      drawTitle: s('phone.drawTitle'),
+      drawBody: s('phone.drawBody'),
+      photoTitle: s('phone.photoTitle'),
+      photoBody: s('phone.photoBody'),
+      waiting: s('phone.waiting'),
+      received: s('phone.received'),
+      timeout: s('phone.timeout'),
+      header: s('phone.header'),
+      takePhoto: s('phone.takePhoto'),
+      retake: s('phone.retake'),
+      send: s('phone.send'),
+      sending: s('phone.sending'),
+      sentTitle: s('phone.sentTitle'),
+      sentBody: s('phone.sentBody'),
+      sendAnother: s('phone.sendAnother'),
+      sendFailed: s('phone.sendFailed'),
+      noCode: s('phone.noCode'),
+    },
+
     notebook: {
       title: s('notebook.title'),
       subtitle: s('notebook.subtitle'),

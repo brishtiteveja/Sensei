@@ -1,7 +1,7 @@
 {
   "name": "sensei-web",
   "version": "0.1.0",
-  "description": "Sensei desktop web \u2014 multilingual Socratic tutor",
+  "description": "Sensei desktop web — multilingual Socratic tutor",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@types/katex": "^0.16.8",
+    "@types/qrcode": "^1.5.6",
     "katex": "^0.18.4",
     "lucide-react": "^1.31.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

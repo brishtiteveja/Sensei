@@ -9,6 +9,7 @@ import { CourseDetailPage } from '@/pages/CourseDetail';
 import { LessonPage } from '@/pages/Lesson';
 import { PracticePage } from '@/pages/Practice';
 import { NotebookPage } from '@/pages/Notebook';
+import { HandoffPage } from '@/pages/Handoff';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { SettingsPage } from '@/pages/Settings';
 import { TutorPage } from '@/pages/Tutor';
@@ -47,6 +48,9 @@ function LocalisedTree() {
   return (
     <BrowserRouter key={language} basename={BASENAME || '/'}>
       <Routes>
+        {/* The phone-handoff page is deliberately outside the shell: it opens on
+            a phone that scanned a QR, and has one job. */}
+        <Route path="handoff" element={<HandoffPage />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="courses" element={<CatalogPage />} />

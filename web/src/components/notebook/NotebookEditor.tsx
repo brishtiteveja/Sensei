@@ -7,6 +7,7 @@ import {
   Pencil,
   PenLine,
   Plus,
+  Smartphone,
   Trash2,
   Type,
 } from 'lucide-react';
@@ -14,6 +15,7 @@ import { Button, IconButton } from '@/components/ui/Button';
 import { RichText } from '@/components/ui/RichText';
 import { EmptyState } from '@/components/ui/States';
 import { ScratchpadPanel } from '@/components/tutor/ScratchpadPanel';
+import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
 import { fileToDownscaledDataUri } from '@/lib/image';
 import { observe } from '@/lib/observe';
 import {
@@ -52,6 +54,7 @@ export function NotebookEditor({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [sketchTarget, setSketchTarget] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Reload when the bound context changes (e.g. the practice question advances).
@@ -196,6 +199,11 @@ export function NotebookEditor({
           label={t.notebook.addImage}
           onClick={() => fileRef.current?.click()}
         />
+        <AddButton
+          icon={<Smartphone size={15} />}
+          label={t.phone.usePhone}
+          onClick={() => setPhoneOpen((v) => !v)}
+        />
         <input
           ref={fileRef}
           type="file"
@@ -205,6 +213,18 @@ export function NotebookEditor({
         />
         <span className="ml-auto text-2xs text-ink-faint">{t.notebook.saved}</span>
       </div>
+
+      {phoneOpen ? (
+        <PhoneHandoff
+          mode="photo"
+          onClose={() => setPhoneOpen(false)}
+          onImage={(image) => {
+            setPhoneOpen(false);
+            update((b) => [...b, { id: blockId(), type: 'image', image, name: 'phone-photo.jpg' }]);
+            observe('notebook.block', { op: 'add', key, blockType: 'image', via: 'phone' });
+          }}
+        />
+      ) : null}
 
       {uploadError ? (
         <p role="alert" className="text-[13px] font-medium text-danger-text">

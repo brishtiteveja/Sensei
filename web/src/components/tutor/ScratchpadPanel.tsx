@@ -8,12 +8,14 @@ import {
   Minus,
   Pencil,
   Plus,
+  Smartphone,
   Square as SquareIcon,
   Triangle as TriangleIcon,
   Undo2,
 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
 import { observe } from '@/lib/observe';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
@@ -165,6 +167,7 @@ export function ScratchpadPanel({
   const [color, setColor] = useState(COLORS[0]);
   const [width, setWidth] = useState(WIDTHS[1]);
   const [zoom, setZoom] = useState(1);
+  const [phoneOpen, setPhoneOpen] = useState(false);
 
   // Refs so the pointer handlers never read stale tool/colour/width.
   const draftRef = useRef<Shape | null>(null);
@@ -384,6 +387,15 @@ export function ScratchpadPanel({
           </div>
 
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              onClick={() => setPhoneOpen((v) => !v)}
+              className="h-8 px-2.5"
+              title={t.phone.drawTitle}
+            >
+              <Smartphone size={15} />
+              <span className="hidden sm:inline">{t.phone.usePhone}</span>
+            </Button>
             <IconButton label={t.scratch.undo} onClick={undo} disabled={!shapes.length}>
               <Undo2 size={16} />
             </IconButton>
@@ -392,6 +404,25 @@ export function ScratchpadPanel({
             </IconButton>
           </div>
         </div>
+
+        {phoneOpen ? (
+          <PhoneHandoff
+            mode="draw"
+            onClose={() => setPhoneOpen(false)}
+            // A drawing done on the phone is already the finished thing, so it
+            // goes straight where this panel was going to send it.
+            onImage={(dataUri) => {
+              setPhoneOpen(false);
+              if (onInsert) {
+                onInsert(dataUri);
+                onClose();
+              } else {
+                onAsk?.(t.scratch.sendNote);
+                onClose();
+              }
+            }}
+          />
+        ) : null}
 
         {/* canvas — scrolls within a fixed viewport once zoomed past 100% */}
         <div
