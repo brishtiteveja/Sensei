@@ -946,11 +946,17 @@ export default function AiChatScreen() {
     micPulse.setValue(1);
   }, [isListening, micPulse]);
 
-  // Seed prompt from navigation params
+  // Seed prompt from navigation params. This tab stays mounted, so the guard
+  // ref must reset once the param is cleared — otherwise only the FIRST
+  // hand-off ever fires and a second "Ask Sensei" (new notebook, another
+  // practice question) silently no-ops.
   useEffect(() => {
-    if (seededPromptRef.current) return;
     const initialPrompt = typeof prompt === 'string' ? prompt.trim() : '';
-    if (!initialPrompt) return;
+    if (!initialPrompt) {
+      seededPromptRef.current = false;
+      return;
+    }
+    if (seededPromptRef.current) return;
     seededPromptRef.current = true;
     startNewChat();
     setTimeout(() => void sendMessage(initialPrompt), 100);
