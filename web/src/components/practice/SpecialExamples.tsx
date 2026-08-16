@@ -287,11 +287,11 @@ function ProblemCard({
       ) : null}
 
       <div className="mt-auto flex flex-wrap items-center gap-2">
-        <Button onClick={onSolve} className="flex-1">
+        <Button data-tour="le-solve" onClick={onSolve} className="flex-1">
           <NotebookPen size={15} />
           {t.practice.solveStepByStep}
         </Button>
-        <Button variant="secondary" onClick={onAsk}>
+        <Button data-tour="le-ask" variant="secondary" onClick={onAsk}>
           <MessageCircle size={15} />
           {t.practice.askWhyShort}
         </Button>

@@ -21,6 +21,8 @@ import { CorrectBurst, ScoreBurst } from '@/components/art/Burst';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { SpecialExamples } from '@/components/practice/SpecialExamples';
+import { Tour } from '@/components/tour/Tour';
+import { HelpCircle } from 'lucide-react';
 import { observe } from '@/lib/observe';
 import { learnerId } from '@/lib/learner';
 import { recordObservation } from '@/lib/api';
@@ -63,6 +65,7 @@ export function PracticePage() {
   const [notebookOpen, setNotebookOpen] = useState(false);
   // Curated examples are the better first impression, so they lead.
   const [special, setSpecial] = useState(true);
+  const [tourOpen, setTourOpen] = useState(false);
 
   const resetSet = useCallback(() => {
     setIndex(0);
@@ -169,7 +172,12 @@ export function PracticePage() {
       subtitle={t.practice.subtitle}
       actions={
         <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={() => setTourOpen(true)}>
+            <HelpCircle size={15} />
+            {t.tour.startHere}
+          </Button>
           <label
+            data-tour="le-special"
             className="flex cursor-pointer select-none items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] font-medium text-ink-soft transition-colors hover:border-accent/40"
             title={t.practice.specialHint}
           >
@@ -294,7 +302,12 @@ export function PracticePage() {
               <span className="text-2xs tabular-nums text-ink-faint">
                 {answered ? `${score}/${answered}` : ''}
               </span>
-              <Button variant="ghost" onClick={() => setNotebookOpen(true)} className="h-8 px-2.5">
+              <Button
+                data-tour="le-notebook"
+                variant="ghost"
+                onClick={() => setNotebookOpen(true)}
+                className="h-8 px-2.5"
+              >
                 <NotebookPen size={15} />
                 <span className="hidden sm:inline">{t.notebook.open}</span>
               </Button>
@@ -404,7 +417,7 @@ export function PracticePage() {
                   <ArrowRight size={15} />
                 </Button>
               ) : (
-                <Button onClick={check} disabled={!picked}>
+                <Button data-tour="le-check" onClick={check} disabled={!picked}>
                   {t.practice.check}
                 </Button>
               )}
@@ -445,6 +458,7 @@ export function PracticePage() {
           }}
         />
       ) : null}
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} name="learn" />
     </Page>
   );
 }

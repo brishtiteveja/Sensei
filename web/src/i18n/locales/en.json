@@ -441,7 +441,7 @@
   "tour.skip": "Skip",
   "tour.next": "Next",
   "tour.done": "Got it",
-  "tour.practiceTitle": "Practice",
+  "tour.practiceTitle": "Learn",
   "tour.practiceBody": "Hand-picked problems by subject, plus past-exam questions. Press Solve to work one out step by step.",
   "tour.notebookTitle": "Your notebook",
   "tour.notebookBody": "Where your working lives — type, sketch a diagram, or photograph a page. It saves itself per problem.",
@@ -467,5 +467,16 @@
   "tour.coSubjectTitle": "Pick a subject",
   "tour.coSubjectBody": "Each course follows a real syllabus — units map to chapters, in your language.",
   "tour.coProgressTitle": "Your progress",
-  "tour.coProgressBody": "Sensei tracks what you've mastered and what's still shaky, and builds the next lesson from it."
+  "tour.coProgressBody": "Sensei tracks what you've mastered and what's still shaky, and builds the next lesson from it.",
+  "slides.skip": "Skip",
+  "slides.start": "Start learning",
+  "slides.replay": "Replay the intro",
+  "tour.leSpecialTitle": "Curated first",
+  "tour.leSpecialBody": "Hand-picked problems by subject lead the set. Untick to get the full past-exam bank instead.",
+  "tour.leAddTitle": "Add your own",
+  "tour.leAddBody": "Paste a question, or photograph one from your book — Sensei writes the options and the answer.",
+  "tour.leCheckTitle": "Check, then ask why",
+  "tour.leCheckBody": "Answer first. Right or wrong, Ask why turns it into a conversation instead of a correction.",
+  "tour.leNotebookTitle": "Show your working",
+  "tour.leNotebookBody": "Open the notebook to write, sketch, or send a photo from your phone. Sensei reads the page, not just the answer."
 }

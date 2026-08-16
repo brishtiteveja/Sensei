@@ -32,6 +32,15 @@ for (const subject of ['physics', 'chemistry', 'math']) {
 }
 console.log('[copy-samples] staged samples into public/samples');
 
+// Pitch slides for the landing slideshow, same deal.
+const slSrc = join(repo, 'slides');
+const slDest = join(here, '..', 'public', 'slides');
+rmSync(slDest, { recursive: true, force: true });
+if (existsSync(slSrc)) {
+  cpSync(slSrc, slDest, { recursive: true });
+  console.log('[copy-samples] staged slides into public/slides');
+}
+
 // The NoTeS-Bank benchmark subset, same deal: committed once under datasets/,
 // staged into public/ at build time rather than duplicated into git.
 // Fetch it with: python3 scripts/fetch_notesbank.py

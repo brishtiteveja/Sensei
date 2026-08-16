@@ -42,3 +42,4 @@ web/public/samples/
 
 # NoTeS-Bank subset staged into web/public at build time; source is /datasets
 web/public/notesbank/
+web/public/slides/

@@ -313,6 +313,11 @@ function build(dict: Dict) {
       startNew: s('attempt.startNew'),
     },
 
+    slides: {
+      skip: s('slides.skip'),
+      start: s('slides.start'),
+      replay: s('slides.replay'),
+    },
     tour: {
       start: s('tour.start'),
       startHere: s('tour.startHere'),
@@ -326,6 +331,14 @@ function build(dict: Dict) {
       nbPhoneBody: s('tour.nbPhoneBody'),
       nbGiveTitle: s('tour.nbGiveTitle'),
       nbGiveBody: s('tour.nbGiveBody'),
+      leSpecialTitle: s('tour.leSpecialTitle'),
+      leSpecialBody: s('tour.leSpecialBody'),
+      leAddTitle: s('tour.leAddTitle'),
+      leAddBody: s('tour.leAddBody'),
+      leCheckTitle: s('tour.leCheckTitle'),
+      leCheckBody: s('tour.leCheckBody'),
+      leNotebookTitle: s('tour.leNotebookTitle'),
+      leNotebookBody: s('tour.leNotebookBody'),
       coSubjectTitle: s('tour.coSubjectTitle'),
       coSubjectBody: s('tour.coSubjectBody'),
       coProgressTitle: s('tour.coProgressTitle'),

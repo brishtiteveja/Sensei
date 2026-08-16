@@ -57,7 +57,7 @@ export function AddQuestion({ onAdded }: { onAdded: (q: DraftedQuestion) => void
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button data-tour="le-add" variant="secondary" onClick={() => setOpen(true)}>
         <Plus size={15} />
         {t.addq.button}
       </Button>

@@ -4,6 +4,7 @@ import {
   BookOpen,
   ChevronsLeft,
   HelpCircle,
+  Presentation,
   ChevronsRight,
   LayoutDashboard,
   Moon,
@@ -24,6 +25,7 @@ import { observe } from '@/lib/observe';
 import { SessionReplay } from '@/components/replay/SessionReplay';
 import { GlobalSensei } from '@/components/tutor/GlobalSensei';
 import { Tour, hasSeenTour } from '@/components/tour/Tour';
+import { SlideShow, hasSeenSlides } from '@/components/tour/SlideShow';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -58,12 +60,15 @@ export function AppShell() {
   }, [location.pathname]);
 
   const [tourOpen, setTourOpen] = useState(false);
+  const [slidesOpen, setSlidesOpen] = useState(() => !hasSeenSlides());
   // Offer the tour once, after the shell has painted so targets exist.
+  // The deck introduces the product; the tour explains the buttons. Never both
+  // at once -- the tour waits until the slides have been seen and dismissed.
   useEffect(() => {
-    if (hasSeenTour()) return;
+    if (hasSeenTour() || !hasSeenSlides() || slidesOpen) return;
     const id = window.setTimeout(() => setTourOpen(true), 900);
     return () => window.clearTimeout(id);
-  }, []);
+  }, [slidesOpen]);
 
   const nav = navItems();
   const groups: Array<{ key: string; label: string }> = [
@@ -80,6 +85,7 @@ export function AppShell() {
       {/* One owl for the whole app: follows the student, draggable, per-problem thread. */}
       <GlobalSensei />
       <Tour open={tourOpen} onClose={() => setTourOpen(false)} />
+      <SlideShow open={slidesOpen} onClose={() => setSlidesOpen(false)} />
 
       <a
         href="#s-main"
@@ -220,6 +226,9 @@ export function AppShell() {
           <div className={cn('flex items-center gap-1', sidebarCollapsed && 'flex-col')}>
             <IconButton label={t.tour.start} onClick={() => setTourOpen(true)}>
               <HelpCircle size={16} />
+            </IconButton>
+            <IconButton label={t.slides.replay} onClick={() => setSlidesOpen(true)}>
+              <Presentation size={16} />
             </IconButton>
             <IconButton
               label={t.nav.toggleTheme}

@@ -28,7 +28,7 @@ interface Step {
   body: string;
 }
 
-export type TourName = 'app' | 'notebook' | 'courses';
+export type TourName = 'app' | 'notebook' | 'courses' | 'learn';
 
 function steps(name: TourName): Step[] {
   if (name === 'notebook') {
@@ -38,6 +38,23 @@ function steps(name: TourName): Step[] {
       { selector: '[data-tour="nb-image"]', title: t.tour.nbImageTitle, body: t.tour.nbImageBody },
       { selector: '[data-tour="nb-phone"]', title: t.tour.nbPhoneTitle, body: t.tour.nbPhoneBody },
       { selector: '[data-tour="nb-give"]', title: t.tour.nbGiveTitle, body: t.tour.nbGiveBody },
+    ];
+  }
+  if (name === 'learn') {
+    return [
+      { selector: '[data-tour="le-special"]', title: t.tour.leSpecialTitle, body: t.tour.leSpecialBody },
+      { selector: '[data-tour="le-add"]', title: t.tour.leAddTitle, body: t.tour.leAddBody },
+      {
+        selector: '[data-tour="le-solve"], [data-tour="le-notebook"]',
+        title: t.tour.leNotebookTitle,
+        body: t.tour.leNotebookBody,
+      },
+      {
+        selector: '[data-tour="le-ask"], [data-tour="le-check"]',
+        title: t.tour.leCheckTitle,
+        body: t.tour.leCheckBody,
+      },
+      { selector: '#sensei-owl', title: t.tour.owlTitle, body: t.tour.owlBody },
     ];
   }
   if (name === 'courses') {
