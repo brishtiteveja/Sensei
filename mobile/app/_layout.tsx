@@ -106,6 +106,7 @@ function AppContent() {
         <Stack.Screen name="lesson-detail" />
         <Stack.Screen name="mocktest" />
         <Stack.Screen name="mocktest-session" />
+        <Stack.Screen name="notebook" />
       </Stack>
     </View>
   );

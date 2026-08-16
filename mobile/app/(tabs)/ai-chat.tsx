@@ -1296,6 +1296,27 @@ export default function AiChatScreen() {
               contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 4, gap: 5, alignItems: 'center' }}
               style={{ backgroundColor: theme.surface, borderTopWidth: 1, borderColor: theme.border, maxHeight: 36 }}
             >
+              {/* Notebook opens a full screen, so it navigates rather than
+                  going through handleToolSelect like the in-composer tools. */}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => router.push('/notebook')}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                  backgroundColor: theme.surfaceAlt,
+                  borderRadius: 14,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                  height: 28,
+                }}
+              >
+                <Text style={{ fontSize: 12 }}>📓</Text>
+                <Text style={{ fontSize: 10, color: theme.textMuted, fontFamily: 'SpaceGrotesk_500Medium' }}>
+                  {t('chatTools.notebook')}
+                </Text>
+              </TouchableOpacity>
               {([
                 { type: 'camera' as const, icon: '📷', label: t('chatTools.camera') },
                 { type: 'equation' as const, icon: '∑', label: t('chatTools.equation') },
