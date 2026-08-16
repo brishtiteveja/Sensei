@@ -254,6 +254,46 @@ function build(dict: Dict) {
       requiresVision: s('handwriting.requiresVision'),
     },
 
+    tools: {
+      label: s('tools.label'),
+      calculator: s('tools.calculator'),
+      scratchpad: s('tools.scratchpad'),
+      image: s('tools.image'),
+    },
+
+    calc: {
+      title: s('calc.title'),
+      subtitle: s('calc.subtitle'),
+      basic: s('calc.basic'),
+      scientific: s('calc.scientific'),
+      radians: s('calc.radians'),
+      insert: s('calc.insert'),
+      clearAll: s('calc.clearAll'),
+      backspace: s('calc.backspace'),
+    },
+
+    scratch: {
+      title: s('scratch.title'),
+      subtitle: s('scratch.subtitle'),
+      pen: s('scratch.pen'),
+      line: s('scratch.line'),
+      rectangle: s('scratch.rectangle'),
+      circle: s('scratch.circle'),
+      triangle: s('scratch.triangle'),
+      arrow: s('scratch.arrow'),
+      eraser: s('scratch.eraser'),
+      color: s('scratch.color'),
+      width: s('scratch.width'),
+      undo: s('scratch.undo'),
+      clear: s('scratch.clear'),
+      clearConfirm: s('scratch.clearConfirm'),
+      download: s('scratch.download'),
+      send: s('scratch.send'),
+      empty: s('scratch.empty'),
+      sendNote: s('scratch.sendNote'),
+      notWired: s('scratch.notWired'),
+    },
+
     practice: {
       title: s('practice.title'),
       subtitle: s('practice.subtitle'),

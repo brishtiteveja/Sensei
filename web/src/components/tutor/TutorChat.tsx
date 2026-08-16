@@ -2,7 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { ReactNode } from 'react';
 import {
   ArrowDown,
+  Calculator as CalculatorIcon,
   ImageUp,
+  PenLine,
   RefreshCw,
   RotateCcw,
   Send,
@@ -14,6 +16,8 @@ import { RichText } from '@/components/ui/RichText';
 import { ConstellationMark } from '@/components/art/HeroArt';
 import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { HandwritingPanel } from './HandwritingPanel';
+import { CalculatorPanel } from './CalculatorPanel';
+import { ScratchpadPanel } from './ScratchpadPanel';
 import { useTutorChat } from '@/hooks/useTutorChat';
 import type { ChatMessage } from '@/hooks/useTutorChat';
 import { useSettings } from '@/state/settings';
@@ -51,7 +55,7 @@ export function TutorChat({
   const { language } = useSettings();
   const chat = useTutorChat({ contextType, contextData, language });
   const [input, setInput] = useState('');
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const [openTool, setOpenTool] = useState<null | 'image' | 'calc' | 'scratch'>(null);
   const [pinned, setPinned] = useState(true);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -96,6 +100,13 @@ export function TutorChat({
     [chat.phase, send],
   );
 
+  // Drop a calculator result into the composer, appending after a space if the
+  // student already typed something, and focus so they can keep going.
+  const insertText = useCallback((text: string) => {
+    setInput((prev) => (prev ? `${prev.replace(/\s+$/, '')} ${text}` : text));
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  }, []);
+
   const busy = chat.phase !== 'idle';
   const isEmpty = chat.messages.length === 0;
   const chips = isEmpty ? suggestions.slice(0, 4) : chat.followUps;
@@ -128,9 +139,6 @@ export function TutorChat({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <IconButton label={t.tutor.attach} onClick={() => setUploadOpen(true)}>
-            <ImageUp size={17} />
-          </IconButton>
           <IconButton label={t.tutor.clear} onClick={reset} disabled={isEmpty && !busy}>
             <RotateCcw size={16} />
           </IconButton>
@@ -209,6 +217,24 @@ export function TutorChat({
 
       {/* composer */}
       <div className="shrink-0 border-t border-line bg-surface/85 px-5 py-4">
+        {/* math & science toolbox */}
+        <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+          <ToolChip
+            icon={<CalculatorIcon size={14} />}
+            label={t.tools.calculator}
+            onClick={() => setOpenTool('calc')}
+          />
+          <ToolChip
+            icon={<PenLine size={14} />}
+            label={t.tools.scratchpad}
+            onClick={() => setOpenTool('scratch')}
+          />
+          <ToolChip
+            icon={<ImageUp size={14} />}
+            label={t.tools.image}
+            onClick={() => setOpenTool('image')}
+          />
+        </div>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -264,12 +290,48 @@ export function TutorChat({
         </div>
       </div>
 
+      <CalculatorPanel
+        open={openTool === 'calc'}
+        onClose={() => setOpenTool(null)}
+        onInsert={insertText}
+      />
+      <ScratchpadPanel
+        open={openTool === 'scratch'}
+        onClose={() => setOpenTool(null)}
+        onAsk={(msg) => submit(msg)}
+      />
       <HandwritingPanel
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
+        open={openTool === 'image'}
+        onClose={() => setOpenTool(null)}
         onAskInText={(msg) => submit(msg)}
       />
     </section>
+  );
+}
+
+/** A pill in the composer's tool row. */
+function ToolChip({
+  icon,
+  label,
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-alt px-2.5 py-1.5',
+        'text-2xs font-medium text-ink-soft transition-all duration-200 ease-smooth',
+        'hover:border-accent/40 hover:bg-accent-soft hover:text-accent',
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 
