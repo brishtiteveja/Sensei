@@ -6,6 +6,7 @@ import {
   ChevronsRight,
   LayoutDashboard,
   Moon,
+  NotebookPen,
   Settings as SettingsIcon,
   ShieldCheck,
   Sun,
@@ -30,6 +31,7 @@ function navItems() {
     { to: '/', label: t.nav.dashboard, icon: LayoutDashboard, end: true, group: 'learn' },
     { to: '/courses', label: t.nav.catalog, icon: BookOpen, group: 'learn' },
     { to: '/practice', label: t.nav.practice, icon: Target, group: 'learn' },
+    { to: '/notebook', label: t.nav.notebook, icon: NotebookPen, group: 'learn' },
     // The owl stands in for the tutor everywhere it speaks -- nav, chat avatar,
     // empty state -- so "Ask Sensei" reads as asking a character, not a feature.
     { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn' },

@@ -8,6 +8,7 @@ import { CatalogPage } from '@/pages/Catalog';
 import { CourseDetailPage } from '@/pages/CourseDetail';
 import { LessonPage } from '@/pages/Lesson';
 import { PracticePage } from '@/pages/Practice';
+import { NotebookPage } from '@/pages/Notebook';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { SettingsPage } from '@/pages/Settings';
 import { TutorPage } from '@/pages/Tutor';
@@ -52,6 +53,7 @@ function LocalisedTree() {
           <Route path="courses/:subjectId" element={<CourseDetailPage />} />
           <Route path="courses/:subjectId/lessons/:lessonId" element={<LessonPage />} />
           <Route path="practice" element={<PracticePage />} />
+          <Route path="notebook" element={<NotebookPage />} />
           <Route path="tutor" element={<TutorPage />} />
           <Route path="progress" element={<ProgressPage />} />
           <Route path="settings" element={<SettingsPage />} />

@@ -4,8 +4,10 @@ import {
   Circle as CircleIcon,
   Download,
   Eraser,
+  Maximize2,
   Minus,
   Pencil,
+  Plus,
   Square as SquareIcon,
   Triangle as TriangleIcon,
   Undo2,
@@ -135,20 +137,30 @@ function drawShape(ctx: CanvasRenderingContext2D, s: Shape) {
   }
 }
 
+const ZOOMS = [1, 1.5, 2, 3];
+
 export function ScratchpadPanel({
   open,
   onClose,
   onAsk,
+  onInsert,
+  title,
 }: {
   open: boolean;
   onClose: () => void;
-  onAsk: (message: string) => void;
+  /** Tutor mode: send a described prompt (server has no vision route). */
+  onAsk?: (message: string) => void;
+  /** Notebook mode: hand back the drawing as a PNG data URI. */
+  onInsert?: (pngDataUri: string) => void;
+  title?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [tool, setTool] = useState<Tool>('pen');
   const [color, setColor] = useState(COLORS[0]);
   const [width, setWidth] = useState(WIDTHS[1]);
+  const [zoom, setZoom] = useState(1);
 
   // Refs so the pointer handlers never read stale tool/colour/width.
   const draftRef = useRef<Shape | null>(null);
@@ -175,9 +187,13 @@ export function ScratchpadPanel({
     if (open) return;
     // Reset when closed so the next open is a fresh page.
     setShapes([]);
+    setZoom(1);
     draftRef.current = null;
   }, [open]);
 
+  // getBoundingClientRect reflects the zoomed on-screen size, so mapping a
+  // pointer through the rect's ratio lands on the right canvas pixel at any
+  // zoom — the scroll position is baked into rect.left/top for free.
   const toCanvas = (e: React.PointerEvent): Pt => {
     const cv = canvasRef.current!;
     const r = cv.getBoundingClientRect();
@@ -233,7 +249,14 @@ export function ScratchpadPanel({
   const ask = () => {
     if (!shapes.length) return;
     download(); // keep a copy in front of the student
-    onAsk(t.scratch.sendNote);
+    onAsk?.(t.scratch.sendNote);
+    onClose();
+  };
+
+  const insert = () => {
+    const cv = canvasRef.current;
+    if (!cv || !shapes.length) return;
+    onInsert?.(cv.toDataURL('image/png'));
     onClose();
   };
 
@@ -241,7 +264,7 @@ export function ScratchpadPanel({
     <Modal
       open={open}
       onClose={onClose}
-      title={t.scratch.title}
+      title={title ?? t.scratch.title}
       description={t.scratch.subtitle}
       width="max-w-3xl"
       footer={
@@ -253,9 +276,15 @@ export function ScratchpadPanel({
             <Download size={15} />
             {t.scratch.download}
           </Button>
-          <Button onClick={ask} disabled={!shapes.length}>
-            {t.scratch.send}
-          </Button>
+          {onInsert ? (
+            <Button onClick={insert} disabled={!shapes.length}>
+              {t.scratch.insert}
+            </Button>
+          ) : (
+            <Button onClick={ask} disabled={!shapes.length}>
+              {t.scratch.send}
+            </Button>
+          )}
         </>
       }
     >
@@ -316,7 +345,33 @@ export function ScratchpadPanel({
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-1">
+          {/* zoom */}
+          <div className="flex items-center gap-1 rounded-lg border border-line bg-surface-alt p-0.5">
+            <IconButton
+              label={t.scratch.zoomOut}
+              onClick={() => setZoom((z) => Math.max(ZOOMS[0], z - 0.5))}
+              disabled={zoom <= ZOOMS[0]}
+            >
+              <Minus size={15} />
+            </IconButton>
+            <button
+              type="button"
+              onClick={() => setZoom(1)}
+              className="w-11 text-center text-2xs font-semibold tabular-nums text-ink-soft hover:text-ink"
+              title={t.scratch.zoomFit}
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <IconButton
+              label={t.scratch.zoomIn}
+              onClick={() => setZoom((z) => Math.min(ZOOMS[ZOOMS.length - 1], z + 0.5))}
+              disabled={zoom >= ZOOMS[ZOOMS.length - 1]}
+            >
+              <Plus size={15} />
+            </IconButton>
+          </div>
+
+          <div className="flex items-center gap-1">
             <IconButton label={t.scratch.undo} onClick={undo} disabled={!shapes.length}>
               <Undo2 size={16} />
             </IconButton>
@@ -326,8 +381,11 @@ export function ScratchpadPanel({
           </div>
         </div>
 
-        {/* canvas */}
-        <div className="overflow-hidden rounded-xl border border-line bg-white shadow-inner">
+        {/* canvas — scrolls within a fixed viewport once zoomed past 100% */}
+        <div
+          ref={scrollRef}
+          className="s-scroll max-h-[58vh] overflow-auto rounded-xl border border-line bg-white shadow-inner"
+        >
           <canvas
             ref={canvasRef}
             width={W}
@@ -336,12 +394,26 @@ export function ScratchpadPanel({
             onPointerMove={onMove}
             onPointerUp={onUp}
             onPointerLeave={onUp}
-            className="block aspect-[900/560] w-full touch-none"
-            style={{ cursor: 'crosshair' }}
+            className="block aspect-[900/560] touch-none"
+            style={{ width: `${zoom * 100}%`, cursor: 'crosshair' }}
           />
         </div>
 
-        <p className="text-2xs leading-relaxed text-ink-faint">{t.scratch.notWired}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-2xs leading-relaxed text-ink-faint">
+            {onInsert ? t.scratch.notWiredNotebook : t.scratch.notWired}
+          </p>
+          {zoom > 1 ? (
+            <button
+              type="button"
+              onClick={() => setZoom(1)}
+              className="inline-flex shrink-0 items-center gap-1 text-2xs font-medium text-ink-faint hover:text-ink"
+            >
+              <Maximize2 size={11} />
+              {t.scratch.zoomFit}
+            </button>
+          ) : null}
+        </div>
       </div>
     </Modal>
   );
