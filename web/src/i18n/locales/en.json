@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "The published class label for this page. Compare it with what Sensei read.",
   "teach.benchFailed": "Could not read that page. Try another.",
   "teach.benchMissing": "Benchmark not downloaded",
-  "teach.benchMissingBody": "The NoTeS-Bank subset is not in this build. Fetch it, then rebuild:"
+  "teach.benchMissingBody": "The NoTeS-Bank subset is not in this build. Fetch it, then rebuild:",
+  "subjects.physics": "Physics",
+  "subjects.chemistry": "Chemistry",
+  "subjects.math": "Mathematics",
+  "subjects.biology": "Biology",
+  "practice.problemCount.one": "1 problem",
+  "practice.problemCount.other": "{n} problems"
 }

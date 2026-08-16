@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "এই পৃষ্ঠার জন্য প্রকাশিত ক্লাস লেবেল। Sensei যা পড়েছে তার সাথে এটি মিলিয়ে দেখুন।",
   "teach.benchFailed": "পৃষ্ঠাটি পড়া যায়নি। অন্য একটি চেষ্টা করুন।",
   "teach.benchMissing": "বেঞ্চমার্ক ডাউনলোড করা হয়নি",
-  "teach.benchMissingBody": "NoTeS-Bank সাবসেটটি এই বিল্ডে নেই। এটি নিয়ে আসুন, তারপর আবার বিল্ড করুন:"
+  "teach.benchMissingBody": "NoTeS-Bank সাবসেটটি এই বিল্ডে নেই। এটি নিয়ে আসুন, তারপর আবার বিল্ড করুন:",
+  "subjects.physics": "পদার্থবিজ্ঞান",
+  "subjects.chemistry": "রসায়ন",
+  "subjects.math": "গণিত",
+  "subjects.biology": "জীববিজ্ঞান",
+  "practice.problemCount.one": "১টি সমস্যা",
+  "practice.problemCount.other": "{n}টি সমস্যা"
 }

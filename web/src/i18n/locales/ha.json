@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "Alamar rukunin da aka wallafa don wannan shafin. Kwatanta shi da abin da Sensei ya karanta.",
   "teach.benchFailed": "An kasa karanta wannan shafin. Gwada wani daban.",
   "teach.benchMissing": "Ba a sauke ma'aunin gwaji ba",
-  "teach.benchMissingBody": "Babu rukunin NoTeS-Bank a cikin wannan rukunin ginin. Nemo shi, sannan ka sake ginawa:"
+  "teach.benchMissingBody": "Babu rukunin NoTeS-Bank a cikin wannan rukunin ginin. Nemo shi, sannan ka sake ginawa:",
+  "subjects.physics": "Fiziks",
+  "subjects.chemistry": "Kemistri",
+  "subjects.math": "Lissafi",
+  "subjects.biology": "Biyoloji",
+  "practice.problemCount.one": "Tambaya 1",
+  "practice.problemCount.other": "Tambayoyi {n}"
 }

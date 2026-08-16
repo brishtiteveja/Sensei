@@ -8,7 +8,8 @@ import { RichText } from '@/components/ui/RichText';
 import { ErrorState, Skeleton } from '@/components/ui/States';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
-import { loadSamples, sampleUrl, type SampleProblem } from '@/lib/samples';
+import { SubjectArt } from '@/components/art/SubjectArt';
+import { loadSamples, SAMPLE_SUBJECTS, sampleUrl, type SampleProblem } from '@/lib/samples';
 import { t } from '@/i18n/strings';
 import { difficultyTone } from '@/lib/utils';
 
@@ -19,6 +20,14 @@ function toSampleSubject(subjectId: string | undefined): string | null {
   if (s.includes('chem')) return 'chemistry';
   if (s.includes('math')) return 'math';
   return null;
+}
+
+/** Localised heading for a sample-kit subject. */
+function subjectLabel(subject: string): string {
+  if (subject === 'physics') return t.subjects.physics;
+  if (subject === 'chemistry') return t.subjects.chemistry;
+  if (subject === 'math') return t.subjects.math;
+  return subject;
 }
 
 /**
@@ -50,9 +59,21 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
   }, []);
 
   const wanted = toSampleSubject(subjectId);
-  const shown = useMemo(() => {
+
+  /**
+   * Grouped by subject, in a fixed order rather than alphabetically: a student
+   * scanning for their subject should find it in the same place every time, and
+   * within a subject the basics come before the advanced topics.
+   */
+  const groups = useMemo(() => {
     if (state.status !== 'ready') return [];
-    return wanted ? state.problems.filter((p) => p.subject === wanted) : state.problems;
+    const shown = wanted ? state.problems.filter((p) => p.subject === wanted) : state.problems;
+    return SAMPLE_SUBJECTS.map((subject) => ({
+      subject,
+      problems: shown
+        .filter((p) => p.subject === subject)
+        .sort((a, b) => (a.band === b.band ? 0 : a.band === 'basic' ? -1 : 1)),
+    })).filter((g) => g.problems.length);
   }, [state, wanted]);
 
   if (state.status === 'loading') {
@@ -76,10 +97,40 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
 
   return (
     <div className="mx-auto max-w-5xl">
-      <p className="mb-5 text-[13.5px] text-ink-muted">{t.practice.specialIntro}</p>
-      <div className="grid gap-5 md:grid-cols-2">
-        {shown.map((p) => (
-          <ProblemCard key={p.id} problem={p} onSolve={() => setNotebookFor(p)} onAsk={() => setAskFor(p)} />
+      <p className="mb-6 text-[13.5px] text-ink-muted">{t.practice.specialIntro}</p>
+      <div className="space-y-9">
+        {groups.map(({ subject, problems }) => (
+          <section key={subject} aria-label={subjectLabel(subject)}>
+            <div className="mb-3.5 flex items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                <SubjectArt subject={subject} className="h-full w-full" wash={false} animate={false} />
+              </span>
+              <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
+                {subjectLabel(subject)}
+              </h2>
+              <span className="text-2xs tabular-nums text-ink-faint">
+                {t.practice.problemCount(problems.length)}
+              </span>
+              <span
+                aria-hidden="true"
+                className="h-px flex-1"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(90deg, rgb(var(--s-line-strong)), transparent)',
+                }}
+              />
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              {problems.map((p) => (
+                <ProblemCard
+                  key={p.id}
+                  problem={p}
+                  onSolve={() => setNotebookFor(p)}
+                  onAsk={() => setAskFor(p)}
+                />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
 

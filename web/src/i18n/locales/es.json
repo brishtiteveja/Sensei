@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "La etiqueta de clase publicada para esta página. Compárala con lo que leyó Sensei.",
   "teach.benchFailed": "No se pudo leer esa página. Intenta con otra.",
   "teach.benchMissing": "Benchmark no descargado",
-  "teach.benchMissingBody": "El subconjunto NoTeS-Bank no está en esta compilación. Descárgalo y luego vuelve a compilar:"
+  "teach.benchMissingBody": "El subconjunto NoTeS-Bank no está en esta compilación. Descárgalo y luego vuelve a compilar:",
+  "subjects.physics": "Física",
+  "subjects.chemistry": "Química",
+  "subjects.math": "Matemáticas",
+  "subjects.biology": "Biología",
+  "practice.problemCount.one": "1 problema",
+  "practice.problemCount.other": "{n} problemas"
 }

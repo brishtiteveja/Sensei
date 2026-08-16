@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "इस पृष्ठ के लिए प्रकाशित क्लास लेबल। इसकी तुलना Sensei द्वारा पढ़े गए डेटा से करें।",
   "teach.benchFailed": "उस पृष्ठ को पढ़ा नहीं जा सका। कोई दूसरा प्रयास करें।",
   "teach.benchMissing": "बेंचमार्क डाउनलोड नहीं हुआ",
-  "teach.benchMissingBody": "NoTeS-Bank सबसेट इस बिल्ड में नहीं है। इसे प्राप्त करें, फिर रीबिल्ड करें:"
+  "teach.benchMissingBody": "NoTeS-Bank सबसेट इस बिल्ड में नहीं है। इसे प्राप्त करें, फिर रीबिल्ड करें:",
+  "subjects.physics": "भौतिक विज्ञान",
+  "subjects.chemistry": "रसायन विज्ञान",
+  "subjects.math": "गणित",
+  "subjects.biology": "जीव विज्ञान",
+  "practice.problemCount.one": "1 प्रश्न",
+  "practice.problemCount.other": "{n} प्रश्न"
 }

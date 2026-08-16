@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "Label kelas yang dipublikasikan untuk halaman ini. Bandingkan dengan apa yang dibaca oleh Sensei.",
   "teach.benchFailed": "Tidak dapat membaca halaman tersebut. Coba yang lain.",
   "teach.benchMissing": "Tolok ukur tidak diunduh",
-  "teach.benchMissingBody": "Subset NoTeS-Bank tidak ada dalam build ini. Ambil subset tersebut, lalu build ulang:"
+  "teach.benchMissingBody": "Subset NoTeS-Bank tidak ada dalam build ini. Ambil subset tersebut, lalu build ulang:",
+  "subjects.physics": "Fisika",
+  "subjects.chemistry": "Kimia",
+  "subjects.math": "Matematika",
+  "subjects.biology": "Biologi",
+  "practice.problemCount.one": "1 soal",
+  "practice.problemCount.other": "{n} soal"
 }

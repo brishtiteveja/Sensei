@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "Label kelas yang diterbitkan untuk halaman ini. Bandingkannya dengan apa yang dibaca oleh Sensei.",
   "teach.benchFailed": "Tidak dapat membaca halaman tersebut. Cuba yang lain.",
   "teach.benchMissing": "Penanda aras tidak dimuat turun",
-  "teach.benchMissingBody": "Subset NoTeS-Bank tiada dalam binaan ini. Dapatkan subset tersebut, kemudian bina semula:"
+  "teach.benchMissingBody": "Subset NoTeS-Bank tiada dalam binaan ini. Dapatkan subset tersebut, kemudian bina semula:",
+  "subjects.physics": "Fizik",
+  "subjects.chemistry": "Kimia",
+  "subjects.math": "Matematik",
+  "subjects.biology": "Biologi",
+  "practice.problemCount.one": "1 soalan",
+  "practice.problemCount.other": "{n} soalan"
 }

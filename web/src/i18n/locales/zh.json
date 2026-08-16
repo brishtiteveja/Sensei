@@ -364,5 +364,11 @@
   "teach.groundTruthBody": "该页面的公开班级标签。将其与 Sensei 读取的内容进行对比。",
   "teach.benchFailed": "无法读取该页面。请尝试其他页面。",
   "teach.benchMissing": "基准测试未下载",
-  "teach.benchMissingBody": "此构建版本中不包含 NoTeS-Bank 子集。请获取该子集，然后重新构建："
+  "teach.benchMissingBody": "此构建版本中不包含 NoTeS-Bank 子集。请获取该子集，然后重新构建：",
+  "subjects.physics": "物理",
+  "subjects.chemistry": "化学",
+  "subjects.math": "数学",
+  "subjects.biology": "生物",
+  "practice.problemCount.one": "1 道题",
+  "practice.problemCount.other": "{n} 道题"
 }

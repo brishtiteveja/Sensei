@@ -305,6 +305,13 @@ function build(dict: Dict) {
       zoomFit: s('scratch.zoomFit'),
     },
 
+    subjects: {
+      physics: s('subjects.physics'),
+      chemistry: s('subjects.chemistry'),
+      math: s('subjects.math'),
+      biology: s('subjects.biology'),
+    },
+
     teach: {
       title: s('teach.title'),
       subtitle: s('teach.subtitle'),
@@ -419,6 +426,7 @@ function build(dict: Dict) {
       advanced: s('practice.advanced'),
       solveStepByStep: s('practice.solveStepByStep'),
       spotMistake: s('practice.spotMistake'),
+      problemCount: (n: number) => plural('practice.problemCount', n),
     },
 
     progress: {
