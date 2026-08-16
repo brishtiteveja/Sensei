@@ -85,34 +85,102 @@ curl -s https://spark-e257.tail803c7f.ts.net:8443/health   # {"loaded":["..."]}
 **`--resume` does not help a preflight failure.** No session exists until
 preflight passes, so a port clash means re-running fresh, not resuming.
 
+**`NEMOCLAW_GATEWAY_PORT` must be set on *every* invocation, not just onboard.**
+Otherwise follow-up commands look for a gateway on 8080, find nginx, and report
+`Sandbox 'sensei' does not exist` — which is alarming and untrue. Export it:
+
+```bash
+export NEMOCLAW_GATEWAY_PORT=8181
+```
+
 ---
 
 ## 4. Hardening the egress policy
 
-The baseline policy ships with real egress allowances. Strip the ones we do not
-need so the sandbox can reach inference and little else:
+Non-interactive onboarding silently applies the **balanced** tier, which is far
+more open than we want: presets `npm`, `pypi`, `huggingface`, `brew`, and
+`openclaw-pricing`. `brew` alone opens `github.com`, `ghcr.io`, and
+`raw.githubusercontent.com`. Strip all five, then strip the baseline entries
+underneath them:
 
 ```bash
-nemoclaw sensei policy exclude nvidia clawhub openclaw_api openclaw_docs npm_registry --force
+export NEMOCLAW_GATEWAY_PORT=8181
+for p in npm pypi huggingface brew openclaw-pricing; do
+  nemoclaw sensei policy remove "$p" -y
+done
+for k in clawhub npm_registry nvidia openclaw_api openclaw_docs; do
+  nemoclaw sensei policy exclude "$k" --force -y
+done
 ```
 
-`managed_inference` cannot be excluded. Telemetry is on by default — turn it off
-with `OPENSHELL_TELEMETRY_ENABLED=false`.
+Use `--dry-run` first; it prints exactly which endpoints a removal closes.
+
+That leaves precisely two baseline policies:
+
+| policy | why it stays |
+|---|---|
+| `managed_inference` | the `inference.local` route — cannot be excluded anyway |
+| `openclaw_gateway_dialback` | the gateway needs it to talk to the sandbox |
+
+Telemetry is on by default — `OPENSHELL_TELEMETRY_ENABLED=false`.
 
 Loopback (`127.0.0.0/8`) is *always* blocked from inside the sandbox and cannot
 be allowed. Anything the sandbox must reach has to bind `0.0.0.0`.
 
 ---
 
-## 5. What this does and does not claim
+## 5. Verified, 16 Aug 2026
 
-Proven: NemoClaw stands up an OpenShell-sandboxed agent whose only inference
-path is our local Spark, validated end to end.
+Run from inside the sandbox with `nemoclaw sensei exec`:
 
-**Not** claimed: that SenseiClaw itself runs under NemoClaw. It does not, and it
-cannot — see §1. SenseiClaw stays on pm2 (`senseiclaw`, port 4050). Anyone
-demoing this should say so plainly rather than imply the whole backend is
-sandboxed.
+```
+https://inference.local/v1/models     HTTP 200
+https://github.com                    exit 56  (connection reset)
+https://registry.npmjs.org            exit 56
+https://pypi.org                      exit 56
+https://huggingface.co                exit 56
+https://clawhub.ai                    exit 56
+https://raw.githubusercontent.com     exit 56
+```
+
+And the 200 is genuinely our box, not a stub — the catalog comes back
+`"owned_by":"dgx-spark"` listing the real Spark models.
+
+**This is the demo.** One command shows a sandboxed agent that can reach the
+local tutor model and, provably, nothing else on the internet.
+
+---
+
+## 6. Can we move SenseiClaw off pm2 and onto NemoClaw?
+
+**No.** Tested on 16 Aug, and worth writing down so it is not re-litigated.
+
+Two independent blockers:
+
+1. **NemoClaw runs three agent runtimes** — `openclaw`, `hermes`,
+   `langchain-deepagents-code`. SenseiClaw is a FastAPI HTTP service. It is not
+   an agent runtime, so there is no `nemoclaw` command that runs it. This is not
+   a configuration gap; it is a category difference.
+
+2. **The route is not reachable from the host.** The obvious fallback — leave
+   SenseiClaw on pm2 but send its inference through the policy proxy — does not
+   work either. The gateway on `:8181` is OpenShell's *control* plane;
+   `http://127.0.0.1:8181/v1/models` returns **404**. `inference.local` is a
+   sandbox-internal name resolved inside the container's network namespace, and
+   there is no host-side OpenAI-compatible listener to point `SENSEI_BASE_URL` at.
+
+So SenseiClaw stays on pm2 (`senseiclaw`, port 4050), and NemoClaw owns a
+separate, genuinely sandboxed agent. Both are true statements and they do not
+overlap.
+
+**Say it accurately when demoing.** The honest claim is *"here is a sandboxed
+agent that can reach our local model and nothing else"* — which we can prove
+live in one command. The dishonest version is *"our backend runs sandboxed under
+NemoClaw"*, which is false and which a judge who knows the tool will catch.
+
+To actually get SenseiClaw inside the sandbox you would have to reimplement the
+tutor as an OpenClaw agent rather than a FastAPI service. That is a rewrite, not
+a migration, and it is not a hackathon-weekend job.
 
 ---
 

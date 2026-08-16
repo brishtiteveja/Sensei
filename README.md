@@ -105,6 +105,25 @@ curl -s https://spark-e257.tail803c7f.ts.net:8443/health   # which model is hot
 curl -s http://127.0.0.1:4050/tutor/health                 # harness up
 ```
 
+### Sandboxed inference (NemoClaw + OpenShell)
+
+A NemoClaw sandbox named `sensei` runs an OpenShell-confined agent whose only
+network egress is our Spark. Verified live — `inference.local` returns the real
+`owned_by: "dgx-spark"` catalog, while `github.com`, `pypi.org`,
+`registry.npmjs.org`, `huggingface.co`, and `raw.githubusercontent.com` all fail
+closed:
+
+```bash
+export NEMOCLAW_GATEWAY_PORT=8181          # 8080 is nginx on this box
+nemoclaw sensei exec -- curl -s https://inference.local/v1/models   # 200
+nemoclaw sensei exec -- curl -s https://github.com                  # exit 56
+```
+
+SenseiClaw itself does **not** run under NemoClaw and cannot — see
+[NEMOCLAW.md §6](others/hackathon/sensei/NEMOCLAW.md). It stays on pm2. NemoClaw
+owns a separate sandboxed agent, and that distinction should be stated plainly
+rather than blurred.
+
 ### Gotchas
 
 - `web/src/i18n/strings.ts` is a **module singleton**. Never hoist `t.*` into a
