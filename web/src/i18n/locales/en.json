@@ -434,5 +434,6 @@
   "coach.threadEmpty": "Ask me anything, or let me look at what you have so far.",
   "coach.dragHint": "Drag me anywhere · tap to talk",
   "replay.insert": "Send to Sensei",
-  "replay.insertedWork": "Here is my whole working session — what do you make of it?"
+  "replay.insertedWork": "Here is my whole working session — what do you make of it?",
+  "coach.readingLabel": "what is on my page"
 }

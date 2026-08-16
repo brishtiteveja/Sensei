@@ -4,10 +4,10 @@ import { SenseiOwl } from '@/components/art/SenseiOwl';
 import { RichText } from '@/components/ui/RichText';
 import { Button, IconButton } from '@/components/ui/Button';
 import { coachWork, seeWork } from '@/lib/api';
-import { streamTutor } from '@/lib/sse';
+import { useTutorChat } from '@/hooks/useTutorChat';
 import { digest, observe } from '@/lib/observe';
 import { activeSurface, onSurfaceChange, type Surface } from '@/lib/senseiSurface';
-import { readJSON, writeJSON, readRaw, writeRaw } from '@/lib/storage';
+import { readRaw, writeRaw } from '@/lib/storage';
 import { useSettings } from '@/state/settings';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
@@ -26,35 +26,14 @@ import { cn } from '@/lib/utils';
  * into this thread so the follow-up conversation already knows what is on the page.
  */
 
-interface Turn {
-  role: 'user' | 'sensei';
-  text: string;
-}
-
 const POS_KEY = 'owl.pos';
-const THREADS_KEY = 'owl.threads.v1';
-/** Threads are a convenience, not an archive. */
-const MAX_TURNS = 40;
-
-type Threads = Record<string, Turn[]>;
-
-function loadThread(key: string): Turn[] {
-  return readJSON<Threads>(THREADS_KEY, {})[key] ?? [];
-}
-
-function saveThread(key: string, turns: Turn[]): void {
-  const all = readJSON<Threads>(THREADS_KEY, {});
-  all[key] = turns.slice(-MAX_TURNS);
-  writeJSON(THREADS_KEY, all);
-}
 
 export function GlobalSensei() {
   const { language } = useSettings();
   const [surface, setSurface] = useState<Surface | null>(activeSurface);
   const [open, setOpen] = useState(false);
-  const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [looking, setLooking] = useState(false);
   const [nudge, setNudge] = useState(false);
 
   // Bottom-right by default; dragged position is remembered.
@@ -73,9 +52,17 @@ export function GlobalSensei() {
 
   useEffect(() => onSurfaceChange(setSurface), []);
 
-  /** One thread per problem; everything outside a problem shares a free thread. */
+  /**
+   * The same hook the Ask Sensei page uses, on the same thread key — so the owl
+   * and that page are one conversation, not two tutors talking past each other.
+   */
   const threadKey = surface?.contextKey ?? 'free';
-  useEffect(() => setTurns(loadThread(threadKey)), [threadKey]);
+  const chat = useTutorChat({
+    contextType: 'free_chat',
+    contextData: surface?.problem ? { problem: surface.problem } : {},
+    language,
+    threadKey,
+  });
 
   useEffect(() => {
     const bob = () => {
@@ -85,16 +72,6 @@ export function GlobalSensei() {
     window.addEventListener('sensei:activity', bob);
     return () => window.removeEventListener('sensei:activity', bob);
   }, []);
-
-  const push = useCallback(
-    (turn: Turn) =>
-      setTurns((prev) => {
-        const next = [...prev, turn].slice(-MAX_TURNS);
-        saveThread(threadKey, next);
-        return next;
-      }),
-    [threadKey],
-  );
 
   // ---- dragging -------------------------------------------------------------
   const onPointerDown = (e: React.PointerEvent) => {
@@ -122,77 +99,52 @@ export function GlobalSensei() {
   };
 
   // ---- actions --------------------------------------------------------------
+  const busy = looking || chat.phase !== 'idle';
+
+  /**
+   * Read the current work and bring it into the conversation. The reading goes
+   * in as the student's turn so the tutor answers it like any other message --
+   * which keeps one thread rather than a side-channel of coach bubbles.
+   */
   const lookAtWork = useCallback(async () => {
     const s = activeSurface();
     if (!s || busy) return;
     setOpen(true);
-    setBusy(true);
+    setLooking(true);
     observe('coach.ask', { problem: s.problem?.slice(0, 80) });
-    push({ role: 'user', text: t.coach.lookAtMyWork });
     try {
       const image = await s.getImage();
       if (!image) {
-        push({ role: 'sensei', text: t.coach.nothingToSee });
+        chat.send(t.coach.nothingToSee);
         return;
       }
       const r = await coachWork(image, s.problem, language);
       if (r.coach) {
         observe('coach.reply', { status: r.coach.status, hint: r.coach.hint });
-        const focus = r.coach.focus ? `\n\n_${t.coach.lookAt}: ${r.coach.focus}_` : '';
-        push({ role: 'sensei', text: `**${r.coach.hint}**${focus}\n\n${r.coach.question}` });
+        const focus = r.coach.focus ? ` Look at ${r.coach.focus}.` : '';
+        chat.send(
+          `${t.coach.lookAtMyWork}\n\n[${t.coach.readingLabel}: ${r.reading ?? ''}]${focus}`,
+          { seen_work: r.reading ?? undefined, observation: digest() ?? undefined },
+        );
       } else {
-        push({ role: 'sensei', text: r.reason ?? t.coach.failed });
+        chat.send(t.coach.lookAtMyWork, { observation: digest() ?? undefined });
       }
     } catch {
-      push({ role: 'sensei', text: t.coach.failed });
+      chat.send(t.coach.lookAtMyWork);
     } finally {
-      setBusy(false);
+      setLooking(false);
     }
-  }, [busy, language, push]);
+  }, [busy, language, chat]);
 
   const send = useCallback(
-    async (text: string) => {
+    (text: string) => {
       const value = text.trim();
       if (!value || busy) return;
       setInput('');
-      push({ role: 'user', text: value });
-      setBusy(true);
       observe('tutor.user', { text: value });
-
-      const s = activeSurface();
-      const history = turns
-        .slice(-6)
-        .map((x) => `${x.role === 'user' ? 'Student' : 'Sensei'}: ${x.text}`)
-        .join('\n');
-
-      let acc = '';
-      await new Promise<void>((resolve) => {
-        void streamTutor(
-          {
-            message: value,
-            context_type: 'free_chat',
-            context_data: {
-              language,
-              observation: digest() ?? undefined,
-              ...(s?.problem ? { problem: s.problem } : {}),
-              ...(history ? { thread: history } : {}),
-            },
-          },
-          {
-            onProgress: () => undefined,
-            onToken: (chunk: string) => {
-              acc += chunk;
-            },
-            onSuggestions: () => undefined,
-            onDone: () => resolve(),
-            onError: () => resolve(),
-          },
-        );
-      });
-      push({ role: 'sensei', text: acc.trim() || t.coach.failed });
-      setBusy(false);
+      chat.send(value, { observation: digest() ?? undefined });
     },
-    [busy, language, push, turns],
+    [busy, chat],
   );
 
   // Replay and other surfaces can drop material straight into this thread.
@@ -201,21 +153,23 @@ export function GlobalSensei() {
       const detail = (ev as CustomEvent<{ image?: string; text?: string; prompt?: string }>).detail;
       if (!detail) return;
       setOpen(true);
-      if (detail.text) push({ role: 'user', text: detail.text });
-      if (!detail.image) return;
-      setBusy(true);
+      if (!detail.image) {
+        if (detail.text) chat.send(detail.text);
+        return;
+      }
+      setLooking(true);
       try {
         const r = await seeWork(detail.image, detail.prompt, language);
-        push({ role: 'sensei', text: r.note ?? t.coach.failed });
+        chat.send(detail.text ?? t.replay.insertedWork, { seen_work: r.note ?? undefined });
       } catch {
-        push({ role: 'sensei', text: t.coach.failed });
+        chat.send(detail.text ?? t.replay.insertedWork);
       } finally {
-        setBusy(false);
+        setLooking(false);
       }
     };
     window.addEventListener('sensei:insert', onInsert as EventListener);
     return () => window.removeEventListener('sensei:insert', onInsert as EventListener);
-  }, [language, push]);
+  }, [language, chat]);
 
   const style: React.CSSProperties =
     pos.x < 0 ? { right: 20, bottom: 20 } : { left: pos.x, top: pos.y };
@@ -236,20 +190,20 @@ export function GlobalSensei() {
             </div>
 
             <div className="s-scroll min-h-0 flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
-              {!turns.length ? (
+              {!chat.messages.length ? (
                 <p className="py-6 text-center text-[13px] text-ink-muted">{t.coach.threadEmpty}</p>
               ) : (
-                turns.map((turn, i) => (
+                chat.messages.map((m) => (
                   <div
-                    key={i}
+                    key={m.id}
                     className={cn(
                       'max-w-[92%] rounded-xl px-3 py-2 text-[13px] leading-relaxed',
-                      turn.role === 'user'
+                      m.role === 'user'
                         ? 's-gradient-fill ml-auto text-white'
                         : 'bg-surface-alt text-ink-soft',
                     )}
                   >
-                    <RichText className="text-[13px]">{turn.text}</RichText>
+                    <RichText className="text-[13px]">{m.text || '…'}</RichText>
                   </div>
                 ))
               )}
@@ -274,7 +228,7 @@ export function GlobalSensei() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  void send(input);
+                  send(input);
                 }}
                 className="flex items-center gap-1.5"
               >

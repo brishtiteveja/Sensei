@@ -434,5 +434,6 @@
   "coach.threadEmpty": "Tambaye ni komai, ko kuma bari in duba abin da kake da shi zuwa yanzu.",
   "coach.dragHint": "Ja ni zuwa ko'ina · danna don yin magana",
   "replay.insert": "Aika wa Sensei",
-  "replay.insertedWork": "Ga duka aikin da na yi — me kake gani game da shi?"
+  "replay.insertedWork": "Ga duka aikin da na yi — me kake gani game da shi?",
+  "coach.readingLabel": "abin da ke kan shafina"
 }

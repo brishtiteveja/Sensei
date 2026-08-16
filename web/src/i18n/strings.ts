@@ -324,6 +324,7 @@ function build(dict: Dict) {
       nothingToSee: s('coach.nothingToSee'),
       threadEmpty: s('coach.threadEmpty'),
       dragHint: s('coach.dragHint'),
+      readingLabel: s('coach.readingLabel'),
     },
 
     replay: {

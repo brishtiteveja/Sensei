@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { streamTutor } from '@/lib/sse';
+import {
+  clearThread,
+  getThread,
+  setThread,
+  subscribeThread,
+  threadKeyFor,
+} from '@/lib/conversations';
+import type { ChatMessage } from '@/lib/conversations';
 import type { ContextType, TutorContextData } from '@/lib/types';
 import { uid } from '@/lib/utils';
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  text: string;
-  /** Set on an assistant turn that failed; the bubble renders as an error. */
-  error?: string;
-  streaming?: boolean;
-}
+export type { ChatMessage };
 
 export type TutorPhase = 'idle' | 'connecting' | 'streaming';
 
@@ -19,6 +20,8 @@ interface UseTutorChatOptions {
   /** Extra fields merged into `context_data` (lesson_id, subject, …). */
   contextData: Omit<TutorContextData, 'language'>;
   language: string;
+  /** Override the thread this chat belongs to; defaults to the context's. */
+  threadKey?: string;
 }
 
 export interface TutorChatApi {
@@ -40,13 +43,40 @@ export function useTutorChat({
   contextType,
   contextData,
   language,
+  threadKey,
 }: UseTutorChatOptions): TutorChatApi {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // The conversation lives in a shared store, not component state, so the
+  // floating owl and the tutor page are literally the same exchange.
+  const key = threadKey ?? threadKeyFor(contextData as Record<string, unknown>);
+  const [messages, setMessagesLocal] = useState<ChatMessage[]>(() => getThread(key).messages);
   const [phase, setPhase] = useState<TutorPhase>('idle');
   const [progressStep, setProgressStep] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [followUps, setFollowUps] = useState<string[]>([]);
+
+  const keyRef = useRef(key);
+  keyRef.current = key;
+
+  /** Write through to the shared store so every mounted view updates. */
+  const setMessages = useCallback(
+    (update: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      const k = keyRef.current;
+      const prev = getThread(k).messages;
+      const next = typeof update === 'function' ? update(prev) : update;
+      setThread(k, { messages: next, sessionId: sessionIdRef.current });
+    },
+    [],
+  );
+
+  // Re-read whenever this thread changes anywhere, including from the owl.
+  useEffect(() => {
+    const sync = () => setMessagesLocal(getThread(key).messages);
+    sync();
+    const stored = getThread(key).sessionId;
+    if (stored) sessionIdRef.current = stored;
+    return subscribeThread(key, sync);
+  }, [key]);
 
   const abortRef = useRef<AbortController | null>(null);
   const lastUserRef = useRef<string | null>(null);
@@ -148,6 +178,7 @@ export function useTutorChat({
   }, []);
 
   const reset = useCallback(() => {
+    clearThread(keyRef.current);
     abortRef.current?.abort();
     abortRef.current = null;
     sessionIdRef.current = null;

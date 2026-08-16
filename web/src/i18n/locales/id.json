@@ -434,5 +434,6 @@
   "coach.threadEmpty": "Tanyakan apa saja, atau biarkan saya melihat apa yang sudah kamu buat sejauh ini.",
   "coach.dragHint": "Seret saya ke mana saja · ketuk untuk berbicara",
   "replay.insert": "Kirim ke Sensei",
-  "replay.insertedWork": "Ini seluruh sesi pengerjaan saya — bagaimana menurutmu?"
+  "replay.insertedWork": "Ini seluruh sesi pengerjaan saya — bagaimana menurutmu?",
+  "coach.readingLabel": "apa yang ada di halaman saya"
 }

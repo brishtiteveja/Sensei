@@ -434,5 +434,6 @@
   "coach.threadEmpty": "问我任何问题，或者让我看看你目前的进展。",
   "coach.dragHint": "拖动我到任意位置 · 轻点开始对话",
   "replay.insert": "发送给 Sensei",
-  "replay.insertedWork": "这是我完整的解答过程 —— 你怎么看？"
+  "replay.insertedWork": "这是我完整的解答过程 —— 你怎么看？",
+  "coach.readingLabel": "我页面上的内容"
 }
