@@ -11,6 +11,7 @@ import {
   Send,
   Square,
   TriangleAlert,
+  X,
 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { RichText } from '@/components/ui/RichText';
@@ -21,12 +22,22 @@ import { CalculatorPanel } from './CalculatorPanel';
 import { ScratchpadPanel } from './ScratchpadPanel';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { FREE_DEFAULT, type NotebookContext } from '@/lib/notebook';
+import { seeWork } from '@/lib/api';
+import { digest, observe } from '@/lib/observe';
 import { useTutorChat } from '@/hooks/useTutorChat';
 import type { ChatMessage } from '@/hooks/useTutorChat';
 import { useSettings } from '@/state/settings';
 import type { ContextType, TutorContextData } from '@/lib/types';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
+
+/** A picture of the student's own work, inserted into the composer. */
+interface Attachment {
+  id: string;
+  kind: 'sketch' | 'image';
+  dataUri?: string;
+  name?: string;
+}
 
 export interface TutorChatProps {
   contextType: ContextType;
@@ -60,6 +71,9 @@ export function TutorChat({
   const [input, setInput] = useState('');
   const [openTool, setOpenTool] = useState<null | 'image' | 'calc' | 'scratch' | 'notebook'>(null);
   const [pinned, setPinned] = useState(true);
+  /** Work the student has inserted but not yet sent. */
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [reading, setReading] = useState(false);
 
   // Bind the tutor's notebook to whatever problem this chat is about, so the
   // notebook opened here is the same one used on the lesson or practice question.
@@ -104,12 +118,76 @@ export function TutorChat({
       const value = text.trim();
       if (!value || chat.phase !== 'idle') return;
       setPinned(true);
-      send(value);
+      observe('tutor.user', { text: value });
+      send(value, { observation: digest() ?? undefined });
       setInput('');
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
     },
     [chat.phase, send],
   );
+
+  /**
+   * Send with whatever the student has inserted.
+   *
+   * Images cannot ride a text turn, so each is read by the vision endpoint first
+   * and the resulting notes go into `seen_work` — the tutor then talks about the
+   * actual lines. If the server has no vision model the notes come back null and
+   * we send anyway rather than pretend the work was read.
+   */
+  const submitWithWork = useCallback(
+    async (text: string) => {
+      const value = text.trim();
+      if (chat.phase !== 'idle') return;
+      const pics = attachments.filter((a) => a.dataUri);
+      if (!value && !pics.length) return;
+
+      if (!pics.length) {
+        submit(value);
+        return;
+      }
+
+      setPinned(true);
+      setReading(true);
+      const problem =
+        typeof contextData.problem === 'string' ? (contextData.problem as string) : undefined;
+
+      const notes = await Promise.all(
+        pics.map(async (a) => {
+          try {
+            const r = await seeWork(a.dataUri!, problem, language);
+            return r.note ? `${a.kind === 'sketch' ? 'Their sketch' : 'Their photo'}: ${r.note}` : null;
+          } catch {
+            return null;
+          }
+        }),
+      );
+      setReading(false);
+
+      const seen = notes.filter(Boolean).join('\n\n');
+      const message =
+        value ||
+        (pics[0].kind === 'sketch'
+          ? 'I drew my working — can you check it?'
+          : 'Here is my working — can you check it?');
+
+      observe('tutor.user', { text: message, attachments: pics.length });
+      send(message, {
+        observation: digest() ?? undefined,
+        ...(seen ? { seen_work: seen } : {}),
+      });
+      setInput('');
+      setAttachments([]);
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    },
+    [attachments, chat.phase, contextData, language, send, submit],
+  );
+
+  /** Put a picture of the student's work into the composer. */
+  const attach = useCallback((a: Omit<Attachment, 'id'>) => {
+    setAttachments((prev) => [...prev, { ...a, id: `att_${Date.now()}_${prev.length}` }]);
+    observe(a.kind === 'sketch' ? 'sketch.insert' : 'image.insert', {});
+    setOpenTool(null);
+  }, []);
 
   // Drop a calculator result into the composer, appending after a space if the
   // student already typed something, and focus so they can keep going.
@@ -251,10 +329,34 @@ export function TutorChat({
             onClick={() => setOpenTool('notebook')}
           />
         </div>
+        {/* inserted work, waiting to be sent */}
+        {attachments.length ? (
+          <div className="mb-2.5 flex flex-wrap gap-2">
+            {attachments.map((a) => (
+              <div
+                key={a.id}
+                className="group relative h-16 w-20 overflow-hidden rounded-lg border border-line bg-white"
+              >
+                <img src={a.dataUri} alt={a.name ?? a.kind} className="h-full w-full object-contain" />
+                <button
+                  type="button"
+                  onClick={() => setAttachments((prev) => prev.filter((x) => x.id !== a.id))}
+                  aria-label={t.handwriting.remove}
+                  className="absolute right-0.5 top-0.5 rounded bg-black/60 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+            {reading ? (
+              <span className="self-center text-2xs text-ink-muted">{t.tutor.readingWork}</span>
+            ) : null}
+          </div>
+        ) : null}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            submit(input);
+            void submitWithWork(input);
           }}
           className="flex items-end gap-2"
         >
@@ -274,7 +376,7 @@ export function TutorChat({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  submit(input);
+                  void submitWithWork(input);
                 }
               }}
               className={cn(
@@ -290,7 +392,11 @@ export function TutorChat({
               <span className="sr-only">{t.tutor.stop}</span>
             </Button>
           ) : (
-            <Button type="submit" disabled={!input.trim()} className="h-10 w-10 px-0">
+            <Button
+              type="submit"
+              disabled={(!input.trim() && !attachments.length) || reading}
+              className="h-10 w-10 px-0"
+            >
               <Send size={16} />
               <span className="sr-only">{t.tutor.send}</span>
             </Button>
@@ -314,11 +420,15 @@ export function TutorChat({
       <ScratchpadPanel
         open={openTool === 'scratch'}
         onClose={() => setOpenTool(null)}
-        onAsk={(msg) => submit(msg)}
+        // Insert the drawing into the conversation rather than downloading it —
+        // the point is for Sensei to look at it, not for the student to file it.
+        onInsert={(dataUri) => attach({ kind: 'sketch', dataUri })}
+        insertLabel={t.scratch.insertChat}
       />
       <HandwritingPanel
         open={openTool === 'image'}
         onClose={() => setOpenTool(null)}
+        onInsert={(dataUri, name) => attach({ kind: 'image', dataUri, name })}
         onAskInText={(msg) => submit(msg)}
       />
       <NotebookSheet

@@ -180,3 +180,45 @@ export function setModel(mode: 'local' | 'cloud', model: string, signal?: AbortS
 export function getTutorHealth(signal?: AbortSignal) {
   return apiFetch<TutorHealth>('/tutor/health', { signal, timeoutMs: 12_000 });
 }
+
+/**
+ * Have the tutor look at a piece of the student's work (a scratchpad sketch or
+ * an uploaded photo) and return a note about it.
+ *
+ * The tutor turn itself is text, so this is what turns pixels into something it
+ * can teach against. It runs on the same pinned model, so it never causes a
+ * model swap. `note` is null when the server has no vision-capable model — the
+ * caller should then send the message without claiming the work was read.
+ */
+export function seeWork(
+  image: string,
+  problem: string | undefined,
+  language: string,
+  signal?: AbortSignal,
+) {
+  return apiFetch<{ note: string | null; reason?: string; model?: string }>('/tutor/see', {
+    method: 'POST',
+    body: { image, problem, language },
+    // A cold model swap is served on this same call.
+    timeoutMs: LONG_TIMEOUT_MS,
+    signal,
+  });
+}
+
+/** Fire-and-forget batch of workspace events. Never throws. */
+export function postObservations(
+  session: string,
+  events: unknown[],
+  learner?: string,
+): Promise<void> {
+  return fetch(`${API_BASE_URL}/observe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session, events, learner }),
+    // Survives the page being closed mid-flush.
+    keepalive: true,
+  }).then(
+    () => undefined,
+    () => undefined,
+  );
+}

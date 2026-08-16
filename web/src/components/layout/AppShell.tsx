@@ -18,6 +18,7 @@ import { Aurora } from '@/components/art/Aurora';
 import { HeaderArcs, HeaderSpark } from '@/components/art/Flourish';
 import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { useSettings } from '@/state/settings';
+import { observe } from '@/lib/observe';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -47,6 +48,7 @@ export function AppShell() {
   // Reset scroll between routes; the lesson view manages its own panes.
   useEffect(() => {
     document.getElementById('s-main')?.scrollTo({ top: 0 });
+    observe('route', { path: location.pathname });
   }, [location.pathname]);
 
   const nav = navItems();

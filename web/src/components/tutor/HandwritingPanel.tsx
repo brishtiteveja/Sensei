@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, ImageUp, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { fileToDownscaledDataUri } from '@/lib/image';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -21,10 +22,13 @@ export function HandwritingPanel({
   open,
   onClose,
   onAskInText,
+  onInsert,
 }: {
   open: boolean;
   onClose: () => void;
   onAskInText: (message: string) => void;
+  /** Hand the picture to the caller so the tutor can actually look at it. */
+  onInsert?: (dataUri: string, name?: string) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -75,6 +79,18 @@ export function HandwritingPanel({
     onClose();
   };
 
+  /** Downscale before handing over: a phone photo is several MB of data URI. */
+  const handleInsert = async () => {
+    if (!file || !onInsert) return;
+    try {
+      onInsert(await fileToDownscaledDataUri(file), file.name);
+    } catch {
+      setError(t.handwriting.wrongType);
+      return;
+    }
+    onClose();
+  };
+
   return (
     <Modal
       open={open}
@@ -87,7 +103,18 @@ export function HandwritingPanel({
           <Button variant="ghost" onClick={onClose}>
             {t.common.cancel}
           </Button>
-          <Button onClick={handleAsk}>{t.handwriting.sendAnyway}</Button>
+          {onInsert ? (
+            <>
+              <Button variant="secondary" onClick={handleAsk}>
+                {t.handwriting.sendAnyway}
+              </Button>
+              <Button onClick={() => void handleInsert()} disabled={!file}>
+                {t.handwriting.insert}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={handleAsk}>{t.handwriting.sendAnyway}</Button>
+          )}
         </>
       }
     >

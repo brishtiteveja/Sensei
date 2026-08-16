@@ -21,6 +21,7 @@ import { CorrectBurst, ScoreBurst } from '@/components/art/Burst';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { SpecialExamples } from '@/components/practice/SpecialExamples';
+import { observe } from '@/lib/observe';
 import { useAsync } from '@/hooks/useAsync';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { getPracticeQuestions } from '@/lib/api';
@@ -77,12 +78,25 @@ export function PracticePage() {
   const correctOption = question?.options.find((o) => o.isCorrect);
   const total = questions.length;
 
+  // Report which question the student is actually looking at, so the tutor's
+  // digest can name it rather than guess.
+  useEffect(() => {
+    if (!question) return;
+    observe('practice.question', {
+      qid: question.id,
+      index: index + 1,
+      subject: subject || 'all',
+      text: question.question,
+    });
+  }, [question, index, subject]);
+
   const { recordPractice } = progress;
   const check = () => {
     if (!question || !picked || revealed) return;
     const isCorrect = question.options.find((o) => o.id === picked)?.isCorrect ?? false;
     setRevealed(true);
     setAnswers((a) => ({ ...a, [question.id]: { picked, correct: isCorrect } }));
+    observe('practice.check', { qid: question.id, picked, correct: isCorrect });
     recordPractice({ questionId: question.id, subjectId: subject || 'all', correct: isCorrect });
   };
 
@@ -105,7 +119,10 @@ export function PracticePage() {
 
       if (/^[1-9]$/.test(e.key) && !revealed) {
         const opt = question.options[Number(e.key) - 1];
-        if (opt) setPicked(opt.id);
+        if (opt) {
+          setPicked(opt.id);
+          observe('practice.pick', { qid: question.id, option: opt.id });
+        }
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (revealed) advance();
@@ -146,7 +163,10 @@ export function PracticePage() {
             <input
               type="checkbox"
               checked={special}
-              onChange={(e) => setSpecial(e.target.checked)}
+              onChange={(e) => {
+                setSpecial(e.target.checked);
+                observe('practice.special', { on: e.target.checked });
+              }}
               className="h-4 w-4 accent-[rgb(var(--s-accent))]"
             />
             {t.practice.special}
@@ -292,7 +312,10 @@ export function PracticePage() {
                     <button
                       type="button"
                       disabled={revealed}
-                      onClick={() => setPicked(o.id)}
+                      onClick={() => {
+                        setPicked(o.id);
+                        observe('practice.pick', { qid: question.id, option: o.id });
+                      }}
                       aria-pressed={isPicked}
                       className={cn(
                         'relative flex w-full items-center gap-3.5 rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ease-smooth',

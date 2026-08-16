@@ -92,7 +92,10 @@ export function Modal({
         aria-label={typeof title === 'string' ? title : undefined}
         tabIndex={-1}
         className={cn(
-          's-gradient-ring s-gradient-ring-on relative w-full animate-fade-up overflow-hidden rounded-2xl border border-line bg-surface shadow-lift outline-none',
+          // A column with a bounded height so a growing body (a notebook filling
+          // up with blocks) scrolls inside the dialog instead of running off the
+          // screen -- the header and footer stay put.
+          's-gradient-ring s-gradient-ring-on relative flex max-h-[calc(100dvh-2rem)] w-full flex-col animate-fade-up overflow-hidden rounded-2xl border border-line bg-surface shadow-lift outline-none',
           width,
         )}
       >
@@ -105,7 +108,7 @@ export function Modal({
               'radial-gradient(70% 100% at 50% 0%, rgb(var(--s-grad-2) / 0.14), transparent 70%)',
           }}
         />
-        <div className="relative flex items-start justify-between gap-4 border-b border-line px-6 py-5">
+        <div className="relative flex shrink-0 items-start justify-between gap-4 border-b border-line px-6 py-5">
           <div className="min-w-0">
             <h2 className="text-base font-semibold tracking-[-0.01em] text-ink">{title}</h2>
             {description ? (
@@ -118,9 +121,11 @@ export function Modal({
             </IconButton>
           ) : null}
         </div>
-        {children ? <div className="relative px-6 py-5">{children}</div> : null}
+        {children ? (
+          <div className="s-scroll relative min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        ) : null}
         {footer ? (
-          <div className="relative flex justify-end gap-3 border-t border-line px-6 py-4">
+          <div className="relative flex shrink-0 justify-end gap-3 border-t border-line px-6 py-4">
             {footer}
           </div>
         ) : null}

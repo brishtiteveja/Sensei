@@ -4,7 +4,6 @@
   "app.offlineBadge": "Runs on-device",
   "app.offlineCaption": "No third-party requests",
   "app.offlineTooltip": "Sensei runs on local hardware. Nothing in this page is loaded from a third party.",
-
   "nav.dashboard": "Dashboard",
   "nav.catalog": "Courses",
   "nav.practice": "Practice",
@@ -16,7 +15,6 @@
   "nav.collapse": "Collapse sidebar",
   "nav.expand": "Expand sidebar",
   "nav.toggleTheme": "Toggle dark mode",
-
   "common.retry": "Try again",
   "common.cancel": "Cancel",
   "common.confirm": "Confirm",
@@ -44,7 +42,6 @@
   "common.optional": "Optional",
   "common.beta": "Beta",
   "common.comingSoon": "Not yet connected",
-
   "errors.title": "Something went wrong",
   "errors.generic": "We could not load this. The tutor server may be unreachable.",
   "errors.offline": "Cannot reach the Sensei server.",
@@ -53,7 +50,6 @@
   "errors.notFoundBody": "That route does not exist in Sensei.",
   "errors.subjectNotFound": "That subject is not in the curriculum.",
   "errors.lessonNotFound": "That lesson could not be found.",
-
   "empty.subjects": "No subjects yet",
   "empty.subjectsBody": "The curriculum on this box is empty. Load a syllabus to get started.",
   "empty.lessons": "No lessons in this unit yet",
@@ -63,7 +59,6 @@
   "empty.lessonContentBody": "The curriculum entry exists but the teaching content has not been generated. You can still ask Sensei about it.",
   "empty.progress": "Nothing tracked yet",
   "empty.progressBody": "Finish a lesson or a practice question and your mastery shows up here.",
-
   "dashboard.greetingMorning": "Good morning",
   "dashboard.greetingAfternoon": "Good afternoon",
   "dashboard.greetingEvening": "Good evening",
@@ -85,12 +80,10 @@
   "dashboard.quickPracticeBody": "Five past-exam questions, immediate feedback.",
   "dashboard.askAnything": "Ask anything",
   "dashboard.askAnythingBody": "Open a free-form Socratic session with Sensei.",
-
   "catalog.title": "Courses",
   "catalog.subtitle": "Curriculum loaded on this box. Every unit maps to a syllabus chapter.",
   "catalog.exams": "Targets",
   "catalog.open": "Open course",
-
   "course.unitsTitle": "Units",
   "course.overview": "Overview",
   "course.aboutThisCourse": "About this course",
@@ -104,7 +97,6 @@
   "course.searchPlaceholder": "Filter lessons…",
   "course.noMatches": "No lessons match that filter.",
   "course.clearFilter": "Clear filter",
-
   "lesson.objectives": "Learning objectives",
   "lesson.steps": "How Sensei will teach this",
   "lesson.keyFormulas": "Key formulas",
@@ -131,7 +123,6 @@
   "lesson.tutorPanelTitle": "Sensei",
   "lesson.tutorPanelSubtitle": "Grounded in this lesson",
   "lesson.resizeHandle": "Drag to resize the tutor panel",
-
   "tutor.title": "Ask Sensei",
   "tutor.subtitle": "Socratic tutoring. It will guide you, not answer for you.",
   "tutor.placeholder": "Ask about this lesson…",
@@ -154,13 +145,13 @@
   "tutor.stopped": "Stopped.",
   "tutor.attach": "Upload handwritten work",
   "tutor.scrollToLatest": "Jump to latest",
+  "tutor.readingWork": "Sensei is looking at your work…",
   "tutor.composerHint": "Enter to send · Shift+Enter for a new line",
   "tutor.prompt1": "I have an exam in three weeks — where should I start?",
   "tutor.prompt2": "Explain why dimensional analysis catches wrong equations.",
   "tutor.prompt3": "I keep getting sign errors in kinematics. Help me find the pattern.",
   "tutor.prompt4": "Give me one hard question and do not tell me the answer.",
   "tutor.promptHardest": "What is the hardest idea in {subject} and why?",
-
   "handwriting.title": "Show your work",
   "handwriting.subtitle": "Photograph or scan a page and Sensei finds the step where you slipped.",
   "handwriting.drop": "Drop an image here",
@@ -175,12 +166,11 @@
   "handwriting.notWiredShort": "Not sent — no image endpoint on this server yet",
   "handwriting.sendAnyway": "Ask about it in text",
   "handwriting.requiresVision": "Also needs a vision-capable model — see Settings.",
-
+  "handwriting.insert": "Insert into chat",
   "tools.label": "Tools",
   "tools.calculator": "Calculator",
   "tools.scratchpad": "Scratchpad",
   "tools.image": "Image",
-
   "calc.title": "Calculator",
   "calc.subtitle": "Work a number out, then drop it into your message.",
   "calc.basic": "Basic",
@@ -189,7 +179,6 @@
   "calc.insert": "Insert to chat",
   "calc.clearAll": "Clear",
   "calc.backspace": "Delete",
-
   "scratch.title": "Draw & explain",
   "scratch.subtitle": "Sketch a diagram or your working — pen, shapes, colours.",
   "scratch.pen": "Pen",
@@ -210,11 +199,11 @@
   "scratch.sendNote": "I've sketched a diagram of my working for this problem. Walk me through it step by step and ask me what each part represents so we can find where I went wrong.",
   "scratch.notWired": "The drawing is saved on your device. This server has no vision route yet, so Sensei reasons from your description — once vision is wired it will see the sketch itself.",
   "scratch.insert": "Add to notebook",
+  "scratch.insertChat": "Insert into chat",
   "scratch.notWiredNotebook": "The sketch is added to your notebook as an image.",
   "scratch.zoomIn": "Zoom in",
   "scratch.zoomOut": "Zoom out",
   "scratch.zoomFit": "Fit to width",
-
   "nav.notebook": "Notebook",
   "notebook.title": "Notebook",
   "notebook.subtitle": "Work a long problem out, step by step — notes, math and sketches.",
@@ -248,7 +237,6 @@
   "notebook.freePage": "Free page",
   "notebook.open": "Notebook",
   "notebook.openForProblem": "Notebook for this problem",
-
   "practice.title": "Practice",
   "practice.subtitle": "Real past-exam questions. One at a time, with immediate feedback.",
   "practice.subject": "Subject",
@@ -280,7 +268,6 @@
   "practice.advanced": "Advanced",
   "practice.solveStepByStep": "Solve step by step",
   "practice.spotMistake": "A student's attempt — spot the mistake",
-
   "progress.title": "Progress",
   "progress.subtitle": "What you have mastered, and what is still shaky.",
   "progress.overall": "Overall",
@@ -297,7 +284,6 @@
   "progress.resetConfirmTitle": "Reset progress?",
   "progress.resetConfirmBody": "This clears every completed lesson, streak and practice result stored in this browser. It cannot be undone.",
   "progress.localOnlyNote": "Progress is stored in this browser only — the Sensei API on this box has no learner endpoint yet.",
-
   "settings.title": "Settings",
   "settings.subtitle": "Language, model and appearance.",
   "settings.language": "Language",

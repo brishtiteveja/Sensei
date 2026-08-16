@@ -228,6 +228,7 @@ function build(dict: Dict) {
       stopped: s('tutor.stopped'),
       attach: s('tutor.attach'),
       scrollToLatest: s('tutor.scrollToLatest'),
+      readingWork: s('tutor.readingWork'),
       composerHint: s('tutor.composerHint'),
       /**
        * Openers the student sends, so they have to be in the student's
@@ -253,6 +254,7 @@ function build(dict: Dict) {
       notWiredShort: s('handwriting.notWiredShort'),
       sendAnyway: s('handwriting.sendAnyway'),
       requiresVision: s('handwriting.requiresVision'),
+      insert: s('handwriting.insert'),
     },
 
     tools: {
@@ -294,6 +296,7 @@ function build(dict: Dict) {
       sendNote: s('scratch.sendNote'),
       notWired: s('scratch.notWired'),
       insert: s('scratch.insert'),
+      insertChat: s('scratch.insertChat'),
       notWiredNotebook: s('scratch.notWiredNotebook'),
       zoomIn: s('scratch.zoomIn'),
       zoomOut: s('scratch.zoomOut'),

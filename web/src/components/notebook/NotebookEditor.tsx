@@ -15,6 +15,7 @@ import { RichText } from '@/components/ui/RichText';
 import { EmptyState } from '@/components/ui/States';
 import { ScratchpadPanel } from '@/components/tutor/ScratchpadPanel';
 import { fileToDownscaledDataUri } from '@/lib/image';
+import { observe } from '@/lib/observe';
 import {
   blockId,
   compileForTutor,
@@ -57,6 +58,7 @@ export function NotebookEditor({
   useEffect(() => {
     setNb(getNotebook(context));
     setEditingId(null);
+    observe('notebook.open', { key, label: context.label });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
@@ -79,14 +81,17 @@ export function NotebookEditor({
     const id = blockId();
     update((b) => [...b, { id, type: 'note', text: '' }]);
     setEditingId(id);
+    observe('notebook.block', { op: 'add', key, blockType: 'note' });
   };
 
   const setNoteText = (id: string, text: string) =>
     update((b) => b.map((x) => (x.id === id && x.type === 'note' ? { ...x, text } : x)));
 
   const remove = (id: string) => {
+    const gone = nb.blocks.find((x) => x.id === id);
     update((b) => b.filter((x) => x.id !== id));
     if (editingId === id) setEditingId(null);
+    observe('notebook.block', { op: 'remove', key, blockType: gone?.type });
   };
 
   const move = (id: string, dir: -1 | 1) =>
@@ -106,6 +111,7 @@ export function NotebookEditor({
       update((b) => [...b, { id: blockId(), type: 'sketch', image }]);
     }
     setSketchTarget(null);
+    observe('notebook.block', { op: 'add', key, blockType: 'sketch' });
   };
 
   const onUpload = async (file: File | undefined | null) => {
@@ -115,6 +121,7 @@ export function NotebookEditor({
     try {
       const image = await fileToDownscaledDataUri(file);
       update((b) => [...b, { id: blockId(), type: 'image', image, name: file.name }]);
+      observe('notebook.block', { op: 'add', key, blockType: 'image', name: file.name });
     } catch {
       setUploadError(t.notebook.uploadError);
     }
@@ -163,7 +170,13 @@ export function NotebookEditor({
               onEdit={() => block.type === 'note' && setEditingId(block.id)}
               onRedraw={() => setSketchTarget(block.id)}
               onChange={(text) => setNoteText(block.id, text)}
-              onDone={() => setEditingId(null)}
+              // Report the finished text, not every keystroke.
+              onDone={() => {
+                setEditingId(null);
+                if (block.type === 'note' && block.text.trim()) {
+                  observe('notebook.block', { op: 'edit', key, blockType: 'note', text: block.text });
+                }
+              }}
               onRemove={() => remove(block.id)}
               onMove={(d) => move(block.id, d)}
             />

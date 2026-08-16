@@ -29,7 +29,8 @@ export interface TutorChatApi {
   sessionId: string | null;
   model: string | null;
   followUps: string[];
-  send: (text: string) => void;
+  /** `extra` is merged into context_data for this turn only. */
+  send: (text: string, extra?: Record<string, unknown>) => void;
   stop: () => void;
   reset: () => void;
   retryLast: () => void;
@@ -58,7 +59,13 @@ export function useTutorChat({
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const run = useCallback((text: string) => {
+  /**
+   * `extra` carries per-turn context the caller computed just now — the
+   * workspace digest, and notes from any work the tutor was shown. It is merged
+   * into context_data rather than held in state so it is always fresh for the
+   * turn being sent.
+   */
+  const run = useCallback((text: string, extra?: Record<string, unknown>) => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
@@ -88,7 +95,7 @@ export function useTutorChat({
         message: trimmed,
         session_id: sessionIdRef.current,
         context_type: ct,
-        context_data: { ...cd, language: lang },
+        context_data: { ...cd, language: lang, ...(extra ?? {}) },
       },
       {
         onProgress: (p) => {

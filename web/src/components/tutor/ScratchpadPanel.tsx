@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
+import { observe } from '@/lib/observe';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -144,14 +145,17 @@ export function ScratchpadPanel({
   onClose,
   onAsk,
   onInsert,
+  insertLabel,
   title,
 }: {
   open: boolean;
   onClose: () => void;
   /** Tutor mode: send a described prompt (server has no vision route). */
   onAsk?: (message: string) => void;
-  /** Notebook mode: hand back the drawing as a PNG data URI. */
+  /** Notebook/chat mode: hand back the drawing as a PNG data URI. */
   onInsert?: (pngDataUri: string) => void;
+  /** Label for the insert action — where the drawing is going. */
+  insertLabel?: string;
   title?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -229,12 +233,19 @@ export function ScratchpadPanel({
       return;
     }
     setShapes((prev) => [...prev, d]);
+    // The tutor teaches against what was actually drawn, so each committed
+    // stroke is reported — not the intermediate drag.
+    observe('sketch.shape', { tool: d.tool, color: d.color, width: d.width, points: d.points.length });
   };
 
-  const undo = () => setShapes((s) => s.slice(0, -1));
+  const undo = () => {
+    setShapes((s) => s.slice(0, -1));
+    observe('sketch.undo');
+  };
   const clear = () => {
     if (shapes.length && !window.confirm(t.scratch.clearConfirm)) return;
     setShapes([]);
+    observe('sketch.clear');
   };
 
   const download = () => {
@@ -272,13 +283,14 @@ export function ScratchpadPanel({
           <Button variant="ghost" onClick={onClose}>
             {t.common.cancel}
           </Button>
-          <Button variant="secondary" onClick={download} disabled={!shapes.length}>
+          {/* Saving a PNG is the side errand, so it stays a quiet ghost button.
+              The primary action is putting the drawing where it gets used. */}
+          <Button variant="ghost" onClick={download} disabled={!shapes.length} title={t.scratch.download}>
             <Download size={15} />
-            {t.scratch.download}
           </Button>
           {onInsert ? (
             <Button onClick={insert} disabled={!shapes.length}>
-              {t.scratch.insert}
+              {insertLabel ?? t.scratch.insert}
             </Button>
           ) : (
             <Button onClick={ask} disabled={!shapes.length}>
