@@ -305,6 +305,58 @@ export function coachWork(
   });
 }
 
+export interface LearnerState {
+  profile: {
+    id: string;
+    name: string | null;
+    language: string;
+    exam: string | null;
+    exam_date: string | null;
+    strengths: string[];
+    weaknesses: string[];
+    recent_mistakes: string[];
+  };
+  mastery: Record<string, number>;
+  unlocked: string[];
+  next_concept: string | null;
+  next_label: string | null;
+}
+
+/** Create or update the student's profile on the server. */
+export function saveLearner(
+  id: string,
+  fields: { name?: string; language?: string; exam?: string; exam_date?: string },
+  signal?: AbortSignal,
+) {
+  return apiFetch<{ ok: boolean }>(`/learner/${encodeURIComponent(id)}`, {
+    method: 'POST',
+    body: fields,
+    signal,
+  });
+}
+
+/** What the tutor remembers about this student, plus where to go next. */
+export function getLearner(id: string, signal?: AbortSignal) {
+  return apiFetch<LearnerState>(`/learner/${encodeURIComponent(id)}`, { signal });
+}
+
+/**
+ * Record one graded moment. On a wrong answer the server consults the concept
+ * graph and may return the root cause — the upstream concept actually missing.
+ */
+export function recordObservation(
+  id: string,
+  body: { topic: string; correct: boolean; note?: string },
+  signal?: AbortSignal,
+) {
+  return apiFetch<{
+    ok: boolean;
+    mastery: number | null;
+    root_cause: string | null;
+    next_concept: string | null;
+  }>(`/learner/${encodeURIComponent(id)}/observation`, { method: 'POST', body, signal });
+}
+
 /** Fire-and-forget one-row account of an attempt. Never throws. */
 export function postAttemptSummary(
   session: string,

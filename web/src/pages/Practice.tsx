@@ -22,6 +22,8 @@ import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { SpecialExamples } from '@/components/practice/SpecialExamples';
 import { observe } from '@/lib/observe';
+import { learnerId } from '@/lib/learner';
+import { recordObservation } from '@/lib/api';
 import { useAsync } from '@/hooks/useAsync';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { getPracticeQuestions } from '@/lib/api';
@@ -99,6 +101,16 @@ export function PracticePage() {
     setAnswers((a) => ({ ...a, [question.id]: { picked, correct: isCorrect } }));
     observe('practice.check', { qid: question.id, picked, correct: isCorrect });
     recordPractice({ questionId: question.id, subjectId: subject || 'all', correct: isCorrect });
+
+    // Teach the server what just happened. Practice questions carry no concept
+    // tags, so the subject is the topic -- coarse, but it moves mastery and the
+    // note keeps the specific slip, which is the part the tutor actually uses.
+    const wrongText = question.options.find((o) => o.id === picked)?.text;
+    void recordObservation(learnerId(), {
+      topic: subject || 'general',
+      correct: isCorrect,
+      note: isCorrect ? undefined : `chose "${wrongText ?? picked}"`,
+    }).catch(() => undefined);
   };
 
   const advance = () => {

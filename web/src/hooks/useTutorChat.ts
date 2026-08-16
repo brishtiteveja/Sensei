@@ -10,6 +10,7 @@ import {
 import type { ChatMessage } from '@/lib/conversations';
 import type { ContextType, TutorContextData } from '@/lib/types';
 import { uid } from '@/lib/utils';
+import { learnerId } from '@/lib/learner';
 
 export type { ChatMessage };
 
@@ -125,7 +126,9 @@ export function useTutorChat({
         message: trimmed,
         session_id: sessionIdRef.current,
         context_type: ct,
-        context_data: { ...cd, language: lang, ...(extra ?? {}) },
+        // learner_id is what lets the server load this student's profile into
+        // the system prompt -- the difference between a tutor and a chatbot.
+        context_data: { ...cd, language: lang, learner_id: learnerId(), ...(extra ?? {}) },
       },
       {
         onProgress: (p) => {
