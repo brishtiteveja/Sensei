@@ -25,7 +25,7 @@ any language / any syllabus → stays on the box → pull the cable, keep teachi
 | Web app | `https://dev.perspectivity.co/sensei/` | Vite/React build, served by nginx from `web/dist` |
 | Landing page | `/sensei/welcome` | standalone, outside app shell |
 | Phone handoff | `/sensei/handoff?c=<code>&m=draw\|photo` | outside app shell |
-| API (SenseiClaw) | `127.0.0.1:4050`, proxied at `/sensei/api` | pm2 process `senseiclaw` |
+| API (SenseiClaw) | `127.0.0.1:4050`, proxied at `/sensei/api` | runs **inside the NemoClaw/OpenShell sandbox**, bridged out by a gRPC service forward |
 | DGX router | `https://spark-e257.tail803c7f.ts.net:8443/v1` | one model resident at a time |
 | Repos | `github.com/brishtiteveja/Sensei`, `github.com/BanglaLLM/SenseiClaw` | both pushed |
 
@@ -40,7 +40,9 @@ VITE_SENSEI_API_URL=/sensei/api npm run build     # prebuild stages samples + no
 raw `http://IP:4050` which HTTPS blocks as mixed content, and every page shows
 "Cannot reach the Sensei server". This has bitten twice.
 
-Backend changes: edit, then `pm2 restart senseiclaw`.
+Backend changes: edit, re-upload into the sandbox, then
+`scripts/sensei-sandbox-start.sh`. See
+[NEMOCLAW.md](NEMOCLAW.md).
 
 ---
 

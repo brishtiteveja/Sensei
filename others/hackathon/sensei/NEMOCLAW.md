@@ -7,18 +7,20 @@ actually proven. Written 16 Aug 2026.
 
 ## 1. Why bother
 
-The bounty asks for NemoClaw/OpenShell in a real role. NemoClaw is not a process
-supervisor — it runs exactly three agent runtimes (`openclaw`, `hermes`,
-`langchain-deepagents-code`) inside a Landlock + seccomp + netns sandbox with an
-OPA egress proxy. **SenseiClaw is a FastAPI service, so it is not a thing
-NemoClaw can run.** Swapping pm2 for NemoClaw is not a like-for-like move and
-was never the option.
+**SenseiClaw — the whole tutor backend — runs inside a NemoClaw / OpenShell
+sandbox, and that is what serves the live app.**
 
-What NemoClaw *can* do for us honestly: own the **inference route**. It puts a
-policy-enforced egress proxy in front of the Spark, so the sandboxed agent
-reaches exactly one endpoint (`inference.local`) and nothing else. That is a
-real security claim we can demo, and it is the claim that matches the product
-story — student work never leaves the box.
+NemoClaw natively supervises three *agent* runtimes (`openclaw`, `hermes`,
+`langchain-deepagents-code`), and a FastAPI service is not one of them. That is
+easy to mistake for "it cannot host our backend." It can: the sandbox is a
+Landlock + seccomp + netns jail you can run anything inside via `exec`, and
+OpenShell will bridge a service out of it — see §7.
+
+The result is the security claim the product actually needs. The tutor's only
+route to the network is `inference.local`, the policy-enforced path to the
+Spark. Package registries, GitHub, the open internet: all fail closed. A minor's
+handwriting and mistakes physically cannot leave the box — a claim we can prove
+live in one command rather than assert on a slide.
 
 ---
 
@@ -151,39 +153,6 @@ local tutor model and, provably, nothing else on the internet.
 
 ---
 
-## 6. Can we move SenseiClaw off pm2 and onto NemoClaw?
-
-**No.** Tested on 16 Aug, and worth writing down so it is not re-litigated.
-
-Two independent blockers:
-
-1. **NemoClaw runs three agent runtimes** — `openclaw`, `hermes`,
-   `langchain-deepagents-code`. SenseiClaw is a FastAPI HTTP service. It is not
-   an agent runtime, so there is no `nemoclaw` command that runs it. This is not
-   a configuration gap; it is a category difference.
-
-2. **The route is not reachable from the host.** The obvious fallback — leave
-   SenseiClaw on pm2 but send its inference through the policy proxy — does not
-   work either. The gateway on `:8181` is OpenShell's *control* plane;
-   `http://127.0.0.1:8181/v1/models` returns **404**. `inference.local` is a
-   sandbox-internal name resolved inside the container's network namespace, and
-   there is no host-side OpenAI-compatible listener to point `SENSEI_BASE_URL` at.
-
-So SenseiClaw stays on pm2 (`senseiclaw`, port 4050), and NemoClaw owns a
-separate, genuinely sandboxed agent. Both are true statements and they do not
-overlap.
-
-**Say it accurately when demoing.** The honest claim is *"here is a sandboxed
-agent that can reach our local model and nothing else"* — which we can prove
-live in one command. The dishonest version is *"our backend runs sandboxed under
-NemoClaw"*, which is false and which a judge who knows the tool will catch.
-
-To actually get SenseiClaw inside the sandbox you would have to reimplement the
-tutor as an OpenClaw agent rather than a FastAPI service. That is a rewrite, not
-a migration, and it is not a hackathon-weekend job.
-
----
-
 ## 6. Student progress and the knowledge graph
 
 Hermes is a NemoClaw runtime and is described as "self-improving agent with
@@ -207,14 +176,14 @@ server-side instead of in browser localStorage — not adopting Hermes.
 
 ---
 
-## 7. UPDATE 16 Aug: SenseiClaw *does* run inside the sandbox
+## 7. Running the tutor inside the sandbox
 
-§6 above was wrong, and is kept only so the reasoning is visible. It ruled out
-two paths — NemoClaw natively supervising a FastAPI service, and repointing the
-host at the gateway — and wrongly concluded the whole idea was impossible. It
-missed the third: **run the service inside the sandbox and bridge it out.**
+Two approaches are dead ends, and both are tempting: NemoClaw will not natively
+supervise a FastAPI service, and the gateway is not an OpenAI endpoint you can
+repoint a host process at (`:8181/v1/models` is 404 — it is a control plane).
 
-The bridge is supported and needs no firewall change:
+The one that works is the third: **run the service inside the sandbox and bridge
+it out.** The bridge is supported and needs no firewall change:
 
 ```
 openshell forward service --target-port 4050 --local 127.0.0.1:4060 sensei
@@ -260,9 +229,9 @@ uploaded), never on a command line.
 
 ### Switching
 
-`scripts/sensei-backend.sh [pm2|nemoclaw|status]` moves which backend owns port
-4050, so nginx never has to be edited. Both stay installed; only one holds the
-port.
+`scripts/sensei-backend.sh status` reports what is serving port 4050, and
+`scripts/sensei-backend.sh nemoclaw` (re)binds the sandboxed tutor to it. nginx
+is gated shared infra and never has to be edited.
 
 **This is the safety claim, and now it applies to the real product**: the
 tutor backend runs confined, and its only route to the network is the local

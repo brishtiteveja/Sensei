@@ -57,6 +57,44 @@ jobs. Everything in `config.py` and `bootstrap_spark.sh` exists to keep that pin
 The web app talks to SenseiClaw and to nothing else. Its README is the reference
 for the API surface, the model pin, and the two-stage design.
 
+## How it fits together
+
+SenseiClaw runs **inside a NemoClaw / OpenShell sandbox**. Its only route to the
+network is `inference.local`, the policy-enforced path to the Spark. Everything
+else — the package registries, GitHub, the open internet — fails closed. A
+student's handwriting physically cannot leave the box.
+
+```mermaid
+flowchart LR
+    subgraph browser["Student / teacher"]
+        WEB["Sensei web app<br/>React · 8 locales"]
+    end
+
+    NGINX["nginx<br/>dev.perspectivity.co"]
+
+    subgraph jail["OpenShell sandbox — Landlock · seccomp · netns"]
+        SC["SenseiClaw<br/>two-stage Socratic tutor"]
+    end
+
+    OPA{{"OPA egress policy"}}
+    SPARK[["DGX Spark GB10<br/>qwen3-vl-30b-a3b"]]
+    NET(["github · npm · pypi<br/>huggingface · internet"])
+
+    WEB -->|"HTTPS /sensei/api"| NGINX
+    NGINX -->|"gRPC forward<br/>127.0.0.1:4050"| SC
+    SC --> OPA
+    OPA -->|"allowed:<br/>inference.local"| SPARK
+    OPA -.->|"BLOCKED"| NET
+
+    classDef blocked stroke-dasharray: 5 5
+    class NET blocked
+```
+
+The two hops that matter: nginx reaches the sandbox over OpenShell's **gRPC
+service forward**, not an open port — nothing is published from the container.
+And every outbound request the tutor makes passes the OPA policy, which allows
+exactly one destination.
+
 ## Layout
 
 ```
@@ -93,36 +131,49 @@ VITE_SENSEI_API_URL=/sensei/api npm run build     # prebuild stages samples + no
 a raw `http://<ip>:4050`, which an HTTPS page blocks as mixed content, and every
 screen shows "Cannot reach the Sensei server." This has bitten twice.
 
-For the backend, see the [SenseiClaw README](https://github.com/brishtiteveja/Sensei-NemoClaw).
+### The backend
+
+SenseiClaw runs inside the sandbox and is bridged to nginx by an OpenShell
+service forward:
+
+```bash
+export NEMOCLAW_GATEWAY_PORT=8181          # 8080 is nginx on this box
+scripts/sensei-sandbox-start.sh            # start the tutor inside the sandbox
+scripts/sensei-backend.sh status           # what is serving :4050
+```
+
+Full setup and the traps are in
+[NEMOCLAW.md](others/hackathon/sensei/NEMOCLAW.md). The service API itself is
+documented in the [SenseiClaw README](https://github.com/brishtiteveja/Sensei-NemoClaw).
 
 ### Before demoing
 
 The resident model has changed under us mid-session before, silently breaking
-every vision feature. Check both:
+every vision feature. Check all three:
 
 ```bash
-curl -s https://spark-e257.tail803c7f.ts.net:8443/health   # which model is hot
-curl -s http://127.0.0.1:4050/tutor/health                 # harness up
+curl -s https://spark-e257.tail803c7f.ts.net:8443/health    # which model is hot
+curl -s https://dev.perspectivity.co/sensei/api/tutor/health # tutor reachable
+nemoclaw sensei exec -- curl -s -o /dev/null -w '%{http_code}' https://github.com
+                                                             # must NOT be 200
 ```
 
-### Sandboxed inference (NemoClaw + OpenShell)
+That third line is the one worth running in front of an audience: it proves the
+confinement is real rather than claimed.
 
-A NemoClaw sandbox named `sensei` runs an OpenShell-confined agent whose only
-network egress is our Spark. Verified live — `inference.local` returns the real
-`owned_by: "dgx-spark"` catalog, while `github.com`, `pypi.org`,
-`registry.npmjs.org`, `huggingface.co`, and `raw.githubusercontent.com` all fail
-closed:
+### Verified confinement
 
-```bash
-export NEMOCLAW_GATEWAY_PORT=8181          # 8080 is nginx on this box
-nemoclaw sensei exec -- curl -s https://inference.local/v1/models   # 200
-nemoclaw sensei exec -- curl -s https://github.com                  # exit 56
-```
+From inside the sandbox — `inference.local` returns the genuine
+`owned_by: "dgx-spark"` catalogue, and everything else fails closed:
 
-SenseiClaw itself does **not** run under NemoClaw and cannot — see
-[NEMOCLAW.md §6](others/hackathon/sensei/NEMOCLAW.md). It stays on pm2. NemoClaw
-owns a separate sandboxed agent, and that distinction should be stated plainly
-rather than blurred.
+| destination | result |
+|---|---|
+| `inference.local/v1/models` | **200** |
+| `github.com` · `pypi.org` · `registry.npmjs.org` | exit 56 |
+| `huggingface.co` · `clawhub.ai` · `raw.githubusercontent.com` | exit 56 |
+
+A real `/tutor/query` through the public URL answers correctly on
+`qwen3-vl-30b-a3b-gguf` in ~14 s, so the confinement costs nothing in practice.
 
 ### Gotchas
 
