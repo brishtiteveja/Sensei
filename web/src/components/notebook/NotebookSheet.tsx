@@ -1,7 +1,10 @@
-import type { ReactNode } from 'react';
+import { useCallback, useRef, type ReactNode } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { NotebookEditor } from './NotebookEditor';
 import { AttemptBar } from '@/components/replay/AttemptBar';
+import { FloatingSensei } from '@/components/tutor/FloatingSensei';
+import { renderNotebookSnapshot } from '@/lib/snapshot';
+import type { NotebookBlock } from '@/lib/notebook';
 import type { NotebookContext, NotebookHandoff } from '@/lib/notebook';
 import { t } from '@/i18n/strings';
 
@@ -33,6 +36,14 @@ export function NotebookSheet({
   recordAttempts?: boolean;
   subject?: string;
 }) {
+  // The owl looks at the page, not one drawing: a student's working is usually
+  // a couple of typed lines beside a sketch, so the whole notebook is composited.
+  const pageRef = useRef<{ blocks: NotebookBlock[]; title: string }>({ blocks: [], title: '' });
+  const snapshot = useCallback(
+    () => renderNotebookSnapshot(pageRef.current.blocks, pageRef.current.title || problem),
+    [problem],
+  );
+
   return (
     <Modal
       open={open}
@@ -52,7 +63,18 @@ export function NotebookSheet({
         </div>
       ) : null}
       {header ? <div className="mb-4">{header}</div> : null}
-      <NotebookEditor context={context} onAttach={onAttach} problem={problem} compact />
+      <div className="relative">
+        <NotebookEditor
+          context={context}
+          onAttach={onAttach}
+          problem={problem}
+          onPageChange={(p) => {
+            pageRef.current = p;
+          }}
+          compact
+        />
+        <FloatingSensei problem={problem} getImage={snapshot} className="sticky bottom-3 left-0 mt-2" />
+      </div>
     </Modal>
   );
 }

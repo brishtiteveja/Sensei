@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { History, Play, Plus } from 'lucide-react';
+import { Circle, History, Play, Plus, Square } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ReplayModal } from '@/components/replay/ReplayModal';
-import { recordedEvents, reportAttempt, setObserveContext } from '@/lib/observe';
+import {
+  isObserveEnabled,
+  onObserveChange,
+  recordedEvents,
+  reportAttempt,
+  setObserveContext,
+  setObserveEnabled,
+} from '@/lib/observe';
 import {
   appendToAttempt,
   getAttempt,
@@ -40,6 +47,9 @@ export function AttemptBar({
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [replayId, setReplayId] = useState<string | null>(null);
+  const [recording, setRecording] = useState(isObserveEnabled);
+
+  useEffect(() => onObserveChange(setRecording), []);
 
   /** Events from this instant on belong to the attempt in progress. */
   const sinceRef = useRef<number>(Date.now());
@@ -124,7 +134,23 @@ export function AttemptBar({
   return (
     <>
       <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface-alt/60 px-3 py-2">
-        <History size={14} className="shrink-0 text-ink-faint" />
+        <button
+          type="button"
+          onClick={() => setObserveEnabled(!recording)}
+          title={recording ? t.replay.stopHint : t.replay.startHint}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-2xs font-medium transition-colors',
+            recording ? 'text-danger-text' : 'text-ink-faint hover:text-ink',
+          )}
+        >
+          {recording ? (
+            <Circle size={9} className="animate-pulse fill-current" />
+          ) : (
+            <Square size={9} className="fill-current" />
+          )}
+          {recording ? t.replay.recording : t.replay.paused}
+        </button>
+        <History size={13} className="shrink-0 text-ink-faint" />
         <span className="text-2xs font-medium text-ink-soft">
           {index >= 0 ? t.attempt.current(index + 1) : t.attempt.recording}
         </span>

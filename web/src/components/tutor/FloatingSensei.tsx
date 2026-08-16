@@ -27,7 +27,7 @@ export function FloatingSensei({
   className,
   onOpenChat,
 }: {
-  getImage: () => string | null;
+  getImage: () => string | null | Promise<string | null>;
   problem?: string;
   className?: string;
   /** Escalate from the one-line nudge into a full conversation. */
@@ -58,8 +58,9 @@ export function FloatingSensei({
   );
 
   const ask = useCallback(async () => {
-    const image = getImage();
-    if (!image || busy) return;
+    if (busy) return;
+    const image = await getImage();
+    if (!image) return;
     setBusy(true);
     setResult(null);
     observe('coach.ask', { problem: problem?.slice(0, 80) });

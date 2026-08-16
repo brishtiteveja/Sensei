@@ -45,6 +45,7 @@ export function NotebookEditor({
   onAttach,
   compact,
   problem,
+  onPageChange,
 }: {
   context: NotebookContext;
   onAttach?: (handoff: NotebookHandoff) => void;
@@ -52,6 +53,8 @@ export function NotebookEditor({
   compact?: boolean;
   /** The problem being solved, handed to the scratchpad's watching owl. */
   problem?: string;
+  /** Lets a parent snapshot the page for the watching owl. */
+  onPageChange?: (page: { blocks: NotebookBlock[]; title: string }) => void;
 }) {
   const key = context.kind + ':' + context.id;
   const [nb, setNb] = useState<Notebook>(() => getNotebook(context));
@@ -133,6 +136,11 @@ export function NotebookEditor({
       setUploadError(t.notebook.uploadError);
     }
   };
+
+  // Keep the parent's snapshot source current without it reaching into state.
+  useEffect(() => {
+    onPageChange?.({ blocks: nb.blocks, title: nb.title });
+  }, [nb.blocks, nb.title, onPageChange]);
 
   const setTitle = (title: string) => setNb((prev) => ({ ...prev, title }));
   const hasContent = nb.blocks.length > 0;
