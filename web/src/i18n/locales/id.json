@@ -427,5 +427,12 @@
   "attempt.recording": "Merekam percobaan ini",
   "attempt.replay": "Putar ulang",
   "attempt.replayNth": "Putar ulang percobaan {n}",
-  "attempt.startNew": "Percobaan baru"
+  "attempt.startNew": "Percobaan baru",
+  "coach.lookAtMyWork": "Lihat pekerjaan saya",
+  "coach.noSurface": "Buka soal untuk menunjukkan pekerjaanmu",
+  "coach.nothingToSee": "Belum ada apa-apa di halaman ini.",
+  "coach.threadEmpty": "Tanyakan apa saja, atau biarkan saya melihat apa yang sudah kamu buat sejauh ini.",
+  "coach.dragHint": "Seret saya ke mana saja · ketuk untuk berbicara",
+  "replay.insert": "Kirim ke Sensei",
+  "replay.insertedWork": "Ini seluruh sesi pengerjaan saya — bagaimana menurutmu?"
 }

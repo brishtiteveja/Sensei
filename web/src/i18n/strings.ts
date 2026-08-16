@@ -319,6 +319,11 @@ function build(dict: Dict) {
       lookAt: s('coach.lookAt'),
       discuss: s('coach.discuss'),
       failed: s('coach.failed'),
+      lookAtMyWork: s('coach.lookAtMyWork'),
+      noSurface: s('coach.noSurface'),
+      nothingToSee: s('coach.nothingToSee'),
+      threadEmpty: s('coach.threadEmpty'),
+      dragHint: s('coach.dragHint'),
     },
 
     replay: {
@@ -338,6 +343,8 @@ function build(dict: Dict) {
       frameCount: (n: number) => plural('replay.frameCount', n),
       visionFailed: s('replay.visionFailed'),
       visionPrompt: s('replay.visionPrompt'),
+      insert: s('replay.insert'),
+      insertedWork: s('replay.insertedWork'),
     },
 
     landing: {

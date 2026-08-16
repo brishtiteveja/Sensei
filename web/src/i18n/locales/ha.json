@@ -427,5 +427,12 @@
   "attempt.recording": "Ana nadar wannan kokarin",
   "attempt.replay": "Sake kunnawa",
   "attempt.replayNth": "Sake kunna kokari na {n}",
-  "attempt.startNew": "Sabuwar kokari"
+  "attempt.startNew": "Sabuwar kokari",
+  "coach.lookAtMyWork": "Duba aiki na",
+  "coach.noSurface": "Buɗe matsala don nuna aikin ka",
+  "coach.nothingToSee": "Babu komai a kan shafin tukunna.",
+  "coach.threadEmpty": "Tambaye ni komai, ko kuma bari in duba abin da kake da shi zuwa yanzu.",
+  "coach.dragHint": "Ja ni zuwa ko'ina · danna don yin magana",
+  "replay.insert": "Aika wa Sensei",
+  "replay.insertedWork": "Ga duka aikin da na yi — me kake gani game da shi?"
 }

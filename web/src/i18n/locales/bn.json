@@ -427,5 +427,12 @@
   "attempt.recording": "এই চেষ্টাটি রেকর্ড করা হচ্ছে",
   "attempt.replay": "আবার চালান",
   "attempt.replayNth": "চেষ্টা {n} আবার চালান",
-  "attempt.startNew": "নতুন চেষ্টা"
+  "attempt.startNew": "নতুন চেষ্টা",
+  "coach.lookAtMyWork": "আমার কাজ দেখুন",
+  "coach.noSurface": "আপনার কাজ দেখাতে একটি সমস্যা খুলুন",
+  "coach.nothingToSee": "পৃষ্ঠায় এখনও কিছু নেই।",
+  "coach.threadEmpty": "আমাকে যেকোনো কিছু জিজ্ঞেস করুন, অথবা আপনার এ পর্যন্ত করা কাজগুলো আমাকে দেখতে দিন।",
+  "coach.dragHint": "আমাকে যেকোনো জায়গায় টেনে নিন · কথা বলতে ট্যাপ করুন",
+  "replay.insert": "Sensei-কে পাঠান",
+  "replay.insertedWork": "এখানে আমার পুরো কাজের সেশনটি রয়েছে — আপনার কী মনে হয়?"
 }

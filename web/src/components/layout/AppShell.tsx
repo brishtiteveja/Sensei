@@ -21,6 +21,7 @@ import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { useSettings } from '@/state/settings';
 import { observe } from '@/lib/observe';
 import { SessionReplay } from '@/components/replay/SessionReplay';
+import { GlobalSensei } from '@/components/tutor/GlobalSensei';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -66,6 +67,8 @@ export function AppShell() {
       {/* Decorative background for the whole app; every surface above it is
           translucent so the colour reads through. */}
       <Aurora />
+      {/* One owl for the whole app: follows the student, draggable, per-problem thread. */}
+      <GlobalSensei />
 
       <a
         href="#s-main"

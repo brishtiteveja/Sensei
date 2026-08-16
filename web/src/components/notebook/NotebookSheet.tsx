@@ -1,8 +1,8 @@
-import { useCallback, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { NotebookEditor } from './NotebookEditor';
 import { AttemptBar } from '@/components/replay/AttemptBar';
-import { FloatingSensei } from '@/components/tutor/FloatingSensei';
+import { registerSurface } from '@/lib/senseiSurface';
 import { renderNotebookSnapshot } from '@/lib/snapshot';
 import type { NotebookBlock } from '@/lib/notebook';
 import type { NotebookContext, NotebookHandoff } from '@/lib/notebook';
@@ -44,6 +44,16 @@ export function NotebookSheet({
     [problem],
   );
 
+  useEffect(() => {
+    if (!open) return;
+    return registerSurface({
+      getImage: snapshot,
+      problem,
+      contextKey: `${context.kind}:${context.id}`,
+      label: context.label ?? t.notebook.title,
+    });
+  }, [open, snapshot, problem, context.kind, context.id, context.label]);
+
   return (
     <Modal
       open={open}
@@ -73,7 +83,6 @@ export function NotebookSheet({
           }}
           compact
         />
-        <FloatingSensei problem={problem} getImage={snapshot} className="sticky bottom-3 left-0 mt-2" />
       </div>
     </Modal>
   );

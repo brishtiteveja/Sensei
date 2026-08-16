@@ -427,5 +427,12 @@
   "attempt.recording": "Merakam percubaan ini",
   "attempt.replay": "Main semula",
   "attempt.replayNth": "Main semula percubaan {n}",
-  "attempt.startNew": "Percubaan baharu"
+  "attempt.startNew": "Percubaan baharu",
+  "coach.lookAtMyWork": "Lihat hasil kerja saya",
+  "coach.noSurface": "Buka soalan untuk tunjukkan hasil kerja anda",
+  "coach.nothingToSee": "Tiada apa-apa di halaman ini lagi.",
+  "coach.threadEmpty": "Tanya saya apa-apa sahaja, atau biar saya lihat apa yang anda ada setakat ini.",
+  "coach.dragHint": "Seret saya ke mana-mana · ketik untuk bercakap",
+  "replay.insert": "Hantar kepada Sensei",
+  "replay.insertedWork": "Ini keseluruhan sesi kerja saya — apa pendapat anda tentangnya?"
 }

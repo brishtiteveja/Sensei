@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Eye, Pause, Play, Trash2 } from 'lucide-react';
+import { Eye, Pause, Play, Send, Trash2 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { RichText } from '@/components/ui/RichText';
@@ -7,6 +7,7 @@ import { buildFrames, contactSheet, renderFrame, stamp, type ReplayFrame } from 
 import { deleteAttempt, getAttempt } from '@/lib/attempts';
 import { recordedEvents } from '@/lib/observe';
 import { seeWork } from '@/lib/api';
+import { insertToSensei } from '@/components/tutor/GlobalSensei';
 import { useSettings } from '@/state/settings';
 import { t } from '@/i18n/strings';
 
@@ -105,6 +106,18 @@ export function ReplayModal({
               {t.replay.clear}
             </Button>
           ) : null}
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (!sheet) return;
+              insertToSensei({ image: sheet, text: t.replay.insertedWork, prompt: t.replay.visionPrompt });
+              onClose();
+            }}
+            disabled={!sheet}
+          >
+            <Send size={15} />
+            {t.replay.insert}
+          </Button>
           <Button onClick={() => void showSensei()} disabled={!sheet || busy}>
             <Eye size={15} />
             {busy ? t.replay.looking : t.replay.showSensei}

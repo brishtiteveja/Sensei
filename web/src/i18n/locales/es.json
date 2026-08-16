@@ -427,5 +427,12 @@
   "attempt.recording": "Grabando este intento",
   "attempt.replay": "Reproducir",
   "attempt.replayNth": "Reproducir intento {n}",
-  "attempt.startNew": "Nuevo intento"
+  "attempt.startNew": "Nuevo intento",
+  "coach.lookAtMyWork": "Mira mi trabajo",
+  "coach.noSurface": "Abre un problema para mostrar tu trabajo",
+  "coach.nothingToSee": "Aún no hay nada en la página.",
+  "coach.threadEmpty": "Pregúntame lo que quieras o déjame ver lo que tienes hasta ahora.",
+  "coach.dragHint": "Arrástrame a cualquier lugar · toca para hablar",
+  "replay.insert": "Enviar a Sensei",
+  "replay.insertedWork": "Aquí está toda mi sesión de trabajo, ¿qué opinas de ella?"
 }

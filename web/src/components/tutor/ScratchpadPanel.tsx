@@ -16,7 +16,8 @@ import {
 import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
-import { FloatingSensei, pokeSensei } from '@/components/tutor/FloatingSensei';
+import { pokeSensei } from '@/components/tutor/FloatingSensei';
+import { registerSurface } from '@/lib/senseiSurface';
 import { observe } from '@/lib/observe';
 import { readJSON, removeKey, writeJSON } from '@/lib/storage';
 import { t } from '@/i18n/strings';
@@ -204,6 +205,17 @@ export function ScratchpadPanel({
   useEffect(() => {
     if (open) repaint();
   }, [open, repaint]);
+
+  // While the canvas is up it is what the owl looks at.
+  useEffect(() => {
+    if (!open) return;
+    return registerSurface({
+      getImage: () => canvasRef.current?.toDataURL('image/png') ?? null,
+      problem,
+      contextKey: draftKey,
+      label: title ?? t.scratch.title,
+    });
+  }, [open, problem, draftKey, title]);
 
   // Restore an unfinished drawing. Closing the dialog by mis-clicking the
   // backdrop used to throw the work away; now only inserting or an explicit
@@ -463,10 +475,7 @@ export function ScratchpadPanel({
           ref={scrollRef}
           className="s-scroll relative max-h-[58vh] overflow-auto rounded-xl border border-line bg-white shadow-inner"
         >
-          <FloatingSensei
-            problem={problem}
-            getImage={() => canvasRef.current?.toDataURL('image/png') ?? null}
-          />
+
           <canvas
             ref={canvasRef}
             width={W}
