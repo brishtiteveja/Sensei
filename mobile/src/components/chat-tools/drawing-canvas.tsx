@@ -10,7 +10,19 @@ import {
 import { Canvas, Path, Skia, useCanvasRef } from '@shopify/react-native-skia';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
-import { X, Send, Undo2, Trash2 } from 'lucide-react-native';
+import {
+  X,
+  Send,
+  Undo2,
+  Trash2,
+  Pencil,
+  Minus,
+  Square as SquareIcon,
+  Circle as CircleIcon,
+  Triangle as TriangleIcon,
+  ArrowUpRight,
+  Eraser,
+} from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/theme';
 import { useI18n } from '@/i18n/i18n-context';
@@ -24,10 +36,63 @@ interface DrawingCanvasProps {
   onSend: (imageUri: string) => void;
 }
 
+type Tool = 'pen' | 'line' | 'rect' | 'circle' | 'triangle' | 'arrow' | 'eraser';
+
 interface DrawPath {
   path: SkPathType;
   color: string;
   strokeWidth: number;
+  tool: Tool;
+}
+
+type Pt = { x: number; y: number };
+
+const DRAW_TOOLS: { tool: Tool; Icon: typeof Pencil; label: string }[] = [
+  { tool: 'pen', Icon: Pencil, label: 'Pen' },
+  { tool: 'line', Icon: Minus, label: 'Line' },
+  { tool: 'rect', Icon: SquareIcon, label: 'Rectangle' },
+  { tool: 'circle', Icon: CircleIcon, label: 'Circle' },
+  { tool: 'triangle', Icon: TriangleIcon, label: 'Triangle' },
+  { tool: 'arrow', Icon: ArrowUpRight, label: 'Arrow' },
+  { tool: 'eraser', Icon: Eraser, label: 'Eraser' },
+];
+
+const ERASER_PAPER = '#FFFFFF';
+
+/**
+ * Build the Skia path for a shape tool from its start and current point. Called
+ * on every gesture update, so shapes rubber-band as the finger moves. Freehand
+ * (pen/eraser) is handled separately by appending line segments.
+ */
+function buildShapePath(tool: Tool, a: Pt, b: Pt): SkPathType {
+  const p = Skia.Path.Make();
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  const w = Math.abs(b.x - a.x);
+  const h = Math.abs(b.y - a.y);
+
+  if (tool === 'line' || tool === 'arrow') {
+    p.moveTo(a.x, a.y);
+    p.lineTo(b.x, b.y);
+    if (tool === 'arrow') {
+      const ang = Math.atan2(b.y - a.y, b.x - a.x);
+      const head = 20;
+      p.moveTo(b.x, b.y);
+      p.lineTo(b.x - head * Math.cos(ang - Math.PI / 6), b.y - head * Math.sin(ang - Math.PI / 6));
+      p.moveTo(b.x, b.y);
+      p.lineTo(b.x - head * Math.cos(ang + Math.PI / 6), b.y - head * Math.sin(ang + Math.PI / 6));
+    }
+  } else if (tool === 'rect') {
+    p.addRect(Skia.XYWHRect(x, y, w, h));
+  } else if (tool === 'circle') {
+    p.addOval(Skia.XYWHRect(x, y, w, h));
+  } else if (tool === 'triangle') {
+    p.moveTo(x + w / 2, y); // apex
+    p.lineTo(x, y + h);
+    p.lineTo(x + w, y + h);
+    p.close();
+  }
+  return p;
 }
 
 const PRESET_COLORS = [
@@ -53,6 +118,7 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
   const [paths, setPaths] = useState<DrawPath[]>([]);
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [strokeWidth, setStrokeWidth] = useState(4);
+  const [tool, setTool] = useState<Tool>('pen');
   const [exporting, setExporting] = useState(false);
 
   // Use refs for gesture callbacks to avoid stale closures
@@ -60,7 +126,10 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
   strokeColorRef.current = strokeColor;
   const strokeWidthRef = useRef(strokeWidth);
   strokeWidthRef.current = strokeWidth;
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
   const currentPathRef = useRef<DrawPath | null>(null);
+  const startRef = useRef<Pt>({ x: 0, y: 0 });
 
   const hasContent = paths.length > 0;
 
@@ -123,6 +192,7 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
     setPaths([]);
     setStrokeColor('#000000');
     setStrokeWidth(4);
+    setTool('pen');
     currentPathRef.current = null;
     onClose();
   }, [onClose]);
@@ -130,23 +200,33 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
   const pan = Gesture.Pan()
     .minDistance(0)
     .onBegin((e) => {
+      const activeTool = toolRef.current;
+      const isEraser = activeTool === 'eraser';
+      startRef.current = { x: e.x, y: e.y };
       const skPath = Skia.Path.Make();
-      skPath.moveTo(e.x, e.y);
+      // Freehand seeds the path with its first point; shapes are rebuilt whole
+      // on each update from the start point, so they start empty.
+      if (activeTool === 'pen' || isEraser) skPath.moveTo(e.x, e.y);
       const newPath: DrawPath = {
         path: skPath,
-        color: strokeColorRef.current,
-        strokeWidth: strokeWidthRef.current,
+        // The eraser is just a fat white brush on white paper.
+        color: isEraser ? ERASER_PAPER : strokeColorRef.current,
+        strokeWidth: isEraser ? Math.max(strokeWidthRef.current * 4, 16) : strokeWidthRef.current,
+        tool: activeTool,
       };
       currentPathRef.current = newPath;
       setPaths((prev) => [...prev, newPath]);
     })
     .onUpdate((e) => {
       const current = currentPathRef.current;
-      if (current) {
+      if (!current) return;
+      if (current.tool === 'pen' || current.tool === 'eraser') {
         current.path.lineTo(e.x, e.y);
-        // Force re-render by creating new array reference
-        setPaths((prev) => [...prev]);
+      } else {
+        current.path = buildShapePath(current.tool, startRef.current, { x: e.x, y: e.y });
       }
+      // Force re-render by creating new array reference
+      setPaths((prev) => [...prev]);
     })
     .onEnd(() => {
       currentPathRef.current = null;
@@ -270,6 +350,43 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
             gap: 12,
           }}
         >
+          {/* Tool Selector Row — pen, shapes, eraser */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+            }}
+          >
+            {DRAW_TOOLS.map(({ tool: tl, Icon, label }) => {
+              const active = tool === tl;
+              return (
+                <TouchableOpacity
+                  key={tl}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    void Haptics.selectionAsync();
+                    setTool(tl);
+                  }}
+                  accessibilityLabel={label}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: active ? theme.accent : theme.surfaceAlt,
+                  }}
+                >
+                  <Icon size={18} color={active ? theme.textInverse : theme.textSoft} />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
           {/* Color Picker Row */}
           <View
             style={{
