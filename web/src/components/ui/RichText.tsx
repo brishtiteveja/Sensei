@@ -19,11 +19,28 @@ type Inline = { text: string; bold?: boolean; italic?: boolean; code?: boolean }
 const INLINE_RE = /(\*\*[^*]+\*\*|`[^`]+`|\*[^*\n]+\*)/g;
 
 /**
- * Inline math: `$…$` (no space just inside the delimiters, so prose like
- * "$5 to $10" is left alone) or `\(…\)`. Display math is peeled off earlier,
- * at the block level, so this never sees `$$`.
+ * Inline math: `$…$` or `\(…\)`. Display math is peeled off earlier, at the
+ * block level, so this never sees `$$`.
+ *
+ * The delimiters may be padded — models routinely write `$ x = 1 $` — so the
+ * old "no space just inside" rule silently dropped most real output back to
+ * raw source. Spacing is allowed and `looksLikeMath` does the discriminating
+ * instead, which is the right trade for a maths tutor: failing to render a
+ * formula is far worse than rendering an odd span.
  */
-const INLINE_MATH_RE = /\$(?!\s)((?:\\\$|[^$\n])+?)(?<!\s)\$|\\\(([\s\S]+?)\\\)/g;
+const INLINE_MATH_RE = /\$((?:\\\$|[^$\n])+?)\$|\\\(([\s\S]+?)\\\)/g;
+
+/** Tell a formula from prose that merely contains dollar signs. */
+function looksLikeMath(body: string): boolean {
+  const s = body.trim();
+  if (!s) return false;
+  // A LaTeX command or an operator is decisive.
+  if (/[\\^_{}=<>±×÷∫∑√]|\\[a-zA-Z]+/.test(s)) return true;
+  // A bare amount is money, not maths: "$5", "$1,200.00".
+  if (/^\d[\d,.]*$/.test(s)) return false;
+  // A single symbol-ish token ("x", "v_0", "3x") is maths; a phrase is not.
+  return !/\s/.test(s);
+}
 
 /** Display math delimiters, split out before any block parsing. */
 const DISPLAY_MATH_RE = /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]/g;
@@ -76,9 +93,12 @@ function Inlines({ text }: { text: string }) {
   };
 
   for (const m of text.matchAll(INLINE_MATH_RE)) {
+    const body = m[1] ?? m[2] ?? '';
+    // `\(…\)` is unambiguous; a `$…$` span has to earn it.
+    if (m[2] === undefined && !looksLikeMath(body)) continue;
     const idx = m.index ?? 0;
     if (idx > last) pushMarkdown(text.slice(last, idx));
-    parts.push(<Math key={key++} latex={(m[1] ?? m[2]).trim()} />);
+    parts.push(<Math key={key++} latex={body.trim()} />);
     last = idx + m[0].length;
   }
   if (last < text.length) pushMarkdown(text.slice(last));
@@ -87,10 +107,12 @@ function Inlines({ text }: { text: string }) {
 }
 
 interface Block {
-  kind: 'p' | 'ul' | 'ol' | 'code' | 'math';
+  kind: 'p' | 'ul' | 'ol' | 'code' | 'math' | 'h';
   lines: string[];
   /** For `kind: 'math'`, the raw LaTeX of a display equation. */
   raw?: string;
+  /** For `kind: 'h'`, the heading depth. */
+  level?: number;
 }
 
 /**
@@ -133,6 +155,14 @@ function parseBlocks(src: string): Block[] {
     }
 
     if (!line.trim()) {
+      i += 1;
+      continue;
+    }
+
+    // Headings: the tutor writes them, and unhandled they render as literal #.
+    const heading = line.match(/^\s*(#{1,4})\s+(.*)$/);
+    if (heading) {
+      blocks.push({ kind: 'h', lines: [heading[2]], level: heading[1].length });
       i += 1;
       continue;
     }
@@ -202,6 +232,16 @@ export function RichText({
               <Math latex={b.raw ?? ''} display />
               {tail}
             </div>
+          );
+        }
+        if (b.kind === 'h') {
+          const size =
+            b.level === 1 ? 'text-[17px]' : b.level === 2 ? 'text-[15.5px]' : 'text-[14px]';
+          return (
+            <p key={bi} className={cn('font-semibold tracking-[-0.01em] text-ink', size)}>
+              <Inlines text={b.lines[0]} />
+              {tail}
+            </p>
           );
         }
         if (b.kind === 'code') {
