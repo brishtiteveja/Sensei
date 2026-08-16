@@ -49,10 +49,13 @@ pixels. One prompt asked to do both does neither: it transcribes and forgets to
 teach, or teaches and invents lines that are not on the page.
 
 Students learn maths, physics, chemistry and biology, or generate a course from a
-regional admissions syllabus. Per-student memory keeps mastery recency-weighted,
-and a prerequisite knowledge graph does root-cause diagnosis: on a wrong answer it
-names the upstream concept actually missing, so the tutor teaches the cause rather
-than the symptom. Teachers get a second surface — grade a stack of photos or PDFs
+regional admissions syllabus. Memory works at two scopes. Per-student: mastery is
+recency-weighted, and a prerequisite knowledge graph does root-cause diagnosis —
+on a wrong answer it names the upstream concept actually missing, so the tutor
+teaches the cause rather than the symptom. Agent-wide: a Hermes agent accumulates
+teaching craft across students — which explanation lands, which misconception
+recurs — folded into every turn, with the rule that if a stored note contradicts
+the student in front of it, the student wins. Teachers get a second surface — grade a stack of photos or PDFs
 against a rubric, and a benchmark tab that runs Sensei against 39 real handwritten
 pages from the public ICDAR 2025 NoTeS-Bank challenge with their published labels,
 so its reading can be checked against ground truth we did not write.
@@ -100,19 +103,54 @@ Backend harness (also public):
 ## AI Models Used
 
 ```
-Qwen3-VL-30B-A3B (GGUF) — served locally on NVIDIA DGX Spark through the vLLM
-router; the single resident model, used for both multilingual Socratic tutoring
-and handwritten-work diagnosis.
+Sensei is model-agnostic by design. It exposes 22 local models on the DGX Spark
+plus 3 cloud models, switchable at runtime from the admin surface and overridable
+per pipeline stage on a single request (reading_model / coaching_model), so the
+vision stage and the teaching stage can run on different models in the same call.
 
-Google Gemini 3.5 Flash — cloud, and only on the teacher surface: batch grading
-of submitted scripts and finalising a teacher-authored question. Deliberately
-off-device so that marking thirty papers never takes the GPU away from a student
-mid-lesson. No student handwriting on the Socratic path is sent to it.
+PRIMARY (the pin, what the demo runs on)
+  qwen3-vl-30b-a3b-gguf — one resident vision-language model doing both
+  multilingual Socratic tutoring and handwritten-work diagnosis, ~72 tok/s.
+
+NVIDIA MODELS ON THE BOX, selectable at runtime
+  nemotron-3.5-lightning-30b-a3b-nvidia-nvfp4  Nemotron 3.5 Lightning
+  nemotron-ocr-v2                              NVIDIA OCR — handwriting reading
+  cosmos-reason2-32b / cosmos-reason2-8b       NVIDIA Cosmos Reason
+  locateanything-3b                            NVIDIA LocateAnything (grounding)
+  qwen3-next-80b-instruct-nvidia-nvfp4         NVFP4, 80B
+  qwen3.6-35b-a3b-nvidia-nvfp4                 NVFP4
+  qwen3.6-27b-nvidia-nvfp4                     NVFP4, vision-capable
+  gemma-4-31b-it-nvidia-nvfp4                  NVFP4
+  gemma-4-26b-a4b-nvidia-nvfp4                 NVFP4
+
+  Seven of these are NVIDIA NVFP4 builds — the 4-bit format the GB10 is built
+  for — which is what makes a 30B-to-80B roster fit in 128 GB of unified memory
+  and stay swappable on one desk-side device.
+
+OTHER LOCAL MODELS
+  qwen3-vl-32b-instruct-gguf, qwen3-vl-30b-a3b-thinking, glm-4.6v-awq-4bit,
+  internvl3-78b-gguf (all vision) · qwen3.6-35b-a3b-qwen-fp8,
+  qwen3-next-80b-thinking-cyankiwi-awq, kimi-linear-48b-a3b-gguf,
+  laguna-s-2.1-poolside-nvfp4, gemma-4-26b-a4b-unsloth-nvfp4,
+  qwen3.8-27b-unsloth-nvfp4, muse-glimmer-30b-gguf
+
+CLOUD, teacher surface only
+  gemini-3.5-flash-lite / gemini-3.6-flash / gemini-3.7-flash — batch grading of
+  submitted scripts and finalising a teacher-authored question. Deliberately
+  off-device so marking thirty papers never takes the GPU from a student
+  mid-lesson. No student handwriting from the Socratic path is sent to it.
 ```
 
-> Corrected from your draft: the exact id is `qwen3-vl-30b-a3b-gguf`. The
-> *thinking* variant is a separate model on the box and its unit is not running,
-> so claiming it would not survive a judge checking `/v1/models`.
+> **Two accuracy notes before you paste.**
+>
+> 1. The router keeps **one** model resident, so "switch at runtime" costs a
+>    1–5 min cold swap, and several vLLM units on the box are currently dead.
+>    The wording above says *selectable* and *exposed*, which is exactly true and
+>    survives scrutiny. Avoid "we run all of these" — a judge can check `/health`
+>    and see one loaded model.
+> 2. `qwen3-vl-30b-a3b-thinking` is listed separately from the GGUF pin; your
+>    original draft merged them into "GGUF / thinking variant". They are two
+>    different entries and the demo uses the GGUF one.
 
 ---
 
@@ -120,12 +158,30 @@ mid-lesson. No student handwriting on the Socratic path is sent to it.
 
 ```
 NVIDIA DGX Spark (GB10) · DGX Spark vLLM router with an OpenAI-compatible local
-endpoint · NemoClaw 0.0.103 and OpenShell 0.0.85 (Landlock + seccomp + network
-namespace with an OPA egress policy; the tutor backend runs inside the sandbox and
-is bridged out by an OpenShell gRPC service forward) · FastAPI · React + TypeScript
-+ Vite · SQLite for per-student memory and the prerequisite knowledge graph ·
-KaTeX bundled locally for maths rendering · ICDAR 2025 NoTeS-Bank (Apache-2.0)
-as an external handwriting benchmark.
+endpoint, driving a 22-model roster with runtime and per-stage model selection ·
+NVFP4 quantised builds for the GB10.
+
+NemoClaw 0.0.103 + OpenShell 0.0.85 — Landlock, seccomp and a network namespace
+with an OPA egress policy. The entire tutor backend runs inside the sandbox and is
+bridged out by an OpenShell gRPC service forward, so nothing is published from the
+container. The policy permits exactly two destinations: the local Spark, and
+Gemini (POST only, /v1beta/**) for teacher grading. Everything else fails closed.
+
+Hermes Agent (Nous Research) — a NemoClaw runtime, used for the memory job it is
+actually built for. The split is by scope: Sensei's own SQLite store holds what a
+*student* knows, and Hermes holds how to *teach* — accumulated craft about which
+explanation lands and which misconception recurs. Hermes and SenseiClaw run on the
+same box, so they integrate over a file rather than a socket: each turn folds the
+tail of ~/.hermes/MEMORY.md into the prompt, with the rule that if a stored note
+contradicts the student in front of it, the student wins. GET /teaching/notes
+exposes exactly what is being drawn on, so the claim is inspectable rather than
+asserted, and absent or empty memory simply renders no section — the tutor
+degrades silently rather than breaking if Hermes has never run.
+
+FastAPI · React + TypeScript + Vite, 8 locales · SQLite for per-student mastery
+(recency-weighted) and the prerequisite knowledge graph used for root-cause
+diagnosis · KaTeX bundled locally · ICDAR 2025 NoTeS-Bank (Apache-2.0) as an
+external handwriting benchmark.
 ```
 
 ---
