@@ -54,6 +54,10 @@ export function Modal({
         onClose();
         return;
       }
+      // The floating tutor sits above the dialog on purpose -- a student
+      // should be able to ask about the thing they are looking at. It is
+      // outside this subtree, so the trap must not drag focus back out of it.
+      if ((e.target as HTMLElement | null)?.closest?.('#sensei-owl')) return;
       if (e.key !== 'Tab') return;
       const items = focusables();
       if (!items.length) return;

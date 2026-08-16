@@ -65,8 +65,13 @@ not just typechecked.
   image lands on the desktop. One-shot pairing codes, 10-min TTL.
 - **Tutor** — streaming Socratic chat, LaTeX rendered via bundled KaTeX,
   inserted work goes through the vision path.
-- **Floating owl** — sits on the solve sheet, bobs as you work, tap it for one
-  Socratic nudge about the page.
+- **Sensei the companion** — one owl in the shell, on every route, draggable
+  (position persists) and reachable *above* open modals, so it can be asked
+  about the thing you are looking at. Tapping it opens a conversation, and that
+  conversation is **the same one** as the Ask Sensei page: threads live in a
+  shared store keyed by problem (`lib/conversations.ts`), so a question asked of
+  the owl appears on the tutor page and vice versa. "Look at my work" snapshots
+  whatever surface is registered and runs the two-stage pipeline into the thread.
 
 ### Teacher surface (`/sensei/teach`)
 - **Grade work** — drop photos *or PDFs* + optional rubric → scorecard: score,
@@ -198,12 +203,12 @@ for local models so stage 2 emits clean JSON.
   pages, run each end to end (Solve → sketch → owl → coach → replay), fix what
   breaks. This is rehearsal and judgement, not code.
 
-**P1 — requested, designed, not built**
-- **Global owl as a chatbot.** Today the owl is per-surface and gives one-shot
-  nudges. Wanted: mounted once in `AppShell`, present everywhere, holding a
-  conversation — with a **new chat session per problem**. The pieces exist
-  (`notebookContext` already derives a per-problem key; attempts already scope
-  per problem); it needs one clean pass rather than a bolt-on.
+**P1 — polish worth doing**
+- The owl panel overlaps the modal it floats above; it is draggable, but a
+  smarter default placement (dodging the dialog) would be better.
+- `Give to Sensei` in the notebook and the owl's `Look at my work` now feed the
+  same thread but do different things (compiled notebook vs page snapshot).
+  Worth deciding whether both belong.
 
 **P2 — logged in `docs/FUTURE_PLANS.md`**
 - Mobile notebook parity (per-lesson/practice buttons; persist phone photos as

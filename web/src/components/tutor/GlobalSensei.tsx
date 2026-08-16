@@ -175,7 +175,7 @@ export function GlobalSensei() {
     pos.x < 0 ? { right: 20, bottom: 20 } : { left: pos.x, top: pos.y };
 
   return (
-    <div className="pointer-events-none fixed z-40" style={style}>
+    <div id="sensei-owl" className="pointer-events-none fixed z-[60]" style={style}>
       <div className="pointer-events-auto flex flex-col items-end gap-2">
         {open ? (
           <div className="flex h-[26rem] w-[22rem] flex-col overflow-hidden rounded-2xl border border-line bg-surface/95 shadow-lift backdrop-blur">
