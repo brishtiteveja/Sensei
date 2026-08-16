@@ -20,6 +20,7 @@ import { HeaderArcs, HeaderSpark } from '@/components/art/Flourish';
 import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/SenseiOwl';
 import { useSettings } from '@/state/settings';
 import { observe } from '@/lib/observe';
+import { SessionReplay } from '@/components/replay/SessionReplay';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -192,6 +193,12 @@ export function AppShell() {
                   {t.app.offlineCaption}
                 </p>
               </div>
+            </div>
+          ) : null}
+
+          {!sidebarCollapsed ? (
+            <div className="flex items-center justify-between gap-2">
+              <SessionReplay />
             </div>
           ) : null}
 

@@ -400,5 +400,22 @@
   "landing.p3body": "学生是未成年人。他们的手写笔迹、错误和薄弱环节都保留在本地设备上——这不是隐私作秀，而是大多数教育科技公司在默默违反的硬性要求。",
   "landing.p4": "断网也能用",
   "landing.p4body": "整个技术栈都在 NVIDIA DGX Spark 上本地运行。拔掉网线，导师依然可以继续授课。",
-  "landing.spark": "小模型用于英文对话还可以，但在多语言数学辅导上会力不从心。GB10 的 128 GB 统一内存可在本地运行 27B 多语言模型——这就是玩具与导师之间的本质区别。"
+  "landing.spark": "小模型用于英文对话还可以，但在多语言数学辅导上会力不从心。GB10 的 128 GB 统一内存可在本地运行 27B 多语言模型——这就是玩具与导师之间的本质区别。",
+  "replay.recording": "正在录制",
+  "replay.paused": "未在录制",
+  "replay.startHint": "录制此会话，以便 Sensei 观察你的解答过程。",
+  "replay.stopHint": "停止录制。已录制的内容将被保留。",
+  "replay.open": "回放此会话",
+  "replay.title": "会话回放",
+  "replay.subtitle": "重现你的实际操作过程——你可以拖动进度条，或让 Sensei 查看完整的过程。",
+  "replay.play": "播放",
+  "replay.clear": "放弃录制",
+  "replay.showSensei": "向 Sensei 展示我的会话",
+  "replay.looking": "Sensei 正在观看…",
+  "replay.senseiSaw": "Sensei 看到的内容",
+  "replay.empty": "尚未录制任何内容。画图或回答问题后，内容会显示在这里。",
+  "replay.frameCount.one": "已记录 1 个瞬间",
+  "replay.frameCount.other": "已记录 {n} 个瞬间",
+  "replay.visionFailed": "Sensei 此时无法观看会话回放。",
+  "replay.visionPrompt": "这些面板按时间顺序展示了一位学生的解答过程，最早的排在最前。请描述他们的解答是如何展开的，并指出他们在哪个面板开始出错。"
 }

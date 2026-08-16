@@ -400,5 +400,22 @@
   "landing.p3body": "Ɗalibai ƙanana ne. Rubutun hannunsu, kura-kuransu, da raunukansu suna nan a cikin na'urar — ba wasan kwaikwayo na sirri ba ne, buƙata ce da yawancin fasahar ilimi ke keta ta a asirce.",
   "landing.p4": "Yana aiki ko da an cire kebul",
   "landing.p4body": "Duk tsarin yana aiki ne a cikin gida a kan NVIDIA DGX Spark. Cire haɗin intanet kuma malamin zai ci gaba da koyarwa.",
-  "landing.spark": "Ƙananan samfura suna da kyau don tattaunawa ta Turanci; amma suna gaza a koyarwar lissafi ta harsuna da yawa. Ƙwaƙwalwar ajiya ta GB10 mai ƙarfin 128 GB tana gudanar da samfurin harsuna da yawa na 27B a cikin gida — bambanci tsakanin abun wasa da malami."
+  "landing.spark": "Ƙananan samfura suna da kyau don tattaunawa ta Turanci; amma suna gaza a koyarwar lissafi ta harsuna da yawa. Ƙwaƙwalwar ajiya ta GB10 mai ƙarfin 128 GB tana gudanar da samfurin harsuna da yawa na 27B a cikin gida — bambanci tsakanin abun wasa da malami.",
+  "replay.recording": "Ana nadawa",
+  "replay.paused": "Ba a nada",
+  "replay.startHint": "Nadi wannan zaman domin Sensei ya kalli yadda kake aiki.",
+  "replay.stopHint": "Dakatar da nadi. Abin da aka riga aka nada yana nan a adane.",
+  "replay.open": "Sake kunna wannan zaman",
+  "replay.title": "Sake kunna zaman",
+  "replay.subtitle": "Aikinka, wanda aka sake zana shi daga ainihin abin da ka yi — duba shi daki-daki, ko kuma ka bar Sensei ya kalli duka yadda aka yi shi.",
+  "replay.play": "Kunna",
+  "replay.clear": "Yar da nadin",
+  "replay.showSensei": "Nuna wa Sensei zamana",
+  "replay.looking": "Sensei yana kallo…",
+  "replay.senseiSaw": "Abin da Sensei ya gani",
+  "replay.empty": "Ba a nada komai ba tukunna. Zana ko amsa wani abu kuma zai bayyana a nan.",
+  "replay.frameCount.one": "An dauki lokaci 1",
+  "replay.frameCount.other": "An dauki lokuta {n}",
+  "replay.visionFailed": "Sensei ya kasa kallon zaman a wannan karon.",
+  "replay.visionPrompt": "Wadannan hotunan sune zaman aikin dalibi daya bi da bi, na farko ne a gaba. Bayyana yadda aikinsu ya ci gaba, kuma ka fadi a wane hoto ne suka fara yin kuskure."
 }

@@ -305,6 +305,25 @@ function build(dict: Dict) {
       zoomFit: s('scratch.zoomFit'),
     },
 
+    replay: {
+      recording: s('replay.recording'),
+      paused: s('replay.paused'),
+      startHint: s('replay.startHint'),
+      stopHint: s('replay.stopHint'),
+      open: s('replay.open'),
+      title: s('replay.title'),
+      subtitle: s('replay.subtitle'),
+      play: s('replay.play'),
+      clear: s('replay.clear'),
+      showSensei: s('replay.showSensei'),
+      looking: s('replay.looking'),
+      senseiSaw: s('replay.senseiSaw'),
+      empty: s('replay.empty'),
+      frameCount: (n: number) => plural('replay.frameCount', n),
+      visionFailed: s('replay.visionFailed'),
+      visionPrompt: s('replay.visionPrompt'),
+    },
+
     landing: {
       tagline: s('landing.tagline'),
       problem: s('landing.problem'),

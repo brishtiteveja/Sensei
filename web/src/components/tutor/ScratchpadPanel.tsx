@@ -143,6 +143,13 @@ function drawShape(ctx: CanvasRenderingContext2D, s: Shape) {
 
 const ZOOMS = [1, 1.5, 2, 3];
 
+/** Keep at most `max` evenly spaced points, always including the last one. */
+function decimate(pts: Pt[], max: number): Pt[] {
+  if (pts.length <= max) return pts;
+  const step = (pts.length - 1) / (max - 1);
+  return Array.from({ length: max }, (_, i) => pts[Math.round(i * step)]);
+}
+
 export function ScratchpadPanel({
   open,
   onClose,
@@ -249,7 +256,15 @@ export function ScratchpadPanel({
     setShapes((prev) => [...prev, d]);
     // The tutor teaches against what was actually drawn, so each committed
     // stroke is reported — not the intermediate drag.
-    observe('sketch.shape', { tool: d.tool, color: d.color, width: d.width, points: d.points.length });
+    // The geometry, not just a count: replay redraws the canvas from these, and
+    // the frames it renders are what a vision model is later shown. Freehand is
+    // decimated because a 400-point scribble replays identically at 60.
+    observe('sketch.shape', {
+      tool: d.tool,
+      color: d.color,
+      width: d.width,
+      points: decimate(d.points, 60).map((p) => [Math.round(p.x), Math.round(p.y)]),
+    });
   };
 
   const undo = () => {

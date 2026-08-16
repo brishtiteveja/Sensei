@@ -36,7 +36,7 @@ const TAIL_MAX = 200;
 let queue: ObsEvent[] = [];
 let tail: ObsEvent[] = [];
 let timer: number | null = null;
-let enabled = true;
+let enabled = readRaw('obs.on') !== '0';
 
 /** Stable per-browser-tab session id, so a reload continues the same session file. */
 function sessionId(): string {
@@ -50,14 +50,33 @@ function sessionId(): string {
 
 export function setObserveEnabled(on: boolean): void {
   enabled = on;
-  if (!on) {
-    queue = [];
-    tail = [];
-  }
+  // Stopping keeps the tail: the point of stopping is usually to look at what
+  // was just recorded. Use clearRecording() to actually discard it.
+  if (!on) queue = [];
+  writeRaw('obs.on', on ? '1' : '0');
+  for (const fn of listeners) fn(on);
 }
 
 export function isObserveEnabled(): boolean {
   return enabled;
+}
+
+/** Everything still in the rolling tail — the source for replay. */
+export function recordedEvents(): ObsEvent[] {
+  return [...tail];
+}
+
+export function clearRecording(): void {
+  tail = [];
+}
+
+/** Notify the UI when recording is toggled, so an indicator can track it. */
+type Listener = (on: boolean) => void;
+const listeners = new Set<Listener>();
+
+export function onObserveChange(fn: Listener): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
 }
 
 function flush(): void {

@@ -400,5 +400,22 @@
   "landing.p3body": "Los estudiantes son menores de edad. Su escritura, errores y puntos débiles se quedan en el dispositivo; no es teatro de privacidad, sino un requisito que la mayoría de las tecnologías educativas infringe en silencio.",
   "landing.p4": "Funciona sin conexión a internet",
   "landing.p4body": "Todo el sistema se ejecuta localmente en una NVIDIA DGX Spark. Desconecta la red y el tutor seguirá enseñando.",
-  "landing.spark": "Los modelos pequeños sirven para conversar en inglés, pero fallan en la tutoría matemática multilingüe. Los 128 GB de memoria unificada de la GB10 ejecutan un modelo multilingüe de 27B de forma local: la diferencia entre un juguete y un tutor."
+  "landing.spark": "Los modelos pequeños sirven para conversar en inglés, pero fallan en la tutoría matemática multilingüe. Los 128 GB de memoria unificada de la GB10 ejecutan un modelo multilingüe de 27B de forma local: la diferencia entre un juguete y un tutor.",
+  "replay.recording": "Grabando",
+  "replay.paused": "Sin grabar",
+  "replay.startHint": "Graba esta sesión para que Sensei pueda ver cómo trabajas.",
+  "replay.stopHint": "Detener grabación. Se conservará lo que ya se grabó.",
+  "replay.open": "Reproducir esta sesión",
+  "replay.title": "Reproducción de la sesión",
+  "replay.subtitle": "Tu trabajo, recreado a partir de lo que hiciste: avanza rápido o deja que Sensei vea todo el proceso.",
+  "replay.play": "Reproducir",
+  "replay.clear": "Descartar grabación",
+  "replay.showSensei": "Mostrar mi sesión a Sensei",
+  "replay.looking": "Sensei está mirando…",
+  "replay.senseiSaw": "Lo que vio Sensei",
+  "replay.empty": "Aún no hay nada grabado. Dibuja o responde algo y aparecerá aquí.",
+  "replay.frameCount.one": "1 momento capturado",
+  "replay.frameCount.other": "{n} momentos capturados",
+  "replay.visionFailed": "Sensei no pudo ver la sesión esta vez.",
+  "replay.visionPrompt": "Estos paneles muestran la sesión de trabajo de un estudiante en orden cronológico. Describe cómo se desarrolló su trabajo y señala en qué panel se equivoca por primera vez."
 }

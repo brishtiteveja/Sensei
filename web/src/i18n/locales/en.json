@@ -400,5 +400,22 @@
   "landing.p3body": "Students are minors. Their handwriting, mistakes and weak spots stay on the box — not privacy theatre, a requirement most edtech quietly violates.",
   "landing.p4": "Works with the cable pulled",
   "landing.p4body": "The whole stack runs locally on an NVIDIA DGX Spark. Unplug the network and the tutor keeps teaching.",
-  "landing.spark": "Small models are fine for English chat; they fail at multilingual maths tutoring. The GB10's 128 GB of unified memory runs a 27B multilingual model locally — the difference between a toy and a tutor."
+  "landing.spark": "Small models are fine for English chat; they fail at multilingual maths tutoring. The GB10's 128 GB of unified memory runs a 27B multilingual model locally — the difference between a toy and a tutor.",
+  "replay.recording": "Recording",
+  "replay.paused": "Not recording",
+  "replay.startHint": "Record this session so Sensei can watch how you work.",
+  "replay.stopHint": "Stop recording. What is already recorded is kept.",
+  "replay.open": "Replay this session",
+  "replay.title": "Session replay",
+  "replay.subtitle": "Your work, redrawn from what you actually did — scrub through it, or let Sensei look at the whole progression.",
+  "replay.play": "Play",
+  "replay.clear": "Discard recording",
+  "replay.showSensei": "Show Sensei my session",
+  "replay.looking": "Sensei is watching…",
+  "replay.senseiSaw": "What Sensei saw",
+  "replay.empty": "Nothing recorded yet. Draw or answer something and it will show up here.",
+  "replay.frameCount.one": "1 moment captured",
+  "replay.frameCount.other": "{n} moments captured",
+  "replay.visionFailed": "Sensei could not watch the session back this time.",
+  "replay.visionPrompt": "These panels are one student's work session in order, earliest first. Describe how their working developed, and say at which panel they first go wrong."
 }

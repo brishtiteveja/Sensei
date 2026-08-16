@@ -400,5 +400,22 @@
   "landing.p3body": "Pelajar adalah di bawah umur. Tulisan tangan, kesilapan dan kelemahan mereka kekal di dalam peranti — bukan sekadar lakonan privasi, satu keperluan yang senyap-senyap dilanggar oleh kebanyakan teknologi pendidikan.",
   "landing.p4": "Berfungsi walaupun kabel dicabut",
   "landing.p4body": "Keseluruhan sistem berjalan secara tempatan pada NVIDIA DGX Spark. Cabut rangkaian dan tutor akan terus mengajar.",
-  "landing.spark": "Model kecil sesuai untuk sembang bahasa Inggeris; ia gagal dalam bimbingan matematik berbilang bahasa. Memori bersatu 128 GB milik GB10 menjalankan model berbilang bahasa 27B secara tempatan — perbezaan antara mainan dan tutor."
+  "landing.spark": "Model kecil sesuai untuk sembang bahasa Inggeris; ia gagal dalam bimbingan matematik berbilang bahasa. Memori bersatu 128 GB milik GB10 menjalankan model berbilang bahasa 27B secara tempatan — perbezaan antara mainan dan tutor.",
+  "replay.recording": "Merakam",
+  "replay.paused": "Tidak merakam",
+  "replay.startHint": "Rakam sesi ini supaya Sensei boleh melihat cara anda bekerja.",
+  "replay.stopHint": "Hentikan rakaman. Apa yang telah dirakam akan disimpan.",
+  "replay.open": "Main semula sesi ini",
+  "replay.title": "Main semula sesi",
+  "replay.subtitle": "Hasil kerja anda, dilukis semula daripada apa yang sebenarnya anda lakukan — imbas melaluinya, atau biarkan Sensei melihat keseluruhan perkembangan.",
+  "replay.play": "Main",
+  "replay.clear": "Buang rakaman",
+  "replay.showSensei": "Tunjukkan sesi saya kepada Sensei",
+  "replay.looking": "Sensei sedang menonton…",
+  "replay.senseiSaw": "Apa yang dilihat oleh Sensei",
+  "replay.empty": "Belum ada yang dirakam. Lukis atau jawab sesuatu dan ia akan dipaparkan di sini.",
+  "replay.frameCount.one": "1 detik dirakam",
+  "replay.frameCount.other": "{n} detik dirakam",
+  "replay.visionFailed": "Sensei tidak dapat menonton semula sesi kali ini.",
+  "replay.visionPrompt": "Panel-panel ini menunjukkan sesi kerja seorang pelajar mengikut urutan, bermula dari yang paling awal. Terangkan bagaimana perkembangan kerja mereka, dan nyatakan pada panel mana mereka mula melakukan kesilapan."
 }

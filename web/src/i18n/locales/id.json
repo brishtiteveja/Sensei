@@ -400,5 +400,22 @@
   "landing.p3body": "Siswa adalah anak di bawah umur. Tulisan tangan, kesalahan, dan kelemahan mereka tetap tersimpan di perangkat — bukan sekadar formalitas privasi, melainkan sebuah keharusan yang sering kali dilanggar diam-diam oleh kebanyakan edtech.",
   "landing.p4": "Tetap berfungsi tanpa koneksi internet",
   "landing.p4body": "Seluruh sistem berjalan secara lokal di NVIDIA DGX Spark. Cabut kabel jaringan dan tutor akan tetap mengajar.",
-  "landing.spark": "Model kecil memang cukup untuk obrolan bahasa Inggris, tetapi gagal dalam bimbingan matematika multibahasa. Memori terpadu 128 GB milik GB10 menjalankan model multibahasa 27B secara lokal — pembeda nyata antara mainan dan seorang tutor."
+  "landing.spark": "Model kecil memang cukup untuk obrolan bahasa Inggris, tetapi gagal dalam bimbingan matematika multibahasa. Memori terpadu 128 GB milik GB10 menjalankan model multibahasa 27B secara lokal — pembeda nyata antara mainan dan seorang tutor.",
+  "replay.recording": "Merekam",
+  "replay.paused": "Tidak merekam",
+  "replay.startHint": "Rekam sesi ini agar Sensei dapat melihat cara kamu mengerjakan.",
+  "replay.stopHint": "Hentikan rekaman. Rekaman yang sudah ada akan tetap disimpan.",
+  "replay.open": "Putar ulang sesi ini",
+  "replay.title": "Putar ulang sesi",
+  "replay.subtitle": "Pekerjaanmu, digambar ulang dari apa yang sebenarnya kamu lakukan — geser linimasa, atau biarkan Sensei melihat seluruh prosesnya.",
+  "replay.play": "Putar",
+  "replay.clear": "Buang rekaman",
+  "replay.showSensei": "Tunjukkan sesiku ke Sensei",
+  "replay.looking": "Sensei sedang melihat…",
+  "replay.senseiSaw": "Yang dilihat Sensei",
+  "replay.empty": "Belum ada yang direkam. Gambar atau jawab sesuatu dan rekaman akan muncul di sini.",
+  "replay.frameCount.one": "1 momen terekam",
+  "replay.frameCount.other": "{n} momen terekam",
+  "replay.visionFailed": "Sensei tidak dapat melihat kembali sesi kali ini.",
+  "replay.visionPrompt": "Panel-panel ini adalah sesi kerja seorang siswa secara berurutan, dari yang paling awal. Jelaskan bagaimana perkembangan pekerjaan mereka, dan sebutkan di panel mana mereka pertama kali melakukan kesalahan."
 }
