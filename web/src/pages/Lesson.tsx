@@ -65,6 +65,8 @@ export function LessonPage() {
 
   const [activeStep, setActiveStep] = useState<number | undefined>(undefined);
   const [notebookOpen, setNotebookOpen] = useState(false);
+  /** Work handed over from the lesson notebook, seeded into the docked tutor. */
+  const [notebookWork, setNotebookWork] = useState<string | null>(null);
   const split = useSplitPane({ storageKey: 'lesson.split' });
   // Below 1024px the two panes stack instead of sitting side by side.
   const isSplit = useMediaQuery('(min-width: 1024px)');
@@ -102,10 +104,11 @@ export function LessonPage() {
 
   // `?ask=` lets other screens (practice) deep-link a preloaded tutor question.
   const seededQuestion = searchParams.get('ask');
-  const seed = useMemo(
-    () => (seededQuestion ? { key: `${lessonId}:${seededQuestion}`, message: seededQuestion } : null),
-    [seededQuestion, lessonId],
-  );
+  const seed = useMemo(() => {
+    // Work handed over from the notebook wins: the student just asked for it.
+    if (notebookWork) return { key: `${lessonId}:work:${notebookWork.length}`, message: notebookWork };
+    return seededQuestion ? { key: `${lessonId}:${seededQuestion}`, message: seededQuestion } : null;
+  }, [seededQuestion, lessonId, notebookWork]);
 
   const suggestions = useMemo(() => {
     const prompts = content?.practice_prompts ?? [];
@@ -399,6 +402,10 @@ export function LessonPage() {
             kind: 'lesson',
             id: lessonId,
             label: content?.title ?? entry?.lesson.title,
+          }}
+          onAttach={({ message }) => {
+            setNotebookWork(message);
+            setNotebookOpen(false);
           }}
         />
       ) : null}

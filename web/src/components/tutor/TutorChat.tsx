@@ -437,7 +437,12 @@ export function TutorChat({
         context={notebookContext}
         // Attach pulls the working into the composer but leaves the notebook
         // open, so the student can keep jotting while they talk it through.
-        onAttach={(msg) => insertText(msg)}
+        // Sketches and photos ride along as attachments, so the tutor reads the
+        // actual drawing rather than a "[sketch]" placeholder.
+        onAttach={({ message, images }) => {
+          insertText(message);
+          for (const dataUri of images) attach({ kind: 'sketch', dataUri });
+        }}
       />
     </section>
   );

@@ -43,7 +43,7 @@ export function NotebookPage() {
       >
         <NotebookEditor
           context={context}
-          onAttach={(message) => {
+          onAttach={({ message }) => {
             // Park the compiled notebook (too long for a URL) and open the tutor.
             writeRaw(TUTOR_SEED_KEY, message);
             navigate('/tutor?seed=notebook');

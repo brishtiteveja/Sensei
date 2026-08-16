@@ -10,6 +10,8 @@ import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { SubjectArt } from '@/components/art/SubjectArt';
 import { loadSamples, SAMPLE_SUBJECTS, sampleUrl, type SampleProblem } from '@/lib/samples';
+import { getCustomQuestions, type DraftedQuestion } from '@/lib/api';
+import { AddQuestion } from './AddQuestion';
 import { t } from '@/i18n/strings';
 import { difficultyTone } from '@/lib/utils';
 
@@ -20,6 +22,23 @@ function toSampleSubject(subjectId: string | undefined): string | null {
   if (s.includes('chem')) return 'chemistry';
   if (s.includes('math')) return 'math';
   return null;
+}
+
+/** A teacher-added question, shaped like a sample so the same card renders it. */
+function toSample(q: DraftedQuestion): SampleProblem {
+  return {
+    id: q.id,
+    subject: q.subject,
+    band: q.level === 'advanced' ? 'advanced' : 'basic',
+    level: q.level,
+    slug: q.id,
+    title: q.title,
+    problem: q.problem,
+    answer: q.answer ?? null,
+    dir: '',
+    images: { ques: null, good: [], bad: [] },
+    solutions: [],
+  };
 }
 
 /** Localised heading for a sample-kit subject. */
@@ -42,6 +61,9 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
 
   const [notebookFor, setNotebookFor] = useState<SampleProblem | null>(null);
   const [askFor, setAskFor] = useState<SampleProblem | null>(null);
+  /** Set when the student hands their notebook over, so the tutor opens on it. */
+  const [handoff, setHandoff] = useState<string | null>(null);
+  const [custom, setCustom] = useState<SampleProblem[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -53,6 +75,10 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
           alive &&
           setState({ status: 'error', error: error instanceof Error ? error : new Error(String(error)) }),
       );
+    // Teacher-added questions live server-side; missing ones are not an error.
+    getCustomQuestions()
+      .then((r) => alive && setCustom((r.questions ?? []).map(toSample)))
+      .catch(() => undefined);
     return () => {
       alive = false;
     };
@@ -67,14 +93,15 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
    */
   const groups = useMemo(() => {
     if (state.status !== 'ready') return [];
-    const shown = wanted ? state.problems.filter((p) => p.subject === wanted) : state.problems;
+    const all = [...state.problems, ...custom];
+    const shown = wanted ? all.filter((p) => p.subject === wanted) : all;
     return SAMPLE_SUBJECTS.map((subject) => ({
       subject,
       problems: shown
         .filter((p) => p.subject === subject)
         .sort((a, b) => (a.band === b.band ? 0 : a.band === 'basic' ? -1 : 1)),
     })).filter((g) => g.problems.length);
-  }, [state, wanted]);
+  }, [state, wanted, custom]);
 
   if (state.status === 'loading') {
     return (
@@ -97,7 +124,10 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
 
   return (
     <div className="mx-auto max-w-5xl">
-      <p className="mb-6 text-[13.5px] text-ink-muted">{t.practice.specialIntro}</p>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13.5px] text-ink-muted">{t.practice.specialIntro}</p>
+        <AddQuestion onAdded={(q) => setCustom((prev) => [...prev, toSample(q)])} />
+      </div>
       <div className="space-y-9">
         {groups.map(({ subject, problems }) => (
           <section key={subject} aria-label={subjectLabel(subject)}>
@@ -139,6 +169,13 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
           open
           onClose={() => setNotebookFor(null)}
           context={{ kind: 'practice', id: `sample:${notebookFor.id}`, label: notebookFor.title }}
+          onAttach={({ message }) => {
+            // Close the notebook and open the tutor already holding the working.
+            const problem = notebookFor;
+            setHandoff(message);
+            setNotebookFor(null);
+            setAskFor(problem);
+          }}
           header={
             <div className="rounded-xl border border-line bg-surface-alt/70 p-3">
               <p className="mb-2 text-2xs font-semibold uppercase tracking-wide text-ink-faint">
@@ -160,7 +197,10 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
 
       <Modal
         open={askFor !== null}
-        onClose={() => setAskFor(null)}
+        onClose={() => {
+          setAskFor(null);
+          setHandoff(null);
+        }}
         title={askFor?.title ?? t.practice.askWhy}
         description={t.tutor.subtitle}
         width="max-w-3xl"
@@ -171,10 +211,11 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
               contextType="exam_review"
               contextData={{ subject: askFor.subject, question_id: askFor.id }}
               seed={{
-                key: askFor.id,
-                message:
-                  `I'm working on this problem:\n\n${askFor.problem}\n\n` +
-                  `Guide me through it step by step with questions — don't just give me the answer.`,
+                key: handoff ? `${askFor.id}:work` : askFor.id,
+                message: handoff
+                  ? `Here is the problem:\n\n${askFor.problem}\n\n${handoff}`
+                  : `I'm working on this problem:\n\n${askFor.problem}\n\n` +
+                    `Guide me through it step by step with questions — don't just give me the answer.`,
               }}
               title={t.tutor.title}
               subtitle={askFor.title}

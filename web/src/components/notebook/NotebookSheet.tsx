@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { NotebookEditor } from './NotebookEditor';
-import type { NotebookContext } from '@/lib/notebook';
+import type { NotebookContext, NotebookHandoff } from '@/lib/notebook';
 import { t } from '@/i18n/strings';
 
 /**
@@ -20,7 +20,7 @@ export function NotebookSheet({
   onClose: () => void;
   context: NotebookContext;
   /** Present in the tutor: hand the compiled notebook to the chat. */
-  onAttach?: (message: string) => void;
+  onAttach?: (handoff: NotebookHandoff) => void;
   /** Pinned above the blocks — the problem being solved, so it stays in view. */
   header?: ReactNode;
 }) {

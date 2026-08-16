@@ -11,6 +11,7 @@ import { PracticePage } from '@/pages/Practice';
 import { NotebookPage } from '@/pages/Notebook';
 import { HandoffPage } from '@/pages/Handoff';
 import { TeachPage } from '@/pages/Teach';
+import { LandingPage } from '@/pages/Landing';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { SettingsPage } from '@/pages/Settings';
 import { TutorPage } from '@/pages/Tutor';
@@ -52,6 +53,8 @@ function LocalisedTree() {
         {/* The phone-handoff page is deliberately outside the shell: it opens on
             a phone that scanned a QR, and has one job. */}
         <Route path="handoff" element={<HandoffPage />} />
+        {/* Standalone, outside the shell: this is the pitch, not a tool. */}
+        <Route path="welcome" element={<LandingPage />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="courses" element={<CatalogPage />} />

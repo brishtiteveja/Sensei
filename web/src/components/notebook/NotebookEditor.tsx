@@ -20,12 +20,13 @@ import { fileToDownscaledDataUri } from '@/lib/image';
 import { observe } from '@/lib/observe';
 import {
   blockId,
-  compileForTutor,
+  compileHandoff,
   getNotebook,
   saveNotebook,
   type Notebook,
   type NotebookBlock,
   type NotebookContext,
+  type NotebookHandoff,
 } from '@/lib/notebook';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
@@ -35,9 +36,9 @@ import { cn } from '@/lib/utils';
  * context's notebook, autosaves every edit, and knows nothing about where it is
  * mounted — the full Notebook page, a sheet over Practice/Lesson, or the tutor.
  *
- * `onAttach`, when given, adds a "Discuss with Sensei" action that hands the
- * compiled notebook to the caller (the tutor inserts it into the message and
- * keeps the notebook open beside the chat).
+ * `onAttach`, when given, adds an action that hands the whole notebook to the
+ * caller -- the prose as a message plus the sketches and photos, which have to
+ * travel separately because only the vision endpoint can read them.
  */
 export function NotebookEditor({
   context,
@@ -45,7 +46,7 @@ export function NotebookEditor({
   compact,
 }: {
   context: NotebookContext;
-  onAttach?: (message: string) => void;
+  onAttach?: (handoff: NotebookHandoff) => void;
   /** Denser layout for use inside a sheet rather than a full page. */
   compact?: boolean;
 }) {
@@ -147,9 +148,14 @@ export function NotebookEditor({
           )}
         />
         {onAttach ? (
-          <Button onClick={() => onAttach(compileForTutor(nb))} disabled={!hasContent} className="shrink-0">
+          <Button
+            onClick={() => onAttach(compileHandoff(nb))}
+            disabled={!hasContent}
+            className="shrink-0"
+            title={t.notebook.attachHint}
+          >
             <MessageCircle size={15} />
-            {t.notebook.askSensei}
+            {t.notebook.attach}
           </Button>
         ) : null}
       </div>

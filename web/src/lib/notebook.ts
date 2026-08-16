@@ -121,6 +121,27 @@ export function notebookHasContent(context: NotebookContext): boolean {
  * written; a sketch becomes a short bracketed marker, since this server has no
  * vision route — the tutor reasons from the surrounding text.
  */
+/** What the tutor receives when a notebook is handed over. */
+export interface NotebookHandoff {
+  message: string;
+  /** Sketches and photos, so the tutor can actually look at the working. */
+  images: string[];
+}
+
+/**
+ * Everything in the notebook, ready for the tutor: the prose as a message and
+ * the pictures separately, since those have to go through the vision endpoint
+ * rather than ride a text turn.
+ */
+export function compileHandoff(nb: Notebook): NotebookHandoff {
+  return {
+    message: compileForTutor(nb),
+    images: nb.blocks
+      .filter((b): b is Extract<NotebookBlock, { image: string }> => 'image' in b)
+      .map((b) => b.image),
+  };
+}
+
 export function compileForTutor(nb: Notebook): string {
   const parts: string[] = [];
   if (nb.title.trim()) parts.push(`# ${nb.title.trim()}`);
