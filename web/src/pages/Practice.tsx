@@ -59,7 +59,8 @@ export function PracticePage() {
   const [finished, setFinished] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
-  const [special, setSpecial] = useState(false);
+  // Curated examples are the better first impression, so they lead.
+  const [special, setSpecial] = useState(true);
 
   const resetSet = useCallback(() => {
     setIndex(0);

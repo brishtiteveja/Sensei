@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { NotebookEditor } from './NotebookEditor';
 import type { NotebookContext } from '@/lib/notebook';
@@ -13,21 +14,25 @@ export function NotebookSheet({
   onClose,
   context,
   onAttach,
+  header,
 }: {
   open: boolean;
   onClose: () => void;
   context: NotebookContext;
   /** Present in the tutor: hand the compiled notebook to the chat. */
   onAttach?: (message: string) => void;
+  /** Pinned above the blocks — the problem being solved, so it stays in view. */
+  header?: ReactNode;
 }) {
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={t.notebook.title}
-      description={context.label ?? t.notebook.subtitle}
+      description={header ? undefined : (context.label ?? t.notebook.subtitle)}
       width="max-w-3xl"
     >
+      {header ? <div className="mb-4">{header}</div> : null}
       <NotebookEditor context={context} onAttach={onAttach} compact />
     </Modal>
   );

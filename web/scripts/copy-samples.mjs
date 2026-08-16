@@ -31,3 +31,16 @@ for (const subject of ['physics', 'chemistry', 'math']) {
   if (existsSync(from)) cpSync(from, join(dest, subject), { recursive: true });
 }
 console.log('[copy-samples] staged samples into public/samples');
+
+// The NoTeS-Bank benchmark subset, same deal: committed once under datasets/,
+// staged into public/ at build time rather than duplicated into git.
+// Fetch it with: python3 scripts/fetch_notesbank.py
+const nbSrc = join(repo, 'datasets', 'notesbank');
+const nbDest = join(here, '..', 'public', 'notesbank');
+rmSync(nbDest, { recursive: true, force: true });
+if (existsSync(join(nbSrc, 'manifest.json'))) {
+  cpSync(nbSrc, nbDest, { recursive: true });
+  console.log('[copy-samples] staged notesbank into public/notesbank');
+} else {
+  console.warn('[copy-samples] no datasets/notesbank — benchmark tab will show a hint');
+}

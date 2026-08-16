@@ -17,6 +17,7 @@ import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
 import { observe } from '@/lib/observe';
+import { readJSON, removeKey, writeJSON } from '@/lib/storage';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -148,6 +149,7 @@ export function ScratchpadPanel({
   onAsk,
   onInsert,
   insertLabel,
+  draftKey = 'scratch.draft',
   title,
 }: {
   open: boolean;
@@ -158,6 +160,8 @@ export function ScratchpadPanel({
   onInsert?: (pngDataUri: string) => void;
   /** Label for the insert action — where the drawing is going. */
   insertLabel?: string;
+  /** Storage slot for the unfinished drawing; per-surface so they don't collide. */
+  draftKey?: string;
   title?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -190,13 +194,20 @@ export function ScratchpadPanel({
     if (open) repaint();
   }, [open, repaint]);
 
+  // Restore an unfinished drawing. Closing the dialog by mis-clicking the
+  // backdrop used to throw the work away; now only inserting or an explicit
+  // Clear ends a drawing, and it even survives a reload.
   useEffect(() => {
-    if (open) return;
-    // Reset when closed so the next open is a fresh page.
-    setShapes([]);
+    if (!open) return;
     setZoom(1);
     draftRef.current = null;
-  }, [open]);
+    setShapes(readJSON<Shape[]>(draftKey, []));
+  }, [open, draftKey]);
+
+  useEffect(() => {
+    if (!open) return;
+    writeJSON(draftKey, shapes);
+  }, [open, shapes, draftKey]);
 
   // getBoundingClientRect reflects the zoomed on-screen size, so mapping a
   // pointer through the rect's ratio lands on the right canvas pixel at any
@@ -248,6 +259,7 @@ export function ScratchpadPanel({
   const clear = () => {
     if (shapes.length && !window.confirm(t.scratch.clearConfirm)) return;
     setShapes([]);
+    removeKey(draftKey);
     observe('sketch.clear');
   };
 
@@ -271,6 +283,8 @@ export function ScratchpadPanel({
     const cv = canvasRef.current;
     if (!cv || !shapes.length) return;
     onInsert?.(cv.toDataURL('image/png'));
+    setShapes([]);
+    removeKey(draftKey);
     onClose();
   };
 

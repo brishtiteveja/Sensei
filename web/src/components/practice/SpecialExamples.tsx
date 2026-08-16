@@ -88,6 +88,22 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
           open
           onClose={() => setNotebookFor(null)}
           context={{ kind: 'practice', id: `sample:${notebookFor.id}`, label: notebookFor.title }}
+          header={
+            <div className="rounded-xl border border-line bg-surface-alt/70 p-3">
+              <p className="mb-2 text-2xs font-semibold uppercase tracking-wide text-ink-faint">
+                {notebookFor.title}
+              </p>
+              {notebookFor.images.ques ? (
+                <img
+                  src={sampleUrl(notebookFor.images.ques)}
+                  alt={notebookFor.title}
+                  className="mx-auto max-h-44 w-auto rounded-lg bg-white"
+                />
+              ) : (
+                <RichText className="text-[13px] text-ink-soft">{notebookFor.problem}</RichText>
+              )}
+            </div>
+          }
         />
       ) : null}
 

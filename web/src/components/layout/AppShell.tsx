@@ -6,6 +6,7 @@ import {
   ChevronsRight,
   LayoutDashboard,
   Moon,
+  GraduationCap,
   NotebookPen,
   Settings as SettingsIcon,
   ShieldCheck,
@@ -36,6 +37,7 @@ function navItems() {
     // The owl stands in for the tutor everywhere it speaks -- nav, chat avatar,
     // empty state -- so "Ask Sensei" reads as asking a character, not a feature.
     { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn' },
+    { to: '/teach', label: t.nav.teach, icon: GraduationCap, group: 'teach' },
     { to: '/progress', label: t.nav.progress, icon: TrendingUp, group: 'you' },
     { to: '/settings', label: t.nav.settings, icon: SettingsIcon, group: 'you' },
   ] as const;
@@ -54,6 +56,7 @@ export function AppShell() {
   const nav = navItems();
   const groups: Array<{ key: string; label: string }> = [
     { key: 'learn', label: t.nav.sectionLearn },
+    { key: 'teach', label: t.nav.sectionTeach },
     { key: 'you', label: t.nav.sectionYou },
   ];
 

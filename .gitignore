@@ -39,3 +39,6 @@ web/node_modules/
 
 # Sample images are copied into web/public at build prep; source of truth is /samples
 web/public/samples/
+
+# NoTeS-Bank subset staged into web/public at build time; source is /datasets
+web/public/notesbank/

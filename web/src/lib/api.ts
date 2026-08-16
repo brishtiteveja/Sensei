@@ -205,6 +205,67 @@ export function seeWork(
   });
 }
 
+export interface GradeReport {
+  summary: string;
+  score: number;
+  grade: string;
+  questions?: {
+    label: string;
+    verdict: 'correct' | 'partial' | 'wrong';
+    error: string | null;
+    feedback: string;
+  }[];
+  strengths?: string[];
+  next_steps?: string[];
+}
+
+/** Grade submitted work. Files are data URIs — images and/or PDFs. */
+export function gradeWork(
+  files: { data: string; mime: string; name: string }[],
+  rubric: string | undefined,
+  language: string,
+  signal?: AbortSignal,
+) {
+  return apiFetch<{ report: GradeReport; model: string }>('/grade', {
+    method: 'POST',
+    body: { files, rubric, language },
+    timeoutMs: LONG_TIMEOUT_MS,
+    signal,
+  });
+}
+
+export interface DraftedQuestion {
+  id: string;
+  subject: string;
+  title: string;
+  level: string;
+  problem: string;
+  answer: string;
+  solution_steps?: string[];
+  common_mistake?: string;
+}
+
+/** Turn a teacher's rough problem into a finalised practice question. */
+export function draftQuestion(
+  input: { text?: string; image?: string; subject_hint?: string },
+  language: string,
+  signal?: AbortSignal,
+) {
+  return apiFetch<{ question: DraftedQuestion }>('/samples/draft', {
+    method: 'POST',
+    body: { ...input, language },
+    timeoutMs: LONG_TIMEOUT_MS,
+    signal,
+  });
+}
+
+export function getCustomQuestions(signal?: AbortSignal) {
+  return apiFetch<{ questions: DraftedQuestion[] }>('/samples/custom', {
+    signal,
+    timeoutMs: 15_000,
+  });
+}
+
 /** Fire-and-forget batch of workspace events. Never throws. */
 export function postObservations(
   session: string,
