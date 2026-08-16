@@ -47,41 +47,74 @@ So a design with "a vision model for handwriting plus a separate tutor model" wo
 single interaction. Sensei instead pins **one vision-capable multilingual model** that does both
 jobs. Everything in `config.py` and `bootstrap_spark.sh` exists to keep that pin honest.
 
+## Two repos
+
+| | |
+|---|---|
+| **this repo** | the surfaces a student and a teacher touch — web app, mobile app, curriculum, samples, benchmark |
+| [**SenseiClaw**](https://github.com/brishtiteveja/Sensei-NemoClaw) | the tutor harness: model routing, pedagogy prompts, the two-stage vision pipeline, observation store |
+
+The web app talks to SenseiClaw and to nothing else. Its README is the reference
+for the API surface, the model pin, and the two-stage design.
+
 ## Layout
 
 ```
-backend/sensei/
-  config.py    model pin + the offline guard that makes the cable-pull real
-  llm.py       vllm router client (streaming, vision, cold-swap-aware timeouts)
-  learner.py   per-student memory in SQLite -- the two-sigma differentiator
-  tutor.py     Socratic prompts + written-work diagnosis
-  server.py    FastAPI: /tutor/stream, /tutor/diagnose, /learner/*
-scripts/
-  bootstrap_spark.sh   clean GB10 -> demo-ready, one command
+web/                 Vite + React student and teacher app -- the deployed surface
+  src/i18n/          8 locales; strings.ts is a module singleton (see gotcha below)
+  scripts/           gen-locales.mjs, copy-samples.mjs (prebuild staging)
+mobile/              Expo app
+backend/sensei/      earlier standalone backend; learner.py + graph.py still live here
+  learner.py         per-student memory in SQLite -- the two-sigma differentiator
+  graph.py           concepts as nodes, prerequisites as edges; mastery-gated path
+samples/             17 curated worked problems, rendered by scripts/render_samples.py
+datasets/            NoTeS-Bank subset (ICDAR 2025, Apache-2.0) -- 39 real handwritten pages
+others/hackathon/sensei/
+  HANDOFF.md         current build state: verified, broken, next
+  NEMOCLAW.md        sandboxed inference via NemoClaw + OpenShell
 docs/
-  PLAN.md      build order, risks, team split
+  FUTURE_PLANS.md    deferred work, with reasons
 ```
+
+`backend/sensei/` predates SenseiClaw and is not what serves the app. It is kept
+because `learner.py` and `graph.py` are the server-side progress model and
+knowledge graph, written and not yet wired up.
 
 ## Running
 
+The app is a static build served by nginx; **deploy means rebuild**.
+
 ```bash
-./scripts/bootstrap_spark.sh          # deps, reachability, catalog check, pre-warm
-cd backend
-uv run uvicorn sensei.server:app --host 0.0.0.0 --port 8080
+cd web
+VITE_SENSEI_API_URL=/sensei/api npm run build     # prebuild stages samples + notesbank
 ```
 
-`GET /health` reports whether the pinned model is actually resident — check it before demoing.
-`warm: false` means the next request eats a cold swap.
+`VITE_SENSEI_API_URL=/sensei/api` is **mandatory**. Without it the bundle bakes in
+a raw `http://<ip>:4050`, which an HTTPS page blocks as mixed content, and every
+screen shows "Cannot reach the Sensei server." This has bitten twice.
 
-### Configuration
+For the backend, see the [SenseiClaw README](https://github.com/brishtiteveja/Sensei-NemoClaw).
 
-| Env | Default | Notes |
-|---|---|---|
-| `SENSEI_BASE_URL` | `http://localhost:8010/v1` | Router base URL |
-| `SENSEI_API_KEY` | — | Bearer token, if the router requires one |
-| `SENSEI_MODEL` | `qwen3-vl-30b-a3b-gguf` | The pin. Changing it is an architectural decision. |
-| `SENSEI_TIMEOUT` | `900` | Must exceed worst-case cold swap |
-| `SENSEI_OFFLINE` | `1` | Hard-fails any off-box request. Set `0` only for remote dev. |
+### Before demoing
+
+The resident model has changed under us mid-session before, silently breaking
+every vision feature. Check both:
+
+```bash
+curl -s https://spark-e257.tail803c7f.ts.net:8443/health   # which model is hot
+curl -s http://127.0.0.1:4050/tutor/health                 # harness up
+```
+
+### Gotchas
+
+- `web/src/i18n/strings.ts` is a **module singleton**. Never hoist `t.*` into a
+  module-level constant — it freezes the language at import time.
+- After adding English keys, regenerate the other seven locales:
+  `GEMINI_API_KEY=... node scripts/gen-locales.mjs` (incremental; missing keys only).
+- nginx is shared infra and editing its config is gated, so assets are staged into
+  `web/public` by a prebuild step rather than served from elsewhere.
+- FastAPI request models must be declared *above* the route that uses them, or the
+  body binds as a query param.
 
 ---
 

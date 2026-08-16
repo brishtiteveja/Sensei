@@ -255,6 +255,17 @@ f6acd36  Teacher tab — grading + NoTeS-Bank benchmark
 4648e9f  Practice "special examples"
 ```
 
-SenseiClaw: `0bafc05` (thinking off for local coaching) ← `d394ae6` (two-stage
-coach) ← `e53b197` (attempt summaries) ← `2fcb74f` (teacher tools) ←
-`7cd4345` (handoff relay) ← `748bf25` (see + observe).
+**SenseiClaw hashes changed on 16 Aug — the ones a previous handoff listed are
+gone.** Its history was squashed so nothing predates the hack: the whole
+pre-hackathon DikkhaClaw codebase is now one `Initial import` commit, and the
+tree is byte-identical to before the rewrite. Fetch fresh rather than trusting
+an old hash; a stale local clone will need `git reset --hard <remote>/main`.
+
+SenseiClaw is now 14 commits, `8122841` (Initial import, 15 Aug) →
+`4015bdc` (thinking off for local coaching, 16 Aug), and lives in **two**
+remotes, both current:
+
+| remote | URL |
+|---|---|
+| `origin` | `github.com/BanglaLLM/SenseiClaw` |
+| `nemoclaw` | `github.com/brishtiteveja/Sensei-NemoClaw` (public) |
