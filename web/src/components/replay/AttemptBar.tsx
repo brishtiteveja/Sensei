@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { History, Play, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { ReplayModal } from '@/components/replay/ReplayModal';
-import { recordedEvents } from '@/lib/observe';
+import { recordedEvents, reportAttempt, setObserveContext } from '@/lib/observe';
 import {
   appendToAttempt,
+  getAttempt,
+  summarize,
   attemptsFor,
   closeAttempt,
   createAttempt,
@@ -64,7 +66,16 @@ export function AttemptBar({
       existing ?? createAttempt({ problemKey, problemTitle, problemText, subject });
     sinceRef.current = Date.now();
     setCurrentId(a.id);
-    setAttempts(attemptsFor(problemKey));
+    const list = attemptsFor(problemKey);
+    setAttempts(list);
+    // Every event recorded from here carries which problem and which try it is.
+    setObserveContext({
+      attempt: a.id,
+      problemKey,
+      problemTitle,
+      subject,
+      attemptNo: Math.max(1, list.findIndex((x) => x.id === a.id) + 1),
+    });
 
     // Unmount = the sheet closed. Keep the attempt open so returning resumes it;
     // only its work is banked.
@@ -73,6 +84,12 @@ export function AttemptBar({
         a.id,
         recordedEvents().filter((e) => e.t >= sinceRef.current),
       );
+      const done = getAttempt(a.id);
+      if (done?.events.length) {
+        const no = Math.max(1, attemptsFor(problemKey).findIndex((x) => x.id === a.id) + 1);
+        reportAttempt(summarize(done, no));
+      }
+      setObserveContext(null);
       pruneEmpty();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,7 +107,15 @@ export function AttemptBar({
     const a = createAttempt({ problemKey, problemTitle, problemText, subject });
     sinceRef.current = Date.now();
     setCurrentId(a.id);
-    refresh();
+    const list = attemptsFor(problemKey);
+    setAttempts(list);
+    setObserveContext({
+      attempt: a.id,
+      problemKey,
+      problemTitle,
+      subject,
+      attemptNo: Math.max(1, list.findIndex((x) => x.id === a.id) + 1),
+    });
   };
 
   const index = attempts.findIndex((a) => a.id === currentId);

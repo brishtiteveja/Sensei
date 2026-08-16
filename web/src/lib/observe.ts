@@ -1,4 +1,4 @@
-import { postObservations } from '@/lib/api';
+import { postAttemptSummary, postObservations } from '@/lib/api';
 import { readRaw, writeRaw } from '@/lib/storage';
 
 /**
@@ -23,6 +23,8 @@ export interface ObsEvent {
   t: number;
   type: string;
   data?: Record<string, unknown>;
+  /** Problem/attempt this happened inside, when there is one. */
+  ctx?: Record<string, unknown>;
 }
 
 const FLUSH_MS = 5_000;
@@ -32,6 +34,23 @@ const DIGEST_WINDOW_MS = 150_000;
 const DIGEST_MAX = 40;
 /** Rolling tail kept in memory for the digest. */
 const TAIL_MAX = 200;
+
+/**
+ * What the student is working on right now. Merged into every event, so a row
+ * in the dataset says which problem and which attempt it belongs to instead of
+ * being an anonymous stroke in a stream.
+ */
+let context: Record<string, unknown> = {};
+
+/** Ship an attempt summary under the current session id. */
+export function reportAttempt(summary: unknown): void {
+  if (!enabled) return;
+  void postAttemptSummary(sessionId(), summary);
+}
+
+export function setObserveContext(ctx: Record<string, unknown> | null): void {
+  context = ctx ?? {};
+}
 
 let queue: ObsEvent[] = [];
 let tail: ObsEvent[] = [];
@@ -93,7 +112,12 @@ function flush(): void {
 /** Record one workspace event. */
 export function observe(type: string, data?: Record<string, unknown>): void {
   if (!enabled) return;
-  const ev: ObsEvent = { t: Date.now(), type, ...(data ? { data } : {}) };
+  const ev: ObsEvent = {
+    t: Date.now(),
+    type,
+    ...(data ? { data } : {}),
+    ...(Object.keys(context).length ? { ctx: { ...context } } : {}),
+  };
 
   queue.push(ev);
   tail.push(ev);

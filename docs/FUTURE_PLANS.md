@@ -23,3 +23,11 @@ Short list of things intentionally left for later, so they don't get forgotten.
   Near-term: surface the curated problems in Practice behind an advanced/special
   toggle. Next: deploy `backend/sensei` and wire the photo-of-work → diagnose →
   Socratic-opening flow end to end from the notebook/scratchpad.
+
+## Dashboard-wide user sessions
+The global recorder in the sidebar stays for now: it is the only thing that
+captures free-form work outside a problem (tutor chat, a free notebook page).
+The fuller idea is a *user session* spanning the whole dashboard — sign in,
+work across practice, lessons and the notebook, and have one timeline that
+stitches the attempts together with everything between them. That needs a
+learner identity and a consent story first, so it waits behind those.

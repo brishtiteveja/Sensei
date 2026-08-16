@@ -305,6 +305,23 @@ export function coachWork(
   });
 }
 
+/** Fire-and-forget one-row account of an attempt. Never throws. */
+export function postAttemptSummary(
+  session: string,
+  summary: unknown,
+  learner?: string,
+): Promise<void> {
+  return fetch(`${API_BASE_URL}/observe/attempt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session, summary, learner }),
+    keepalive: true,
+  }).then(
+    () => undefined,
+    () => undefined,
+  );
+}
+
 /** Fire-and-forget batch of workspace events. Never throws. */
 export function postObservations(
   session: string,

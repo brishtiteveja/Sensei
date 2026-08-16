@@ -125,3 +125,72 @@ export function deleteAttempt(id: string): void {
 export function pruneEmpty(): void {
   persist(all().filter((a) => a.events.length > 0));
 }
+
+/**
+ * A one-row account of an attempt, for the dataset.
+ *
+ * The event log says exactly what happened; this says what it *meant*. The
+ * signals here are the ones learning research actually asks for and that a raw
+ * stroke list buries: how long before the student committed to anything
+ * (hesitation), how much they took back (uncertainty), whether they asked for
+ * help before or after going wrong, and how it ended. Computed client-side
+ * because the events are already here, and it keeps the server a plain sink.
+ */
+export interface AttemptSummary {
+  attempt: string;
+  problemKey: string;
+  problemTitle: string;
+  subject?: string;
+  attemptNo: number;
+  startedAt: number;
+  durationMs: number;
+  events: number;
+  /** ms from opening the problem to the first mark made. */
+  timeToFirstActionMs: number | null;
+  strokes: number;
+  undos: number;
+  clears: number;
+  erases: number;
+  notesWritten: number;
+  /** Times the student asked the watching tutor to look. */
+  coachAsks: number;
+  /** What the tutor said about the work, in order. */
+  coachVerdicts: string[];
+  tutorTurns: number;
+  outcome?: 'correct' | 'wrong';
+}
+
+export function summarize(a: Attempt, attemptNo: number): AttemptSummary {
+  const count = (type: string) => a.events.filter((e) => e.type === type).length;
+  const first = a.events.find((e) =>
+    ['sketch.shape', 'notebook.block', 'practice.pick', 'tutor.user'].includes(e.type),
+  );
+  const last = a.events[a.events.length - 1];
+
+  return {
+    attempt: a.id,
+    problemKey: a.problemKey,
+    problemTitle: a.problemTitle,
+    subject: a.subject,
+    attemptNo,
+    startedAt: a.startedAt,
+    durationMs: (last?.t ?? a.updatedAt) - a.startedAt,
+    events: a.events.length,
+    timeToFirstActionMs: first ? first.t - a.startedAt : null,
+    strokes: count('sketch.shape'),
+    undos: count('sketch.undo'),
+    clears: count('sketch.clear'),
+    erases: a.events.filter(
+      (e) => e.type === 'sketch.shape' && (e.data as { tool?: string } | undefined)?.tool === 'eraser',
+    ).length,
+    notesWritten: a.events.filter(
+      (e) => e.type === 'notebook.block' && (e.data as { op?: string } | undefined)?.op === 'edit',
+    ).length,
+    coachAsks: count('coach.ask'),
+    coachVerdicts: a.events
+      .filter((e) => e.type === 'coach.reply')
+      .map((e) => String((e.data as { status?: string } | undefined)?.status ?? '')),
+    tutorTurns: count('tutor.user'),
+    outcome: a.outcome,
+  };
+}
