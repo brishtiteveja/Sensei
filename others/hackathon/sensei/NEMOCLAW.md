@@ -87,6 +87,16 @@ curl -s https://spark-e257.tail803c7f.ts.net:8443/health   # {"loaded":["..."]}
 **`--resume` does not help a preflight failure.** No session exists until
 preflight passes, so a port clash means re-running fresh, not resuming.
 
+**Never `pkill -f "uvicorn clawpy"` inside the sandbox.** The restart command
+line *contains* that string, so the pattern matches the very shell running it
+and the script kills itself part-way through — leaving the old process dead, the
+new one never started, and nginx serving 502. This caused a real outage. Use a
+bracket pattern so it cannot self-match:
+
+```bash
+pkill -f "[u]vicorn clawpy"
+```
+
 **`NEMOCLAW_GATEWAY_PORT` must be set on *every* invocation, not just onboard.**
 Otherwise follow-up commands look for a gateway on 8080, find nginx, and report
 `Sandbox 'sensei' does not exist` — which is alarming and untrue. Export it:

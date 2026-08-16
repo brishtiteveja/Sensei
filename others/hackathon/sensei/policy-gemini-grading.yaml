@@ -1,0 +1,29 @@
+# Teacher-side grading runs on cloud Gemini so that marking a stack of scripts
+# never takes the GPU away from a student mid-lesson. That is the only reason
+# this egress exists.
+#
+# Scoped as tightly as the feature allows: one host, POST only, and only the
+# two API prefixes SenseiClaw actually calls (/v1beta/openai for the
+# OpenAI-compatible path, /v1beta/models for the native one). Student work on
+# the Socratic path still never leaves the box -- that runs on inference.local.
+#
+#   nemoclaw sensei policy add --from-file others/hackathon/sensei/policy-gemini-grading.yaml -y
+
+preset:
+  name: gemini-grading
+  description: "Cloud Gemini for teacher-side grading and question finalisation"
+
+network_policies:
+  gemini_grading:
+    name: gemini_grading
+    endpoints:
+      - host: generativelanguage.googleapis.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow: { method: POST, path: "/v1beta/openai/**" }
+          - allow: { method: POST, path: "/v1beta/models/**" }
+    binaries:
+      - { path: /sandbox/senseiclaw/.venv/bin/python* }
+      - { path: /usr/bin/python3* }
