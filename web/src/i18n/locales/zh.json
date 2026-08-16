@@ -435,5 +435,6 @@
   "coach.dragHint": "拖动我到任意位置 · 轻点开始对话",
   "replay.insert": "发送给 Sensei",
   "replay.insertedWork": "这是我完整的解答过程 —— 你怎么看？",
-  "coach.readingLabel": "我页面上的内容"
+  "coach.readingLabel": "我页面上的内容",
+  "coach.noWorkSurface": "打开笔记本或草稿纸以显示步骤"
 }

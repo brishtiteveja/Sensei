@@ -435,5 +435,6 @@
   "coach.dragHint": "Seret saya ke mana-mana · ketik untuk bercakap",
   "replay.insert": "Hantar kepada Sensei",
   "replay.insertedWork": "Ini keseluruhan sesi kerja saya — apa pendapat anda tentangnya?",
-  "coach.readingLabel": "apa yang ada di halaman saya"
+  "coach.readingLabel": "apa yang ada di halaman saya",
+  "coach.noWorkSurface": "Buka buku nota atau draf kerja untuk menunjukkan hasil kerja"
 }

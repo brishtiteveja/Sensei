@@ -435,5 +435,6 @@
   "coach.dragHint": "Arrástrame a cualquier lugar · toca para hablar",
   "replay.insert": "Enviar a Sensei",
   "replay.insertedWork": "Aquí está toda mi sesión de trabajo, ¿qué opinas de ella?",
-  "coach.readingLabel": "qué hay en mi página"
+  "coach.readingLabel": "qué hay en mi página",
+  "coach.noWorkSurface": "Abre el cuaderno o borrador para mostrar tu trabajo"
 }

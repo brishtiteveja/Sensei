@@ -435,5 +435,6 @@
   "coach.dragHint": "मुझे कहीं भी ड्रैग करें · बात करने के लिए टैप करें",
   "replay.insert": "Sensei को भेजें",
   "replay.insertedWork": "यहाँ मेरा पूरा वर्किंग सेशन है — आपको इसके बारे में क्या लगता है?",
-  "coach.readingLabel": "मेरे पेज पर क्या है"
+  "coach.readingLabel": "मेरे पेज पर क्या है",
+  "coach.noWorkSurface": "काम दिखाने के लिए नोटबुक या स्क्रैचपैड खोलें"
 }

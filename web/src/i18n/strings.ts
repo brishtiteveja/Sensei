@@ -321,6 +321,7 @@ function build(dict: Dict) {
       failed: s('coach.failed'),
       lookAtMyWork: s('coach.lookAtMyWork'),
       noSurface: s('coach.noSurface'),
+      noWorkSurface: s('coach.noWorkSurface'),
       nothingToSee: s('coach.nothingToSee'),
       threadEmpty: s('coach.threadEmpty'),
       dragHint: s('coach.dragHint'),

@@ -22,6 +22,8 @@ import { CalculatorPanel } from './CalculatorPanel';
 import { ScratchpadPanel } from './ScratchpadPanel';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
 import { FREE_DEFAULT, type NotebookContext } from '@/lib/notebook';
+import { registerSurface } from '@/lib/senseiSurface';
+import { threadKeyFor } from '@/lib/conversations';
 import { seeWork } from '@/lib/api';
 import { digest, observe } from '@/lib/observe';
 import { useTutorChat } from '@/hooks/useTutorChat';
@@ -82,6 +84,17 @@ export function TutorChat({
     : contextData.question_id
       ? { kind: 'practice', id: String(contextData.question_id) }
       : FREE_DEFAULT;
+
+  // Any open tutor sets the owl's context, so the owl shows this problem's
+  // thread rather than the free one -- they are the same conversation.
+  useEffect(() => {
+    const problem = typeof contextData.problem === 'string' ? contextData.problem : undefined;
+    return registerSurface({
+      problem,
+      contextKey: threadKeyFor(contextData as Record<string, unknown>),
+      label: typeof title === 'string' ? title : undefined,
+    });
+  }, [contextData, title]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

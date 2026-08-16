@@ -9,8 +9,12 @@
  */
 
 export interface Surface {
-  /** Pixels of the current work, rendered on demand. */
-  getImage: () => string | null | Promise<string | null>;
+  /**
+   * Pixels of the current work, rendered on demand. Absent when the student is
+   * on a problem that has no drawable surface — a chat about a question still
+   * sets the context even though there is nothing to look at.
+   */
+  getImage?: () => string | null | Promise<string | null>;
   /** What the student is solving, for the tutor's context. */
   problem?: string;
   /** Stable key for the problem, so each gets its own conversation. */

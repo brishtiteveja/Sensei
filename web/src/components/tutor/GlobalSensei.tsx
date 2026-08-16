@@ -111,12 +111,12 @@ export function GlobalSensei() {
    */
   const lookAtWork = useCallback(async () => {
     const s = activeSurface();
-    if (!s || busy) return;
+    if (!s?.getImage || busy) return;
     setOpen(true);
     setLooking(true);
     observe('coach.ask', { problem: s.problem?.slice(0, 80) });
     try {
-      const image = await s.getImage();
+      const image = await s.getImage!();
       if (!image) {
         chat.send(t.coach.nothingToSee);
         return;
@@ -255,10 +255,14 @@ export function GlobalSensei() {
                 variant="secondary"
                 className="h-8 w-full text-2xs"
                 onClick={() => void lookAtWork()}
-                disabled={busy || !surface}
+                disabled={busy || !surface?.getImage}
               >
                 <Eye size={13} />
-                {surface ? t.coach.lookAtMyWork : t.coach.noSurface}
+                {surface?.getImage
+                  ? t.coach.lookAtMyWork
+                  : surface
+                    ? t.coach.noWorkSurface
+                    : t.coach.noSurface}
               </Button>
               <form
                 onSubmit={(e) => {

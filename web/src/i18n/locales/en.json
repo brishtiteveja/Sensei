@@ -435,5 +435,6 @@
   "coach.dragHint": "Drag me anywhere · tap to talk",
   "replay.insert": "Send to Sensei",
   "replay.insertedWork": "Here is my whole working session — what do you make of it?",
-  "coach.readingLabel": "what is on my page"
+  "coach.readingLabel": "what is on my page",
+  "coach.noWorkSurface": "Open the notebook or scratchpad to show work"
 }
