@@ -26,7 +26,7 @@ export function SessionReplay() {
 
   return (
     <>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1" data-tour="record">
         <button
           type="button"
           onClick={() => setObserveEnabled(!recording)}

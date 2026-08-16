@@ -436,5 +436,21 @@
   "replay.insert": "Send to Sensei",
   "replay.insertedWork": "Here is my whole working session — what do you make of it?",
   "coach.readingLabel": "what is on my page",
-  "coach.noWorkSurface": "Open the notebook or scratchpad to show work"
+  "coach.noWorkSurface": "Open the notebook or scratchpad to show work",
+  "tour.start": "Take a quick tour",
+  "tour.skip": "Skip",
+  "tour.next": "Next",
+  "tour.done": "Got it",
+  "tour.practiceTitle": "Practice",
+  "tour.practiceBody": "Hand-picked problems by subject, plus past-exam questions. Press Solve to work one out step by step.",
+  "tour.notebookTitle": "Your notebook",
+  "tour.notebookBody": "Where your working lives — type, sketch a diagram, or photograph a page. It saves itself per problem.",
+  "tour.tutorTitle": "Ask Sensei",
+  "tour.tutorBody": "Socratic tutoring: it guides you to the answer instead of handing it over.",
+  "tour.owlTitle": "Sensei is watching",
+  "tour.owlBody": "Drag this owl anywhere. Tap it to talk, or let it look at your work and tell you where you went wrong.",
+  "tour.teachTitle": "For teachers",
+  "tour.teachBody": "Grade a pile of homework — photos or PDFs — and check Sensei against a public handwriting benchmark.",
+  "tour.recordTitle": "Recording",
+  "tour.recordBody": "Your attempts are recorded so you can replay them, and so Sensei can see how your thinking developed. Pause it any time."
 }

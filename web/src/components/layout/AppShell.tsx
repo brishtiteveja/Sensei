@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   BookOpen,
   ChevronsLeft,
+  HelpCircle,
   ChevronsRight,
   LayoutDashboard,
   Moon,
@@ -22,6 +23,7 @@ import { useSettings } from '@/state/settings';
 import { observe } from '@/lib/observe';
 import { SessionReplay } from '@/components/replay/SessionReplay';
 import { GlobalSensei } from '@/components/tutor/GlobalSensei';
+import { Tour, hasSeenTour } from '@/components/tour/Tour';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
 
@@ -34,12 +36,12 @@ function navItems() {
   return [
     { to: '/', label: t.nav.dashboard, icon: LayoutDashboard, end: true, group: 'learn' },
     { to: '/courses', label: t.nav.catalog, icon: BookOpen, group: 'learn' },
-    { to: '/practice', label: t.nav.practice, icon: Target, group: 'learn' },
-    { to: '/notebook', label: t.nav.notebook, icon: NotebookPen, group: 'learn' },
+    { to: '/practice', label: t.nav.practice, icon: Target, group: 'learn', tour: 'practice' },
+    { to: '/notebook', label: t.nav.notebook, icon: NotebookPen, group: 'learn', tour: 'notebook' },
     // The owl stands in for the tutor everywhere it speaks -- nav, chat avatar,
     // empty state -- so "Ask Sensei" reads as asking a character, not a feature.
-    { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn' },
-    { to: '/teach', label: t.nav.teach, icon: GraduationCap, group: 'teach' },
+    { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn', tour: 'tutor' },
+    { to: '/teach', label: t.nav.teach, icon: GraduationCap, group: 'teach', tour: 'teach' },
     { to: '/progress', label: t.nav.progress, icon: TrendingUp, group: 'you' },
     { to: '/settings', label: t.nav.settings, icon: SettingsIcon, group: 'you' },
   ] as const;
@@ -55,6 +57,14 @@ export function AppShell() {
     observe('route', { path: location.pathname });
   }, [location.pathname]);
 
+  const [tourOpen, setTourOpen] = useState(false);
+  // Offer the tour once, after the shell has painted so targets exist.
+  useEffect(() => {
+    if (hasSeenTour()) return;
+    const id = window.setTimeout(() => setTourOpen(true), 900);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const nav = navItems();
   const groups: Array<{ key: string; label: string }> = [
     { key: 'learn', label: t.nav.sectionLearn },
@@ -69,6 +79,7 @@ export function AppShell() {
       <Aurora />
       {/* One owl for the whole app: follows the student, draggable, per-problem thread. */}
       <GlobalSensei />
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} />
 
       <a
         href="#s-main"
@@ -130,6 +141,7 @@ export function AppShell() {
                   <li key={item.to}>
                     <NavLink
                       to={item.to}
+                      data-tour={'tour' in item ? item.tour : undefined}
                       end={'end' in item ? item.end : false}
                       title={sidebarCollapsed ? item.label : undefined}
                       className={({ isActive }) =>
@@ -206,6 +218,9 @@ export function AppShell() {
           ) : null}
 
           <div className={cn('flex items-center gap-1', sidebarCollapsed && 'flex-col')}>
+            <IconButton label={t.tour.start} onClick={() => setTourOpen(true)}>
+              <HelpCircle size={16} />
+            </IconButton>
             <IconButton
               label={t.nav.toggleTheme}
               onClick={() => setTheme(isDark ? 'light' : 'dark')}

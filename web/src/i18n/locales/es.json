@@ -436,5 +436,21 @@
   "replay.insert": "Enviar a Sensei",
   "replay.insertedWork": "Aquí está toda mi sesión de trabajo, ¿qué opinas de ella?",
   "coach.readingLabel": "qué hay en mi página",
-  "coach.noWorkSurface": "Abre el cuaderno o borrador para mostrar tu trabajo"
+  "coach.noWorkSurface": "Abre el cuaderno o borrador para mostrar tu trabajo",
+  "tour.start": "Hacer un recorrido rápido",
+  "tour.skip": "Omitir",
+  "tour.next": "Siguiente",
+  "tour.done": "Entendido",
+  "tour.practiceTitle": "Práctica",
+  "tour.practiceBody": "Problemas seleccionados por materia y preguntas de exámenes anteriores. Presiona Resolver para trabajar paso a paso.",
+  "tour.notebookTitle": "Tu cuaderno",
+  "tour.notebookBody": "Donde vive tu trabajo: escribe, dibuja un diagrama o toma una foto de tu página. Se guarda automáticamente por problema.",
+  "tour.tutorTitle": "Pregúntale a Sensei",
+  "tour.tutorBody": "Tutoría socrática: te guía hacia la respuesta en lugar de simplemente dártela.",
+  "tour.owlTitle": "Sensei te observa",
+  "tour.owlBody": "Arrastra este búho a cualquier lugar. Tócalo para hablar, o deja que mire tu trabajo y te diga en qué te equivocaste.",
+  "tour.teachTitle": "Para profesores",
+  "tour.teachBody": "Califica un montón de tareas (fotos o PDF) y compara a Sensei con una referencia pública de escritura a mano.",
+  "tour.recordTitle": "Grabación",
+  "tour.recordBody": "Tus intentos se graban para que puedas reproducirlos y para que Sensei vea cómo se desarrolló tu pensamiento. Paúsala en cualquier momento."
 }

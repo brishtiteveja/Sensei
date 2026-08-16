@@ -313,6 +313,25 @@ function build(dict: Dict) {
       startNew: s('attempt.startNew'),
     },
 
+    tour: {
+      start: s('tour.start'),
+      skip: s('tour.skip'),
+      next: s('tour.next'),
+      done: s('tour.done'),
+      practiceTitle: s('tour.practiceTitle'),
+      practiceBody: s('tour.practiceBody'),
+      notebookTitle: s('tour.notebookTitle'),
+      notebookBody: s('tour.notebookBody'),
+      tutorTitle: s('tour.tutorTitle'),
+      tutorBody: s('tour.tutorBody'),
+      owlTitle: s('tour.owlTitle'),
+      owlBody: s('tour.owlBody'),
+      teachTitle: s('tour.teachTitle'),
+      teachBody: s('tour.teachBody'),
+      recordTitle: s('tour.recordTitle'),
+      recordBody: s('tour.recordBody'),
+    },
+
     coach: {
       ask: s('coach.ask'),
       looking: s('coach.looking'),

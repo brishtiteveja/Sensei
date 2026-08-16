@@ -436,5 +436,21 @@
   "replay.insert": "Hantar kepada Sensei",
   "replay.insertedWork": "Ini keseluruhan sesi kerja saya — apa pendapat anda tentangnya?",
   "coach.readingLabel": "apa yang ada di halaman saya",
-  "coach.noWorkSurface": "Buka buku nota atau draf kerja untuk menunjukkan hasil kerja"
+  "coach.noWorkSurface": "Buka buku nota atau draf kerja untuk menunjukkan hasil kerja",
+  "tour.start": "Mula jelajah ringkas",
+  "tour.skip": "Langkau",
+  "tour.next": "Seterusnya",
+  "tour.done": "Faham",
+  "tour.practiceTitle": "Latihan",
+  "tour.practiceBody": "Soalan terpilih mengikut subjek, serta soalan peperiksaan lepas. Tekan Selesaikan untuk menyelesaikannya langkah demi langkah.",
+  "tour.notebookTitle": "Buku nota anda",
+  "tour.notebookBody": "Tempat kerja jalan kira anda — taip, lakar gambar rajah, atau ambil foto halaman. Ia disimpan secara automatik untuk setiap soalan.",
+  "tour.tutorTitle": "Tanya Sensei",
+  "tour.tutorBody": "Bimbingan Sokratik: ia membimbing anda kepada jawapan dan bukannya memberikan jawapan secara terus.",
+  "tour.owlTitle": "Sensei sedang memerhati",
+  "tour.owlBody": "Seret burung hantu ini ke mana-mana sahaja. Ketik padanya untuk berbual, atau biarkan ia melihat hasil kerja anda dan memberitahu di mana kesilapan anda.",
+  "tour.teachTitle": "Untuk guru",
+  "tour.teachBody": "Nilai timbunan kerja rumah — foto atau PDF — dan bandingkan Sensei dengan penanda aras tulisan tangan awam.",
+  "tour.recordTitle": "Rakaman",
+  "tour.recordBody": "Percubaan anda dirakam supaya anda boleh memainkannya semula, dan supaya Sensei dapat melihat perkembangan pemikiran anda. Jeda pada bila-bila masa."
 }

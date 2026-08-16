@@ -436,5 +436,21 @@
   "replay.insert": "Aika wa Sensei",
   "replay.insertedWork": "Ga duka aikin da na yi — me kake gani game da shi?",
   "coach.readingLabel": "abin da ke kan shafina",
-  "coach.noWorkSurface": "Buɗe littafin rubutu ko takardar rubutu don nuna aiki"
+  "coach.noWorkSurface": "Buɗe littafin rubutu ko takardar rubutu don nuna aiki",
+  "tour.start": "Yi ɗan gajeren yawon shakatawa",
+  "tour.skip": "Tsallake",
+  "tour.next": "Na gaba",
+  "tour.done": "Na gane",
+  "tour.practiceTitle": "Ayyuka",
+  "tour.practiceBody": "Zaɓaɓɓun matsaloli ta fannin darasi, haɗi da tambayoyin jarrabawar baya. Latsa Warware don yin aiki mataki-mataki.",
+  "tour.notebookTitle": "Littafin rubutunka",
+  "tour.notebookBody": "Inda ayyukanka suke — rubuta, zana hoto, ko ɗauki hoton shafi. Yana adana kansa ga kowace matsala.",
+  "tour.tutorTitle": "Tambayi Sensei",
+  "tour.tutorBody": "Koyarwa irin ta Socratic: tana yi maka jagora zuwa ga amsar maimakon ba ka ita kai tsaye.",
+  "tour.owlTitle": "Sensei yana kallo",
+  "tour.owlBody": "Jawo wannan mujiya zuwa ko'ina. Latsa ta don yin magana, ko ka bar ta ta kalli aikinka don ta gaya maka inda ka yi kuskure.",
+  "tour.teachTitle": "Don malamai",
+  "tour.teachBody": "Yi wa tarin aikin gida makin — hotuna ko PDFs — kuma ka gwada Sensei da ma'aunin rubutun hannu na jama'a.",
+  "tour.recordTitle": "Yin rikodi",
+  "tour.recordBody": "Ana rikodin ƙoƙarinka don ka iya sake kunna su, kuma don Sensei ya ga yadda tunaninka ya haɓaka. Dakatar da shi a kowane lokaci."
 }
