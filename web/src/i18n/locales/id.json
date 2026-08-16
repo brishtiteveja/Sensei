@@ -422,5 +422,10 @@
   "coach.looking": "Sensei sedang melihat pekerjaanmu…",
   "coach.lookAt": "Lihat",
   "coach.discuss": "Diskusikan",
-  "coach.failed": "Sensei tidak dapat melihat hal itu saat ini."
+  "coach.failed": "Sensei tidak dapat melihat hal itu saat ini.",
+  "attempt.current": "Percobaan {n}",
+  "attempt.recording": "Merekam percobaan ini",
+  "attempt.replay": "Putar ulang",
+  "attempt.replayNth": "Putar ulang percobaan {n}",
+  "attempt.startNew": "Percobaan baru"
 }

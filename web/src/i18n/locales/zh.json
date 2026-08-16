@@ -422,5 +422,10 @@
   "coach.looking": "Sensei 正在查看你的解答…",
   "coach.lookAt": "查看",
   "coach.discuss": "讨论一下",
-  "coach.failed": "Sensei 刚刚无法查看该内容。"
+  "coach.failed": "Sensei 刚刚无法查看该内容。",
+  "attempt.current": "尝试 {n}",
+  "attempt.recording": "正在记录本次尝试",
+  "attempt.replay": "重放",
+  "attempt.replayNth": "重放尝试 {n}",
+  "attempt.startNew": "新尝试"
 }

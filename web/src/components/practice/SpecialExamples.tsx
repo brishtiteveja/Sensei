@@ -170,6 +170,8 @@ export function SpecialExamples({ subjectId }: { subjectId: string | undefined }
           onClose={() => setNotebookFor(null)}
           context={{ kind: 'practice', id: `sample:${notebookFor.id}`, label: notebookFor.title }}
           problem={notebookFor.problem}
+          subject={notebookFor.subject}
+          recordAttempts
           onAttach={({ message }) => {
             // Close the notebook and open the tutor already holding the working.
             const problem = notebookFor;

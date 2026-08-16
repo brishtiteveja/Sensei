@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { NotebookEditor } from './NotebookEditor';
+import { AttemptBar } from '@/components/replay/AttemptBar';
 import type { NotebookContext, NotebookHandoff } from '@/lib/notebook';
 import { t } from '@/i18n/strings';
 
@@ -16,6 +17,8 @@ export function NotebookSheet({
   onAttach,
   header,
   problem,
+  recordAttempts,
+  subject,
 }: {
   open: boolean;
   onClose: () => void;
@@ -26,6 +29,9 @@ export function NotebookSheet({
   header?: ReactNode;
   /** Plain-text problem for the scratchpad's watching owl. */
   problem?: string;
+  /** Record this sitting against the problem, and offer its past attempts. */
+  recordAttempts?: boolean;
+  subject?: string;
 }) {
   return (
     <Modal
@@ -35,6 +41,16 @@ export function NotebookSheet({
       description={header ? undefined : (context.label ?? t.notebook.subtitle)}
       width="max-w-3xl"
     >
+      {recordAttempts ? (
+        <div className="mb-3">
+          <AttemptBar
+            problemKey={`${context.kind}:${context.id}`}
+            problemTitle={context.label ?? t.notebook.title}
+            problemText={problem}
+            subject={subject}
+          />
+        </div>
+      ) : null}
       {header ? <div className="mb-4">{header}</div> : null}
       <NotebookEditor context={context} onAttach={onAttach} problem={problem} compact />
     </Modal>

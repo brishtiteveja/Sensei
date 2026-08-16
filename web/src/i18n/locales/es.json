@@ -422,5 +422,10 @@
   "coach.looking": "Sensei está mirando tu trabajo…",
   "coach.lookAt": "Mirar",
   "coach.discuss": "Conversar al respecto",
-  "coach.failed": "Sensei no pudo mirar eso en este momento."
+  "coach.failed": "Sensei no pudo mirar eso en este momento.",
+  "attempt.current": "Intento {n}",
+  "attempt.recording": "Grabando este intento",
+  "attempt.replay": "Reproducir",
+  "attempt.replayNth": "Reproducir intento {n}",
+  "attempt.startNew": "Nuevo intento"
 }

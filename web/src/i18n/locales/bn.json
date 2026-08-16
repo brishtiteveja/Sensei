@@ -422,5 +422,10 @@
   "coach.looking": "Sensei আপনার কাজ দেখছে…",
   "coach.lookAt": "দেখুন",
   "coach.discuss": "আলোচনা করুন",
-  "coach.failed": "Sensei এই মুহূর্তে এটি দেখতে পারছে না।"
+  "coach.failed": "Sensei এই মুহূর্তে এটি দেখতে পারছে না।",
+  "attempt.current": "চেষ্টা {n}",
+  "attempt.recording": "এই চেষ্টাটি রেকর্ড করা হচ্ছে",
+  "attempt.replay": "আবার চালান",
+  "attempt.replayNth": "চেষ্টা {n} আবার চালান",
+  "attempt.startNew": "নতুন চেষ্টা"
 }

@@ -422,5 +422,10 @@
   "coach.looking": "Sensei yana duba aikinka…",
   "coach.lookAt": "Duba",
   "coach.discuss": "Tattauna shi",
-  "coach.failed": "Sensei ya kasa duba wannan a yanzu."
+  "coach.failed": "Sensei ya kasa duba wannan a yanzu.",
+  "attempt.current": "Kokari na {n}",
+  "attempt.recording": "Ana nadar wannan kokarin",
+  "attempt.replay": "Sake kunnawa",
+  "attempt.replayNth": "Sake kunna kokari na {n}",
+  "attempt.startNew": "Sabuwar kokari"
 }

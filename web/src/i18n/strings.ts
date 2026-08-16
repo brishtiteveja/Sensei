@@ -305,6 +305,14 @@ function build(dict: Dict) {
       zoomFit: s('scratch.zoomFit'),
     },
 
+    attempt: {
+      current: (n: number) => fill(s('attempt.current'), { n }),
+      recording: s('attempt.recording'),
+      replay: s('attempt.replay'),
+      replayNth: (n: number) => fill(s('attempt.replayNth'), { n }),
+      startNew: s('attempt.startNew'),
+    },
+
     coach: {
       ask: s('coach.ask'),
       looking: s('coach.looking'),
