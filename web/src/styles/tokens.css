@@ -5,6 +5,12 @@
  * (mobile/src/theme/themes/data.js) so the two clients read as one product.
  * Stored as space-separated RGB channels so Tailwind's `<alpha-value>` works.
  *
+ * The palette is deliberately deep and saturated: indigo -> violet -> fuchsia
+ * for the product spine, with teal/amber reserved for subject identity. The
+ * `--s-deco-*` group drives decorative surfaces only (aurora, gradients,
+ * subject art). Text colours are tuned separately so body copy always clears
+ * 4.5:1 against the tinted page — colour never lands on words.
+ *
  * NOTE: fonts are system stacks only. No @font-face, no CDN — the offline
  * ("pull the cable") claim requires zero network egress from the bundle.
  */
@@ -16,82 +22,139 @@
   --s-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', 'DejaVu Sans Mono', monospace;
 
-  /* light */
-  --s-page: 250 250 250;
+  /* light — bright paper under a faint indigo wash */
+  --s-page: 248 248 253;
   --s-surface: 255 255 255;
-  --s-surface-alt: 244 244 245;
+  --s-surface-alt: 242 242 249;
   --s-card: 255 255 255;
-  --s-border: 228 228 231;
-  --s-border-strong: 212 212 216;
+  --s-border: 226 226 238;
+  --s-border-strong: 205 205 224;
 
-  --s-text: 24 24 27;
-  --s-text-soft: 63 63 70;
-  --s-text-muted: 113 113 122;
-  --s-text-disabled: 161 161 170;
+  --s-text: 20 20 31;
+  --s-text-soft: 57 57 74;
+  /* Muted/faint are darkened relative to stock zinc because the page is no
+     longer neutral; both clear 4.5:1 on --s-page. */
+  --s-text-muted: 98 98 112;
+  --s-text-disabled: 116 116 132;
   --s-text-inverse: 255 255 255;
 
   --s-accent: 79 70 229;
   --s-accent-strong: 67 56 202;
-  --s-accent-soft: 238 242 255;
+  --s-accent-soft: 238 240 255;
 
   --s-success: 16 185 129;
-  --s-success-bg: 236 253 245;
-  --s-success-text: 4 120 87;
+  --s-success-bg: 233 252 243;
+  --s-success-text: 4 116 84;
 
   --s-warning: 245 158 11;
-  --s-warning-bg: 255 251 235;
-  --s-warning-text: 180 83 9;
+  --s-warning-bg: 255 249 232;
+  --s-warning-text: 168 78 8;
 
   --s-danger: 239 68 68;
-  --s-danger-bg: 254 226 226;
-  --s-danger-text: 185 28 28;
+  --s-danger-bg: 254 232 232;
+  --s-danger-text: 182 28 28;
 
   --s-info: 6 182 212;
-  --s-info-bg: 236 254 255;
-  --s-info-text: 21 94 117;
+  --s-info-bg: 234 253 255;
+  --s-info-text: 20 92 115;
 
-  --s-skeleton: 228 228 231;
+  --s-skeleton: 234 234 243;
   --s-shimmer: 255 255 255;
+
+  /* --- decorative ------------------------------------------------------ */
+  /* The product gradient. Used for headlines, rings, borders, hero fills. */
+  --s-grad-1: 79 70 229; /* indigo  */
+  --s-grad-2: 139 92 246; /* violet  */
+  --s-grad-3: 217 70 239; /* fuchsia */
+
+  /* Secondary identity hues (subject art, accent chips). */
+  --s-deco-teal: 13 148 136;
+  --s-deco-amber: 217 119 6;
+  --s-deco-cyan: 8 145 178;
+
+  /* Aurora background layer. Alphas are theme-specific: a light page needs a
+     whisper, deep space can take real colour. */
+  --s-aurora-1: 99 102 241;
+  --s-aurora-2: 192 38 211;
+  --s-aurora-3: 20 184 166;
+  --s-aurora-a1: 0.2;
+  --s-aurora-a2: 0.15;
+  --s-aurora-a3: 0.13;
+
+  /* Dot/grid mesh drawn over the aurora. */
+  --s-mesh: 79 70 229;
+  --s-mesh-a: 0.08;
+
+  /* Translucent card fill so the aurora reads through the content layer. */
+  --s-glass-a: 0.82;
+  --s-glass-strong-a: 0.94;
+
+  /* Floating vector shapes. */
+  --s-shape-a: 0.5;
 
   color-scheme: light;
 }
 
 .dark {
-  --s-page: 9 9 11;
-  --s-surface: 24 24 27;
-  --s-surface-alt: 31 31 35;
-  --s-card: 24 24 27;
-  --s-border: 39 39 42;
-  --s-border-strong: 63 63 70;
+  /* dark — deep space: near-black with an indigo cast, not neutral grey */
+  --s-page: 8 8 20;
+  --s-surface: 21 21 36;
+  --s-surface-alt: 30 30 50;
+  --s-card: 21 21 36;
+  --s-border: 44 44 70;
+  --s-border-strong: 72 72 108;
 
-  --s-text: 250 250 250;
-  --s-text-soft: 212 212 216;
-  --s-text-muted: 161 161 170;
-  --s-text-disabled: 113 113 122;
-  --s-text-inverse: 9 9 11;
+  --s-text: 246 246 252;
+  --s-text-soft: 208 208 226;
+  --s-text-muted: 160 160 184;
+  --s-text-disabled: 130 130 156;
+  --s-text-inverse: 10 10 24;
 
-  --s-accent: 129 140 248;
-  --s-accent-strong: 99 102 241;
-  --s-accent-soft: 30 27 75;
+  --s-accent: 139 148 250;
+  --s-accent-strong: 109 112 246;
+  --s-accent-soft: 40 36 88;
 
   --s-success: 52 211 153;
-  --s-success-bg: 2 44 34;
+  --s-success-bg: 5 46 39;
   --s-success-text: 110 231 183;
 
   --s-warning: 251 191 36;
-  --s-warning-bg: 69 26 3;
+  --s-warning-bg: 62 34 6;
   --s-warning-text: 252 211 77;
 
   --s-danger: 248 113 113;
-  --s-danger-bg: 69 10 10;
+  --s-danger-bg: 66 16 26;
   --s-danger-text: 252 165 165;
 
   --s-info: 34 211 238;
-  --s-info-bg: 8 51 68;
+  --s-info-bg: 8 48 68;
   --s-info-text: 103 232 249;
 
-  --s-skeleton: 39 39 42;
+  --s-skeleton: 38 38 62;
   --s-shimmer: 255 255 255;
+
+  --s-grad-1: 99 102 241;
+  --s-grad-2: 168 85 247;
+  --s-grad-3: 232 121 249;
+
+  --s-deco-teal: 45 212 191;
+  --s-deco-amber: 251 191 36;
+  --s-deco-cyan: 34 211 238;
+
+  --s-aurora-1: 79 70 229;
+  --s-aurora-2: 147 51 234;
+  --s-aurora-3: 13 148 136;
+  --s-aurora-a1: 0.4;
+  --s-aurora-a2: 0.32;
+  --s-aurora-a3: 0.24;
+
+  --s-mesh: 165 180 252;
+  --s-mesh-a: 0.09;
+
+  --s-glass-a: 0.72;
+  --s-glass-strong-a: 0.9;
+
+  --s-shape-a: 0.85;
 
   color-scheme: dark;
 }

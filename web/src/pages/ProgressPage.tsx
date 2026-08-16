@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ProgressBar, ProgressRing } from '@/components/ui/Progress';
 import { EmptyState, ErrorState, SkeletonCards } from '@/components/ui/States';
 import { Modal } from '@/components/ui/Modal';
+import { SubjectTile } from '@/components/art/SubjectArt';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { useProgress } from '@/state/progress';
 import { t } from '@/i18n/strings';
@@ -55,16 +56,25 @@ export function ProgressPage() {
       wide
     >
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <Card className="p-7">
-          <p className="text-2xs font-semibold uppercase tracking-wider text-ink-faint">
+        <Card className="relative overflow-hidden p-7 shadow-glow-sm">
+          {/* the headline ring sits in its own pool of colour */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(75% 42% at 50% 30%, rgb(var(--s-grad-2) / 0.18), transparent 70%)',
+            }}
+          />
+          <p className="relative text-2xs font-semibold uppercase tracking-wider text-ink-faint">
             {t.progress.overall}
           </p>
-          <div className="mt-6 flex justify-center">
+          <div className="relative mt-6 flex justify-center">
             <ProgressRing value={overallPercent} size={132} stroke={10}>
               <span className="text-2xl font-semibold tabular-nums">{overallPercent}%</span>
             </ProgressRing>
           </div>
-          <dl className="mt-7 space-y-3.5 border-t border-line pt-5 text-[13px]">
+          <dl className="relative mt-7 space-y-3.5 border-t border-line pt-5 text-[13px]">
             <Row icon={<Award size={14} />} label={t.progress.lessonsDone} value={String(totals.lessonsDone)} />
             <Row icon={<Clock size={14} />} label={t.progress.timeSpent} value={t.common.minutes(totals.minutes)} />
             <Row icon={<Flame size={14} />} label={t.dashboard.streak} value={String(state.streak.count)} />
@@ -79,7 +89,7 @@ export function ProgressPage() {
               value={totals.practiceTotal ? `${totals.accuracy}%` : '—'}
             />
           </dl>
-          <p className="mt-6 border-t border-line pt-4 text-2xs leading-relaxed text-ink-faint">
+          <p className="relative mt-6 border-t border-line pt-4 text-2xs leading-relaxed text-ink-faint">
             {t.progress.localOnlyNote}
           </p>
         </Card>
@@ -99,11 +109,9 @@ export function ProgressPage() {
                   <li key={r.id}>
                     <Link to={`/courses/${r.id}`} className="group block">
                       <div className="flex items-center justify-between gap-4">
-                        <span className="flex min-w-0 items-center gap-2.5">
-                          <span aria-hidden="true" className="text-lg leading-none">
-                            {r.icon ?? '📘'}
-                          </span>
-                          <span className="truncate text-[14px] font-medium text-ink group-hover:text-accent">
+                        <span className="flex min-w-0 items-center gap-3">
+                          <SubjectTile subject={r.id} icon={r.icon} size="sm" />
+                          <span className="truncate text-[14px] font-medium text-ink transition-colors duration-200 group-hover:text-accent">
                             {r.title}
                           </span>
                         </span>
@@ -205,8 +213,10 @@ function Highlight({
   return (
     <div
       className={cn(
-        'rounded-xl px-4 py-3',
-        tone === 'success' ? 'bg-success-bg' : 'bg-warning-bg',
+        'rounded-xl border px-4 py-3',
+        tone === 'success'
+          ? 'border-success/25 bg-success-bg'
+          : 'border-warning/25 bg-warning-bg',
       )}
     >
       <p

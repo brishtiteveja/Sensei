@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ProgressBar } from '@/components/ui/Progress';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/States';
 import { Modal } from '@/components/ui/Modal';
+import { CorrectBurst, ScoreBurst } from '@/components/art/Burst';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { useAsync } from '@/hooks/useAsync';
 import { useSubjects } from '@/hooks/useCurriculum';
@@ -175,27 +176,46 @@ export function PracticePage() {
           }
         />
       ) : finished ? (
-        <Card className="mx-auto max-w-2xl p-10 text-center">
+        <Card className="relative mx-auto max-w-2xl overflow-hidden p-10 text-center shadow-glow">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                pct(score, total) >= 60
+                  ? 'radial-gradient(70% 60% at 50% 0%, rgb(var(--s-success) / 0.16), transparent 66%)'
+                  : 'radial-gradient(70% 60% at 50% 0%, rgb(var(--s-warning) / 0.16), transparent 66%)',
+            }}
+          />
+          {/* laurel of rays behind the trophy plate */}
+          <ScoreBurst
+            className="pointer-events-none absolute left-1/2 top-4 h-56 w-56 -translate-x-1/2"
+            tone={pct(score, total) >= 60 ? 'success' : 'warning'}
+          />
           <span
             className={cn(
-              'mx-auto flex h-16 w-16 items-center justify-center rounded-2xl',
-              pct(score, total) >= 60 ? 'bg-success-bg text-success-text' : 'bg-warning-bg text-warning-text',
+              'relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ring-1 ring-inset',
+              pct(score, total) >= 60
+                ? 'bg-success-bg text-success-text ring-success/30'
+                : 'bg-warning-bg text-warning-text ring-warning/30',
             )}
           >
             <Trophy size={28} />
           </span>
-          <h2 className="mt-6 text-2xl font-semibold tracking-[-0.02em] text-ink">
+          <h2 className="relative mt-6 text-2xl font-semibold tracking-[-0.02em] text-ink">
             {t.practice.resultsTitle}
           </h2>
-          <p className="mt-2 text-sm text-ink-muted">{t.practice.resultsScore(score, total)}</p>
-          <div className="mx-auto mt-6 max-w-xs">
+          <p className="relative mt-2 text-sm text-ink-muted">
+            {t.practice.resultsScore(score, total)}
+          </p>
+          <div className="relative mx-auto mt-6 max-w-xs">
             <ProgressBar
               value={pct(score, total)}
               tone={pct(score, total) >= 60 ? 'success' : 'accent'}
               label="Score"
             />
           </div>
-          <div className="mt-8 flex justify-center gap-3">
+          <div className="relative mt-8 flex justify-center gap-3">
             <Button onClick={questionsQuery.reload}>
               <RotateCcw size={15} />
               {t.practice.resultsAgain}
@@ -224,12 +244,20 @@ export function PracticePage() {
           </div>
           <ProgressBar value={pct(index, total)} className="mb-8" label="Set progress" />
 
-          <Card className="p-8">
-            <h2 className="text-[19px] font-semibold leading-relaxed tracking-[-0.015em] text-ink">
+          <Card className="relative overflow-hidden p-8 shadow-card">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage:
+                  'radial-gradient(60% 55% at 100% 0%, rgb(var(--s-grad-2) / 0.12), transparent 62%), radial-gradient(50% 45% at 0% 100%, rgb(var(--s-grad-1) / 0.08), transparent 62%)',
+              }}
+            />
+            <h2 className="relative text-[19px] font-semibold leading-relaxed tracking-[-0.015em] text-ink">
               {question.question}
             </h2>
 
-            <ul className="mt-7 space-y-2.5">
+            <ul className="relative mt-7 space-y-2.5">
               {question.options.map((o, i) => {
                 const isPicked = picked === o.id;
                 const showCorrect = revealed && o.isCorrect;
@@ -242,29 +270,33 @@ export function PracticePage() {
                       onClick={() => setPicked(o.id)}
                       aria-pressed={isPicked}
                       className={cn(
-                        'flex w-full items-center gap-3.5 rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ease-smooth',
+                        'relative flex w-full items-center gap-3.5 rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ease-smooth',
                         'disabled:cursor-default',
                         showCorrect
-                          ? 'border-success bg-success-bg'
+                          ? 'border-success bg-success-bg shadow-soft'
                           : showWrong
                             ? 'border-danger bg-danger-bg'
                             : isPicked
-                              ? 'border-accent bg-accent-soft'
-                              : 'border-line bg-surface hover:border-line-strong hover:bg-surface-alt',
+                              ? 'border-accent bg-accent-soft shadow-glow-sm'
+                              : 's-glass border-line hover:-translate-y-px hover:border-grad-2/45 hover:bg-surface-alt/80 hover:shadow-glow-sm',
                       )}
                     >
                       <span
                         className={cn(
-                          'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[12.5px] font-semibold',
+                          'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[12.5px] font-semibold',
                           showCorrect
                             ? 'bg-success text-white'
                             : showWrong
                               ? 'bg-danger text-white'
                               : isPicked
-                                ? 'bg-accent text-white'
-                                : 'bg-surface-alt text-ink-muted',
+                                ? 's-gradient-fill text-white'
+                                : 'bg-surface-alt text-ink-muted ring-1 ring-inset ring-line',
                         )}
                       >
+                        {/* Fires once, and only when the student actually
+                            picked the right answer — never on the option they
+                            missed. */}
+                        {showCorrect && isPicked ? <CorrectBurst /> : null}
                         {showCorrect ? (
                           <Check size={14} />
                         ) : showWrong ? (
@@ -300,7 +332,7 @@ export function PracticePage() {
               />
             ) : null}
 
-            <div className="mt-8 flex items-center justify-between gap-4 border-t border-line pt-6">
+            <div className="relative mt-8 flex items-center justify-between gap-4 border-t border-line pt-6">
               <span className="text-2xs text-ink-faint">
                 Press 1–{Math.min(9, question.options.length)} to choose · Enter to{' '}
                 {revealed ? 'continue' : 'check'}
@@ -357,14 +389,23 @@ function FeedbackPanel({
     <div
       role="status"
       className={cn(
-        'mt-7 animate-fade-up rounded-xl border px-5 py-4',
-        correct ? 'border-success/35 bg-success-bg' : 'border-danger/35 bg-danger-bg',
+        'relative mt-7 animate-fade-up rounded-xl border px-5 py-4',
+        correct ? 'border-success/40 bg-success-bg' : 'border-danger/40 bg-danger-bg',
       )}
     >
-      <div className="flex items-start gap-3">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-xl"
+        style={{
+          backgroundImage: correct
+            ? 'radial-gradient(50% 140% at 0% 50%, rgb(var(--s-success) / 0.18), transparent 70%)'
+            : 'radial-gradient(50% 140% at 0% 50%, rgb(var(--s-danger) / 0.15), transparent 70%)',
+        }}
+      />
+      <div className="relative flex items-start gap-3">
         <span
           className={cn(
-            'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white',
+            'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white',
             correct ? 'bg-success' : 'bg-danger',
           )}
         >

@@ -16,6 +16,8 @@ import {
 import { Badge } from '@/components/ui/Badge';
 import { Button, LinkButton } from '@/components/ui/Button';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/components/ui/States';
+import { SectionRule } from '@/components/art/Flourish';
+import { SubjectArt } from '@/components/art/SubjectArt';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { useAsync } from '@/hooks/useAsync';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -125,8 +127,20 @@ export function LessonPage() {
     >
       {/* ---------------- left: the lesson ---------------- */}
       {/* Below lg the page scrolls as one column; at lg each pane scrolls itself. */}
-      <div className="s-scroll min-w-0 flex-1 lg:min-h-0 lg:overflow-y-auto">
-        <div className="mx-auto max-w-[820px] px-8 py-8 xl:px-10">
+      <div className="s-scroll relative min-w-0 flex-1 lg:min-h-0 lg:overflow-y-auto">
+        {/* subject motif fading out behind the lesson title */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[190px] overflow-hidden">
+          <SubjectArt subject={subjectId} className="h-full w-full" opacity={0.6} />
+          <span
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(to bottom, rgb(var(--s-page) / 0.35) 0%, rgb(var(--s-page) / 0.85) 55%, rgb(var(--s-page)) 100%)',
+            }}
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-[820px] px-8 py-8 xl:px-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
               to={`/courses/${subjectId}`}
@@ -236,9 +250,18 @@ export function LessonPage() {
                     {content.key_formulas.map((f, i) => (
                       <div
                         key={i}
-                        className="rounded-xl border border-accent/25 bg-accent-soft/70 px-4 py-3"
+                        className="relative overflow-hidden rounded-xl border border-accent/25 bg-accent-soft/70 px-4 py-3"
                       >
-                        <code className="block font-mono text-[13.5px] leading-relaxed text-accent">
+                        {/* gradient rail marking a formula block */}
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-y-0 left-0 w-1"
+                          style={{
+                            backgroundImage:
+                              'linear-gradient(180deg, rgb(var(--s-grad-1)), rgb(var(--s-grad-3)))',
+                          }}
+                        />
+                        <code className="block pl-3 font-mono text-[13.5px] leading-relaxed text-accent">
                           {f}
                         </code>
                       </div>
@@ -330,9 +353,18 @@ export function LessonPage() {
 
       {/* ---------------- right: docked tutor ---------------- */}
       <div
-        className="h-[600px] shrink-0 border-t border-line lg:h-auto lg:min-h-0 lg:border-t-0"
+        className="relative h-[600px] shrink-0 border-t border-line bg-surface/70 lg:h-auto lg:min-h-0 lg:border-t-0"
         style={isSplit ? { width: `${split.width}%`, minWidth: 340 } : undefined}
       >
+        {/* the tutor pane gets its own glow so it reads as a separate place */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(70% 40% at 100% 0%, rgb(var(--s-grad-2) / 0.14), transparent 65%), radial-gradient(60% 40% at 0% 100%, rgb(var(--s-grad-1) / 0.10), transparent 65%)',
+          }}
+        />
         <TutorChat
           contextType="topic_study"
           contextData={{
@@ -368,9 +400,12 @@ function Section({
 }) {
   return (
     <section className={className}>
-      <h2 className="mb-4 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wider text-ink-faint">
-        <span className="text-accent">{icon}</span>
+      <h2 className="mb-4 flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wider text-ink-faint">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent ring-1 ring-inset ring-accent/20">
+          {icon}
+        </span>
         {title}
+        <SectionRule className="ml-1 min-w-0 flex-1" />
       </h2>
       {children}
     </section>

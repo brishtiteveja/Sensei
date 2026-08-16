@@ -30,6 +30,201 @@
 }
 
 @layer components {
+  /* ------------------------------------------------------------------ *
+   * Aurora backdrop
+   *
+   * One fixed layer behind the whole app: three drifting radial washes plus a
+   * dot mesh. Radial gradients are used instead of `filter: blur()` so nothing
+   * costs a paint-time blur, and the stack is `position: fixed` so it never
+   * participates in a scroll container.
+   * ------------------------------------------------------------------ */
+  .s-aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    will-change: transform;
+  }
+
+  .s-aurora-1 {
+    inset: -30% 34% 44% -20%;
+    background: radial-gradient(
+      closest-side,
+      rgb(var(--s-aurora-1) / var(--s-aurora-a1)),
+      rgb(var(--s-aurora-1) / 0) 72%
+    );
+    animation: s-drift 26s ease-in-out infinite;
+  }
+
+  .s-aurora-2 {
+    inset: -24% -22% 38% 42%;
+    background: radial-gradient(
+      closest-side,
+      rgb(var(--s-aurora-2) / var(--s-aurora-a2)),
+      rgb(var(--s-aurora-2) / 0) 72%
+    );
+    animation: s-drift-alt 34s ease-in-out infinite;
+  }
+
+  .s-aurora-3 {
+    inset: 44% 6% -36% 14%;
+    background: radial-gradient(
+      closest-side,
+      rgb(var(--s-aurora-3) / var(--s-aurora-a3)),
+      rgb(var(--s-aurora-3) / 0) 70%
+    );
+    animation: s-drift 40s ease-in-out infinite reverse;
+  }
+
+  /* Dot mesh, faded toward the bottom so long pages stay calm. */
+  .s-mesh {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgb(var(--s-mesh) / var(--s-mesh-a)) 1px, transparent 1px);
+    background-size: 26px 26px;
+    background-position: -13px -13px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 88%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 88%);
+  }
+
+  /* Fine grid; only strong enough to read as structure near the top. */
+  .s-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(
+        to right,
+        rgb(var(--s-mesh) / calc(var(--s-mesh-a) * 0.55)) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgb(var(--s-mesh) / calc(var(--s-mesh-a) * 0.55)) 1px,
+        transparent 1px
+      );
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(120% 78% at 50% 0%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(120% 78% at 50% 0%, #000 0%, transparent 72%);
+  }
+
+  @keyframes s-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(3%, -3.5%, 0) scale(1.08);
+    }
+  }
+
+  @keyframes s-drift-alt {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1.06);
+    }
+    50% {
+      transform: translate3d(-3.5%, 3%, 0) scale(1);
+    }
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Glass surfaces
+   *
+   * Translucent fills so the aurora reads through the content layer. No
+   * backdrop-filter: these live inside scroll containers, where a blur
+   * repaints the whole subtree every frame.
+   * ------------------------------------------------------------------ */
+  .s-glass {
+    background-color: rgb(var(--s-card) / var(--s-glass-a));
+  }
+
+  .s-glass-strong {
+    background-color: rgb(var(--s-surface) / var(--s-glass-strong-a));
+  }
+
+  /* Gradient hairline border, drawn with a masked pseudo-element so the card
+     keeps its own background. Reveals on hover of the enclosing `.group`. */
+  .s-gradient-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--s-grad-1) / 0.9),
+      rgb(var(--s-grad-2) / 0.75) 45%,
+      rgb(var(--s-grad-3) / 0.85)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .group:hover .s-gradient-ring::after,
+  .group:focus-within .s-gradient-ring::after,
+  .s-gradient-ring:hover::after {
+    opacity: 1;
+  }
+  /* Always-on variant for hero surfaces. */
+  .s-gradient-ring-on::after {
+    opacity: 1;
+  }
+
+  /* Gradient headline. */
+  .s-gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      rgb(var(--s-grad-1)),
+      rgb(var(--s-grad-2)) 48%,
+      rgb(var(--s-grad-3))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* The product gradient as a fill, for hero cards and primary buttons. */
+  .s-gradient-fill {
+    background-image: linear-gradient(
+      118deg,
+      rgb(var(--s-grad-1)),
+      rgb(var(--s-grad-2)) 52%,
+      rgb(var(--s-grad-3))
+    );
+  }
+
+  /* One-shot light sweep across a hero surface on mount. */
+  .s-sheen {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .s-sheen::before {
+    content: '';
+    position: absolute;
+    inset: -40% -60%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.2) 45%, transparent);
+    animation: s-sheen-sweep 1100ms cubic-bezier(0.22, 1, 0.36, 1) 260ms both;
+  }
+
+  @keyframes s-sheen-sweep {
+    from {
+      transform: translateX(-110%) skewX(-16deg);
+    }
+    to {
+      transform: translateX(220%) skewX(-16deg);
+    }
+  }
+
   .s-scroll {
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--s-border-strong)) transparent;

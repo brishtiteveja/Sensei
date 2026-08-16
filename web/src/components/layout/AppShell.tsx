@@ -14,6 +14,8 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { IconButton } from '@/components/ui/Button';
+import { Aurora } from '@/components/art/Aurora';
+import { HeaderArcs, HeaderSpark } from '@/components/art/Flourish';
 import { useSettings } from '@/state/settings';
 import { t } from '@/i18n/strings';
 import { cn } from '@/lib/utils';
@@ -42,7 +44,11 @@ export function AppShell() {
   ];
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-page">
+    <div className="relative flex h-dvh w-full overflow-hidden bg-page">
+      {/* Decorative background for the whole app; every surface above it is
+          translucent so the colour reads through. */}
+      <Aurora />
+
       <a
         href="#s-main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-white"
@@ -52,20 +58,37 @@ export function AppShell() {
 
       <aside
         className={cn(
-          'flex shrink-0 flex-col border-r border-line bg-surface transition-[width] duration-300 ease-smooth',
+          'relative z-10 flex shrink-0 flex-col border-r border-line bg-surface/80 transition-[width] duration-300 ease-smooth',
           sidebarCollapsed ? 'w-[68px]' : 'w-[248px]',
         )}
       >
+        {/* vertical gradient wash down the rail */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(180deg, rgb(var(--s-grad-1) / 0.10), rgb(var(--s-grad-2) / 0.05) 45%, rgb(var(--s-grad-3) / 0.07))',
+          }}
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-px"
+          style={{
+            backgroundImage:
+              'linear-gradient(180deg, transparent, rgb(var(--s-grad-2) / 0.5) 30%, rgb(var(--s-grad-3) / 0.35) 70%, transparent)',
+          }}
+        />
         <div
           className={cn(
-            'flex h-16 shrink-0 items-center gap-2.5 border-b border-line',
+            'relative flex h-16 shrink-0 items-center gap-2.5 border-b border-line',
             sidebarCollapsed ? 'justify-center px-2' : 'px-5',
           )}
         >
           <Logo />
           {!sidebarCollapsed ? (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[15px] font-semibold tracking-[-0.02em] text-ink">
+              <p className="s-gradient-text truncate text-[15px] font-semibold tracking-[-0.02em]">
                 {t.app.name}
               </p>
               <p className="truncate text-2xs text-ink-muted">{t.app.tagline}</p>
@@ -73,7 +96,7 @@ export function AppShell() {
           ) : null}
         </div>
 
-        <nav className="s-scroll flex-1 overflow-y-auto px-3 py-4">
+        <nav className="s-scroll relative flex-1 overflow-y-auto px-3 py-4">
           {groups.map((g, gi) => (
             <div key={g.key} className={gi > 0 ? 'mt-6' : undefined}>
               {!sidebarCollapsed ? (
@@ -90,16 +113,42 @@ export function AppShell() {
                       title={sidebarCollapsed ? item.label : undefined}
                       className={({ isActive }) =>
                         cn(
-                          'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-all duration-200 ease-smooth',
+                          'group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-[13.5px] font-medium transition-all duration-200 ease-smooth',
                           sidebarCollapsed && 'justify-center px-0',
                           isActive
-                            ? 'bg-accent-soft text-accent'
-                            : 'text-ink-muted hover:bg-surface-alt hover:text-ink',
+                            ? 'text-accent shadow-glow-sm'
+                            : 'text-ink-muted hover:bg-surface-alt/80 hover:text-ink',
                         )
                       }
                     >
-                      <item.icon size={18} className="shrink-0" />
-                      {!sidebarCollapsed ? <span className="truncate">{item.label}</span> : null}
+                      {({ isActive }) => (
+                        <>
+                          {isActive ? (
+                            <>
+                              <span
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-0 rounded-xl"
+                                style={{
+                                  backgroundImage:
+                                    'linear-gradient(100deg, rgb(var(--s-grad-1) / 0.20), rgb(var(--s-grad-2) / 0.16) 55%, rgb(var(--s-grad-3) / 0.14))',
+                                }}
+                              />
+                              <span
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-y-1.5 left-0 w-[3px] rounded-r-full"
+                                style={{
+                                  backgroundImage:
+                                    'linear-gradient(180deg, rgb(var(--s-grad-1)), rgb(var(--s-grad-3)))',
+                                }}
+                              />
+                            </>
+                          ) : null}
+                          <item.icon size={18} className="relative shrink-0" />
+                          {!sidebarCollapsed ? (
+                            <span className="relative truncate">{item.label}</span>
+                          ) : null}
+                        </>
+                      )}
                     </NavLink>
                   </li>
                 ))}
@@ -110,13 +159,13 @@ export function AppShell() {
 
         <div
           className={cn(
-            'shrink-0 border-t border-line p-3',
+            'relative shrink-0 border-t border-line p-3',
             sidebarCollapsed ? 'space-y-2' : 'space-y-3',
           )}
         >
           {!sidebarCollapsed ? (
             <div
-              className="flex items-start gap-2.5 rounded-xl bg-success-bg px-3 py-2.5"
+              className="flex items-start gap-2.5 rounded-xl border border-success/25 bg-success-bg px-3 py-2.5"
               title={t.app.offlineTooltip}
             >
               <ShieldCheck size={15} className="mt-px shrink-0 text-success-text" />
@@ -146,7 +195,7 @@ export function AppShell() {
         </div>
       </aside>
 
-      <main id="s-main" className="s-scroll min-w-0 flex-1 overflow-y-auto">
+      <main id="s-main" className="s-scroll relative z-10 min-w-0 flex-1 overflow-y-auto">
         <Outlet />
       </main>
     </div>
@@ -156,10 +205,24 @@ export function AppShell() {
 function Logo() {
   return (
     <span
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-soft"
+      className="s-gradient-fill relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-white shadow-glow-sm"
       aria-hidden="true"
     >
-      <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none">
+      {/* orbit ghosted behind the mark */}
+      <svg viewBox="0 0 32 32" className="absolute inset-0 h-full w-full" fill="none">
+        <circle cx="26" cy="6" r="11" fill="#fff" fillOpacity="0.18" />
+        <ellipse
+          cx="16"
+          cy="16"
+          rx="15"
+          ry="6.5"
+          stroke="#fff"
+          strokeOpacity="0.3"
+          strokeWidth="1"
+          transform="rotate(-28 16 16)"
+        />
+      </svg>
+      <svg viewBox="0 0 32 32" className="relative h-5 w-5" fill="none">
         <path
           d="M10 21.5c3 1.9 10.5 2 10.5-1.9 0-4-9.3-2.6-9.3-6.6 0-3.7 7-3.7 9.8-1.7"
           stroke="currentColor"
@@ -186,16 +249,32 @@ export function Page({
   wide?: boolean;
 }) {
   return (
-    <div className={cn('mx-auto px-8 py-9 xl:px-12', wide ? 'max-w-[1600px]' : 'max-w-[1240px]')}>
+    <div
+      className={cn(
+        'relative mx-auto px-8 py-9 xl:px-12',
+        wide ? 'max-w-[1600px]' : 'max-w-[1240px]',
+      )}
+    >
       {title ? (
-        <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="text-[26px] font-semibold tracking-[-0.025em] text-ink">{title}</h1>
-            {subtitle ? (
-              <p className="mt-1.5 text-sm text-ink-muted">{subtitle}</p>
-            ) : null}
+        <header className="relative mb-8 flex flex-wrap items-end justify-between gap-4">
+          {/* concentric arcs behind the title block */}
+          <HeaderArcs className="pointer-events-none absolute -top-10 right-0 hidden h-40 w-[340px] opacity-70 lg:block" />
+          <div className="relative min-w-0">
+            <div className="mb-2 flex items-center gap-2.5">
+              <HeaderSpark className="h-3.5 w-11" />
+              <span
+                aria-hidden="true"
+                className="h-px w-14"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgb(var(--s-grad-3) / 0.45), transparent)',
+                }}
+              />
+            </div>
+            <h1 className="text-[28px] font-semibold tracking-[-0.028em] text-ink">{title}</h1>
+            {subtitle ? <p className="mt-1.5 max-w-2xl text-sm text-ink-muted">{subtitle}</p> : null}
           </div>
-          {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+          {actions ? <div className="relative flex items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
       {children}

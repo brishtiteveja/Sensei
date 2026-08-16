@@ -92,11 +92,20 @@ export function Modal({
         aria-label={typeof title === 'string' ? title : undefined}
         tabIndex={-1}
         className={cn(
-          'relative w-full animate-fade-up rounded-2xl border border-line bg-surface shadow-lift outline-none',
+          's-gradient-ring s-gradient-ring-on relative w-full animate-fade-up overflow-hidden rounded-2xl border border-line bg-surface shadow-lift outline-none',
           width,
         )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
+        {/* colour wash behind the dialog header */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32"
+          style={{
+            backgroundImage:
+              'radial-gradient(70% 100% at 50% 0%, rgb(var(--s-grad-2) / 0.14), transparent 70%)',
+          }}
+        />
+        <div className="relative flex items-start justify-between gap-4 border-b border-line px-6 py-5">
           <div className="min-w-0">
             <h2 className="text-base font-semibold tracking-[-0.01em] text-ink">{title}</h2>
             {description ? (
@@ -109,9 +118,11 @@ export function Modal({
             </IconButton>
           ) : null}
         </div>
-        {children ? <div className="px-6 py-5">{children}</div> : null}
+        {children ? <div className="relative px-6 py-5">{children}</div> : null}
         {footer ? (
-          <div className="flex justify-end gap-3 border-t border-line px-6 py-4">{footer}</div>
+          <div className="relative flex justify-end gap-3 border-t border-line px-6 py-4">
+            {footer}
+          </div>
         ) : null}
       </div>
     </div>,

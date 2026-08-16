@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button, IconButton } from '@/components/ui/Button';
 import { RichText } from '@/components/ui/RichText';
+import { ConstellationMark } from '@/components/art/HeroArt';
 import { HandwritingPanel } from './HandwritingPanel';
 import { useTutorChat } from '@/hooks/useTutorChat';
 import type { ChatMessage } from '@/hooks/useTutorChat';
@@ -102,8 +103,10 @@ export function TutorChat({
   return (
     <section
       className={cn(
-        'flex min-h-0 flex-col overflow-hidden bg-surface',
-        variant === 'docked' ? 'h-full' : 'h-full rounded-2xl border border-line shadow-soft',
+        // Translucent so the page aurora — and, in a lesson, the docked pane's
+        // own glow — reads behind the transcript.
+        'relative flex min-h-0 flex-col overflow-hidden bg-surface/70',
+        variant === 'docked' ? 'h-full' : 'h-full rounded-2xl border border-line shadow-card',
         className,
       )}
       aria-label={title}
@@ -111,10 +114,10 @@ export function TutorChat({
       {/* header */}
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line px-5 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent">
+          <span className="s-gradient-fill relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-glow-sm">
             <Sparkles size={17} />
             {busy ? (
-              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-accent ring-2 ring-surface" />
+              <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 animate-pulse rounded-full bg-success ring-2 ring-surface" />
             ) : null}
           </span>
           <div className="min-w-0">
@@ -142,7 +145,8 @@ export function TutorChat({
       >
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-2 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+            <ConstellationMark className="h-24 w-32 opacity-90" />
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent ring-1 ring-inset ring-accent/20">
               <Sparkles size={22} />
             </span>
             <div className="max-w-xs space-y-1.5">
@@ -206,7 +210,7 @@ export function TutorChat({
       ) : null}
 
       {/* composer */}
-      <div className="shrink-0 border-t border-line bg-surface px-5 py-4">
+      <div className="shrink-0 border-t border-line bg-surface/85 px-5 py-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -275,7 +279,7 @@ function Bubble({ message, onRetry }: { message: ChatMessage; onRetry: () => voi
   if (message.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] animate-fade-up rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[13.5px] leading-relaxed text-white shadow-soft dark:text-ink-inverse">
+        <div className="s-gradient-fill max-w-[85%] animate-fade-up rounded-2xl rounded-br-md px-4 py-2.5 text-[13.5px] leading-relaxed text-white shadow-glow-sm">
           <p className="whitespace-pre-wrap">{message.text}</p>
         </div>
       </div>

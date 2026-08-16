@@ -297,7 +297,7 @@ export function SettingsPage() {
                 className={cn(
                   'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[13px] font-medium transition-all duration-200',
                   theme === opt.id
-                    ? 'bg-surface text-ink shadow-soft'
+                    ? 'bg-surface text-accent shadow-glow-sm ring-1 ring-inset ring-accent/25'
                     : 'text-ink-muted hover:text-ink',
                 )}
               >
@@ -427,7 +427,7 @@ function SettingHeader({
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex min-w-0 items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent">
+        <span className="s-gradient-fill mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-glow-sm">
           {icon}
         </span>
         <div className="min-w-0">

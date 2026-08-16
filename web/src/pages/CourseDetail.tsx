@@ -7,6 +7,7 @@ import { LinkButton } from '@/components/ui/Button';
 import { ProgressBar, ProgressRing } from '@/components/ui/Progress';
 import { EmptyState, ErrorState, Skeleton, SkeletonText } from '@/components/ui/States';
 import { CourseSidebar } from '@/components/course/CourseSidebar';
+import { SubjectArt, subjectGradient, subjectVisual } from '@/components/art/SubjectArt';
 import { useSubject } from '@/hooks/useCurriculum';
 import { useProgress } from '@/state/progress';
 import { buildOutline, unitProgress } from '@/lib/course';
@@ -54,224 +55,282 @@ export function CourseDetailPage() {
   }
 
   const current = outline.current;
+  const { hue } = subjectVisual(subject.subject);
 
   return (
     <div className="flex h-full min-h-0">
-      <aside className="hidden w-[320px] shrink-0 border-r border-line bg-surface lg:block">
-        <CourseSidebar
-          subject={subject}
-          outline={outline}
-          isComplete={progress.isLessonComplete}
+      <aside className="relative hidden w-[320px] shrink-0 border-r border-line bg-surface/80 lg:block">
+        {/* the subject's hue washed down the outline rail */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(180deg, hsl(${hue} 80% 58% / 0.12), transparent 55%)`,
+          }}
         />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 w-px"
+          style={{ backgroundImage: subjectGradient(hue, 0.45) }}
+        />
+        <div className="relative h-full">
+          <CourseSidebar
+            subject={subject}
+            outline={outline}
+            isComplete={progress.isLessonComplete}
+          />
+        </div>
       </aside>
 
       <div className="s-scroll min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[880px] px-8 py-9 xl:px-10">
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
-          >
-            <ArrowLeft size={14} />
-            {t.catalog.title}
-          </Link>
+        {/* Subject banner: the motif runs full width behind the crumb + title. */}
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[210px] overflow-hidden">
+            <SubjectArt subject={subject.subject} className="h-full w-full" opacity={0.85} />
+            <span
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to bottom, rgb(var(--s-page) / 0.1) 0%, rgb(var(--s-page) / 0.75) 62%, rgb(var(--s-page)) 100%)',
+              }}
+            />
+          </div>
 
-          <header className="mt-5 flex flex-wrap items-start justify-between gap-6">
-            <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="text-4xl leading-none">
-                  {subject.icon ?? '📘'}
-                </span>
-                <div className="min-w-0">
-                  <h1 className="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-ink">
-                    {subject.title}
-                  </h1>
-                  {subject.title_bn && subject.title_bn !== subject.title ? (
-                    <p className="mt-0.5 text-sm text-ink-muted">{subject.title_bn}</p>
-                  ) : null}
-                </div>
-              </div>
-              {subject.target_exams?.length ? (
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="text-2xs font-semibold uppercase tracking-wider text-ink-faint">
-                    {t.catalog.exams}
+          <div className="relative mx-auto max-w-[880px] px-8 py-9 xl:px-10">
+            <Link
+              to="/courses"
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
+            >
+              <ArrowLeft size={14} />
+              {t.catalog.title}
+            </Link>
+
+            <header className="mt-5 flex flex-wrap items-start justify-between gap-6">
+              <div className="min-w-0">
+                <div className="flex items-center gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-4xl leading-none"
+                    style={{
+                      backgroundImage: subjectGradient(hue, 0.2),
+                      backgroundColor: 'rgb(var(--s-card) / 0.7)',
+                      boxShadow: `0 10px 26px -12px hsl(${hue} 70% 45% / 0.6), inset 0 0 0 1px hsl(${hue} 70% 55% / 0.3)`,
+                    }}
+                  >
+                    {subject.icon ?? '📘'}
                   </span>
-                  {subject.target_exams.map((e) => (
-                    <Badge key={e} tone="accent">
-                      {e.toUpperCase()}
-                    </Badge>
-                  ))}
+                  <div className="min-w-0">
+                    <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.03em] text-ink">
+                      {subject.title}
+                    </h1>
+                    {/* No title_bn subtitle -- `title` is already localized
+                        server-side via the `lang` param. */}
+                    <p className="mt-1 text-[13px] text-ink-muted">
+                      {t.common.units(subject.total_units)} · {t.common.lessons(outline.totalLessons)}
+                    </p>
+                  </div>
                 </div>
-              ) : null}
-            </div>
-            <ProgressRing value={outline.percent} size={76} stroke={7} />
-          </header>
+                {subject.target_exams?.length ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="text-2xs font-semibold uppercase tracking-wider text-ink-faint">
+                      {t.catalog.exams}
+                    </span>
+                    {subject.target_exams.map((e) => (
+                      <Badge key={e} tone="accent">
+                        {e.toUpperCase()}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <ProgressRing value={outline.percent} size={76} stroke={7} />
+            </header>
 
-          {/* continue / start */}
-          {current ? (
-            <Card className="mt-8 overflow-hidden p-0">
-              <div className="flex flex-wrap items-center justify-between gap-5 p-6">
-                <div className="min-w-0">
-                  <p className="text-2xs font-semibold uppercase tracking-wider text-accent">
-                    {outline.completedCount > 0 ? t.common.continue : t.dashboard.nextUp}
-                  </p>
-                  <h2 className="mt-2 text-lg font-semibold tracking-[-0.015em] text-ink">
-                    {current.lesson.title}
-                  </h2>
-                  <p className="mt-1 text-[13px] text-ink-muted">
-                    {current.unit.title}
-                    {current.lesson.minutes ? ` · ${t.common.minutes(current.lesson.minutes)}` : ''}
-                  </p>
+            {/* continue / start */}
+            {current ? (
+              <Card className="s-gradient-ring s-gradient-ring-on mt-8 overflow-hidden p-0 shadow-glow-sm">
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    backgroundImage:
+                      'radial-gradient(60% 130% at 0% 0%, rgb(var(--s-grad-1) / 0.14), transparent 60%)',
+                  }}
+                />
+                <div className="relative flex flex-wrap items-center justify-between gap-5 p-6">
+                  <div className="min-w-0">
+                    <p className="text-2xs font-semibold uppercase tracking-wider text-accent">
+                      {outline.completedCount > 0 ? t.common.continue : t.dashboard.nextUp}
+                    </p>
+                    <h2 className="mt-2 text-lg font-semibold tracking-[-0.015em] text-ink">
+                      {current.lesson.title}
+                    </h2>
+                    <p className="mt-1 text-[13px] text-ink-muted">
+                      {current.unit.title}
+                      {current.lesson.minutes ? ` · ${t.common.minutes(current.lesson.minutes)}` : ''}
+                    </p>
+                  </div>
+                  <LinkButton
+                    to={`/courses/${subject.subject}/lessons/${current.lesson.id}`}
+                    size="lg"
+                  >
+                    <Play size={15} className="fill-current" />
+                    {outline.completedCount > 0 ? t.common.resume : t.common.startLesson}
+                  </LinkButton>
                 </div>
+                <div className="relative border-t border-line bg-surface-alt/60 px-6 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <ProgressBar value={outline.percent} label={t.course.yourProgress} />
+                    <span className="shrink-0 text-2xs font-medium tabular-nums text-ink-muted">
+                      {outline.completedCount}/{outline.totalLessons}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ) : outline.totalLessons > 0 ? (
+              <Card className="mt-8 border-success/30 bg-success-bg p-6">
+                <p className="text-[15px] font-semibold text-success-text">
+                  Course complete — every lesson done.
+                </p>
+                <p className="mt-1 text-[13px] text-success-text/85">
+                  Keep it sharp with past-exam practice.
+                </p>
                 <LinkButton
-                  to={`/courses/${subject.subject}/lessons/${current.lesson.id}`}
-                  size="lg"
+                  to={`/practice?subject=${subject.subject}`}
+                  variant="secondary"
+                  className="mt-4"
                 >
-                  <Play size={15} className="fill-current" />
-                  {outline.completedCount > 0 ? t.common.resume : t.common.startLesson}
+                  <Target size={15} />
+                  {t.course.practiceThisSubject}
+                </LinkButton>
+              </Card>
+            ) : null}
+
+            <Card className="mt-6 p-6">
+              <h2 className="text-[15px] font-semibold text-ink">{t.course.aboutThisCourse}</h2>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
+                {t.course.aboutBody}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <LinkButton to={`/practice?subject=${subject.subject}`} variant="secondary" size="sm">
+                  <Target size={14} />
+                  {t.course.practiceThisSubject}
+                </LinkButton>
+                <LinkButton to="/tutor" variant="ghost" size="sm">
+                  <Sparkles size={14} />
+                  {t.tutor.title}
                 </LinkButton>
               </div>
-              <div className="border-t border-line bg-surface-alt/60 px-6 py-3.5">
-                <div className="flex items-center gap-3">
-                  <ProgressBar value={outline.percent} label={t.course.yourProgress} />
-                  <span className="shrink-0 text-2xs font-medium tabular-nums text-ink-muted">
-                    {outline.completedCount}/{outline.totalLessons}
-                  </span>
-                </div>
-              </div>
             </Card>
-          ) : outline.totalLessons > 0 ? (
-            <Card className="mt-8 border-success/30 bg-success-bg p-6">
-              <p className="text-[15px] font-semibold text-success-text">
-                Course complete — every lesson done.
-              </p>
-              <p className="mt-1 text-[13px] text-success-text/85">
-                Keep it sharp with past-exam practice.
-              </p>
-              <LinkButton
-                to={`/practice?subject=${subject.subject}`}
-                variant="secondary"
-                className="mt-4"
-              >
-                <Target size={15} />
-                {t.course.practiceThisSubject}
-              </LinkButton>
-            </Card>
-          ) : null}
 
-          <Card className="mt-6 p-6">
-            <h2 className="text-[15px] font-semibold text-ink">{t.course.aboutThisCourse}</h2>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
-              {t.course.aboutBody}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <LinkButton to={`/practice?subject=${subject.subject}`} variant="secondary" size="sm">
-                <Target size={14} />
-                {t.course.practiceThisSubject}
-              </LinkButton>
-              <LinkButton to="/tutor" variant="ghost" size="sm">
-                <Sparkles size={14} />
-                {t.tutor.title}
-              </LinkButton>
-            </div>
-          </Card>
+            {/* units */}
+            <section className="mt-10">
+              <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink">
+                {t.course.unitsTitle}
+              </h2>
 
-          {/* units */}
-          <section className="mt-10">
-            <h2 className="text-lg font-semibold tracking-[-0.015em] text-ink">
-              {t.course.unitsTitle}
-            </h2>
-
-            {!subject.units?.length ? (
-              <EmptyState className="mt-4" title={t.empty.lessons} icon={<BookOpen size={22} />} />
-            ) : (
-              <ol className="mt-5 space-y-4">
-                {subject.units.map((unit, i) => {
-                  const up = unitProgress(unit, progress.isLessonComplete);
-                  return (
-                    <li key={unit.id}>
-                      <Card className="overflow-hidden p-0">
-                        <div className="flex items-start gap-4 px-6 pb-4 pt-5">
-                          <span
-                            className={cn(
-                              'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[13px] font-semibold tabular-nums',
-                              up.percent === 100
-                                ? 'bg-success-bg text-success-text'
-                                : 'bg-surface-alt text-ink-muted',
-                            )}
+              {!subject.units?.length ? (
+                <EmptyState className="mt-4" title={t.empty.lessons} icon={<BookOpen size={22} />} />
+              ) : (
+                <ol className="mt-5 space-y-4">
+                  {subject.units.map((unit, i) => {
+                    const up = unitProgress(unit, progress.isLessonComplete);
+                    return (
+                      <li key={unit.id}>
+                        {/* Not `interactive`: the whole-card lift would fire
+                            while hovering an individual lesson row. */}
+                        <Card className="overflow-hidden p-0">
+                          <div
+                            className="relative flex items-start gap-4 px-6 pb-4 pt-5"
+                            style={{
+                              backgroundImage:
+                                'linear-gradient(180deg, rgb(var(--s-grad-1) / 0.06), transparent)',
+                            }}
                           >
-                            {i + 1}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-[15px] font-semibold text-ink">{unit.title}</h3>
-                            <p className="mt-0.5 text-2xs text-ink-muted">
-                              {t.common.lessons(unit.lessons?.length ?? 0)}
-                              {unit.nctb_chapter
-                                ? ` · ${t.course.chapter} ${unit.nctb_chapter}`
-                                : ''}
-                              {unit.nctb_class ? ` · ${t.course.class} ${unit.nctb_class}` : ''}
-                            </p>
+                            <span
+                              className={cn(
+                                'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[13px] font-semibold tabular-nums ring-1 ring-inset',
+                                up.percent === 100
+                                  ? 'bg-success-bg text-success-text ring-success/30'
+                                  : up.percent > 0
+                                    ? 'bg-accent-soft text-accent ring-accent/30'
+                                    : 'bg-surface-alt text-ink-muted ring-line',
+                              )}
+                            >
+                              {i + 1}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-[15px] font-semibold text-ink">{unit.title}</h3>
+                              <p className="mt-0.5 text-2xs text-ink-muted">
+                                {t.common.lessons(unit.lessons?.length ?? 0)}
+                                {unit.nctb_chapter
+                                  ? ` · ${t.course.chapter} ${unit.nctb_chapter}`
+                                  : ''}
+                                {unit.nctb_class ? ` · ${t.course.class} ${unit.nctb_class}` : ''}
+                              </p>
+                            </div>
+                            <span className="shrink-0 text-2xs font-medium tabular-nums text-ink-muted">
+                              {up.done}/{up.total}
+                            </span>
                           </div>
-                          <span className="shrink-0 text-2xs font-medium tabular-nums text-ink-muted">
-                            {up.done}/{up.total}
-                          </span>
-                        </div>
 
-                        <ul className="divide-y divide-line border-t border-line">
-                          {(unit.lessons ?? []).map((lesson) => {
-                            const state = outline.byId.get(lesson.id)?.state ?? 'available';
-                            return (
-                              <li key={lesson.id}>
-                                <Link
-                                  to={`/courses/${subject.subject}/lessons/${lesson.id}`}
-                                  className="group flex items-center gap-4 px-6 py-3.5 transition-colors duration-200 hover:bg-surface-alt"
-                                >
-                                  <span
-                                    className={cn(
-                                      'h-2 w-2 shrink-0 rounded-full',
-                                      state === 'completed'
-                                        ? 'bg-success'
-                                        : state === 'current'
-                                          ? 'bg-accent'
-                                          : 'bg-line-strong',
-                                    )}
-                                    aria-hidden="true"
-                                  />
-                                  <span className="min-w-0 flex-1">
-                                    <span className="block truncate text-[13.5px] font-medium text-ink">
-                                      {lesson.title}
+                          <ul className="divide-y divide-line border-t border-line">
+                            {(unit.lessons ?? []).map((lesson) => {
+                              const state = outline.byId.get(lesson.id)?.state ?? 'available';
+                              return (
+                                <li key={lesson.id}>
+                                  <Link
+                                    to={`/courses/${subject.subject}/lessons/${lesson.id}`}
+                                    className="group flex items-center gap-4 px-6 py-3.5 transition-colors duration-200 hover:bg-surface-alt"
+                                  >
+                                    <span
+                                      className={cn(
+                                        'h-2 w-2 shrink-0 rounded-full',
+                                        state === 'completed'
+                                          ? 'bg-success'
+                                          : state === 'current'
+                                            ? 'bg-accent'
+                                            : 'bg-line-strong',
+                                      )}
+                                      aria-hidden="true"
+                                    />
+                                    <span className="min-w-0 flex-1">
+                                      <span className="block truncate text-[13.5px] font-medium text-ink">
+                                        {lesson.title}
+                                      </span>
+                                      {lesson.concepts?.length ? (
+                                        <span className="mt-0.5 block truncate text-2xs text-ink-muted">
+                                          {lesson.concepts.join(' · ')}
+                                        </span>
+                                      ) : null}
                                     </span>
-                                    {lesson.concepts?.length ? (
-                                      <span className="mt-0.5 block truncate text-2xs text-ink-muted">
-                                        {lesson.concepts.join(' · ')}
+                                    {lesson.difficulty ? (
+                                      <Badge tone={difficultyTone(lesson.difficulty)}>
+                                        {lesson.difficulty}
+                                      </Badge>
+                                    ) : null}
+                                    {lesson.minutes ? (
+                                      <span className="w-14 shrink-0 text-right text-2xs tabular-nums text-ink-muted">
+                                        {t.common.minutes(lesson.minutes)}
                                       </span>
                                     ) : null}
-                                  </span>
-                                  {lesson.difficulty ? (
-                                    <Badge tone={difficultyTone(lesson.difficulty)}>
-                                      {lesson.difficulty}
-                                    </Badge>
-                                  ) : null}
-                                  {lesson.minutes ? (
-                                    <span className="w-14 shrink-0 text-right text-2xs tabular-nums text-ink-muted">
-                                      {t.common.minutes(lesson.minutes)}
-                                    </span>
-                                  ) : null}
-                                  <ArrowRight
-                                    size={15}
-                                    className="shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
-                                  />
-                                </Link>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </Card>
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
-          </section>
+                                    <ArrowRight
+                                      size={15}
+                                      className="shrink-0 text-ink-faint transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
+                                    />
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </Card>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </div>

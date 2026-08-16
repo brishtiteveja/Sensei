@@ -11,11 +11,14 @@ const base =
   'disabled:opacity-45 disabled:pointer-events-none select-none whitespace-nowrap';
 
 const variants: Record<Variant, string> = {
+  // The primary action carries the product gradient. White text on the
+  // indigo->fuchsia ramp stays above 4.5:1 across the whole sweep.
   primary:
-    'bg-accent text-white shadow-soft hover:bg-accent-strong active:scale-[0.985] dark:text-ink-inverse',
+    's-gradient-fill text-white shadow-glow-sm hover:brightness-110 hover:shadow-glow active:scale-[0.985]',
   secondary:
-    'bg-surface text-ink border border-line hover:border-line-strong hover:bg-surface-alt active:scale-[0.985]',
-  subtle: 'bg-accent-soft text-accent hover:brightness-95 dark:hover:brightness-125 active:scale-[0.985]',
+    's-glass-strong text-ink border border-line hover:border-grad-2/50 hover:text-accent active:scale-[0.985]',
+  subtle:
+    'bg-accent-soft text-accent ring-1 ring-inset ring-accent/15 hover:brightness-95 dark:hover:brightness-125 active:scale-[0.985]',
   ghost: 'text-ink-soft hover:bg-surface-alt hover:text-ink active:scale-[0.985]',
   danger: 'bg-danger text-white hover:brightness-95 active:scale-[0.985]',
 };
@@ -84,7 +87,7 @@ export function IconButton({
       title={label}
       className={cn(
         'inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted',
-        'transition-colors duration-200 hover:bg-surface-alt hover:text-ink',
+        'transition-all duration-200 ease-smooth hover:bg-accent-soft hover:text-accent',
         'disabled:opacity-40 disabled:pointer-events-none',
         className,
       )}
