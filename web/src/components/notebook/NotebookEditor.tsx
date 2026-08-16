@@ -44,11 +44,14 @@ export function NotebookEditor({
   context,
   onAttach,
   compact,
+  problem,
 }: {
   context: NotebookContext;
   onAttach?: (handoff: NotebookHandoff) => void;
   /** Denser layout for use inside a sheet rather than a full page. */
   compact?: boolean;
+  /** The problem being solved, handed to the scratchpad's watching owl. */
+  problem?: string;
 }) {
   const key = context.kind + ':' + context.id;
   const [nb, setNb] = useState<Notebook>(() => getNotebook(context));
@@ -242,6 +245,8 @@ export function NotebookEditor({
         open={sketchTarget !== null}
         onClose={() => setSketchTarget(null)}
         onInsert={onSketch}
+        problem={problem}
+        draftKey={`scratch.draft.${key}`}
       />
     </div>
   );

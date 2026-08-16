@@ -305,6 +305,14 @@ function build(dict: Dict) {
       zoomFit: s('scratch.zoomFit'),
     },
 
+    coach: {
+      ask: s('coach.ask'),
+      looking: s('coach.looking'),
+      lookAt: s('coach.lookAt'),
+      discuss: s('coach.discuss'),
+      failed: s('coach.failed'),
+    },
+
     replay: {
       recording: s('replay.recording'),
       paused: s('replay.paused'),

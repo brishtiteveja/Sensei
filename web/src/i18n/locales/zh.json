@@ -417,5 +417,10 @@
   "replay.frameCount.one": "已记录 1 个瞬间",
   "replay.frameCount.other": "已记录 {n} 个瞬间",
   "replay.visionFailed": "Sensei 此时无法观看会话回放。",
-  "replay.visionPrompt": "这些面板按时间顺序展示了一位学生的解答过程，最早的排在最前。请描述他们的解答是如何展开的，并指出他们在哪个面板开始出错。"
+  "replay.visionPrompt": "这些面板按时间顺序展示了一位学生的解答过程，最早的排在最前。请描述他们的解答是如何展开的，并指出他们在哪个面板开始出错。",
+  "coach.ask": "让 Sensei 看看这个",
+  "coach.looking": "Sensei 正在查看你的解答…",
+  "coach.lookAt": "查看",
+  "coach.discuss": "讨论一下",
+  "coach.failed": "Sensei 刚刚无法查看该内容。"
 }

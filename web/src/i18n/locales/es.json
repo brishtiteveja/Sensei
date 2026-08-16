@@ -417,5 +417,10 @@
   "replay.frameCount.one": "1 momento capturado",
   "replay.frameCount.other": "{n} momentos capturados",
   "replay.visionFailed": "Sensei no pudo ver la sesión esta vez.",
-  "replay.visionPrompt": "Estos paneles muestran la sesión de trabajo de un estudiante en orden cronológico. Describe cómo se desarrolló su trabajo y señala en qué panel se equivoca por primera vez."
+  "replay.visionPrompt": "Estos paneles muestran la sesión de trabajo de un estudiante en orden cronológico. Describe cómo se desarrolló su trabajo y señala en qué panel se equivoca por primera vez.",
+  "coach.ask": "Pídele a Sensei que mire esto",
+  "coach.looking": "Sensei está mirando tu trabajo…",
+  "coach.lookAt": "Mirar",
+  "coach.discuss": "Conversar al respecto",
+  "coach.failed": "Sensei no pudo mirar eso en este momento."
 }

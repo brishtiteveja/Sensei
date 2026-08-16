@@ -417,5 +417,10 @@
   "replay.frameCount.one": "1 detik dirakam",
   "replay.frameCount.other": "{n} detik dirakam",
   "replay.visionFailed": "Sensei tidak dapat menonton semula sesi kali ini.",
-  "replay.visionPrompt": "Panel-panel ini menunjukkan sesi kerja seorang pelajar mengikut urutan, bermula dari yang paling awal. Terangkan bagaimana perkembangan kerja mereka, dan nyatakan pada panel mana mereka mula melakukan kesilapan."
+  "replay.visionPrompt": "Panel-panel ini menunjukkan sesi kerja seorang pelajar mengikut urutan, bermula dari yang paling awal. Terangkan bagaimana perkembangan kerja mereka, dan nyatakan pada panel mana mereka mula melakukan kesilapan.",
+  "coach.ask": "Tanya Sensei untuk lihat ini",
+  "coach.looking": "Sensei sedang melihat hasil kerja anda…",
+  "coach.lookAt": "Lihat pada",
+  "coach.discuss": "Bincangkan bersama",
+  "coach.failed": "Sensei tidak dapat melihat perkara itu buat masa ini."
 }

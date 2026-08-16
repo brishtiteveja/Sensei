@@ -266,6 +266,45 @@ export function getCustomQuestions(signal?: AbortSignal) {
   });
 }
 
+export interface CoachResult {
+  reading: string | null;
+  coach: {
+    status: 'correct' | 'error' | 'incomplete' | 'blank';
+    hint: string;
+    question: string;
+    focus: string | null;
+  } | null;
+  reason?: string;
+  models?: { reading: string; coaching: string };
+}
+
+/**
+ * Look at the student's work in progress and come back with one Socratic nudge.
+ *
+ * Two stages server-side: a vision pass that reads the page, then a text pass
+ * that decides what to ask. Optionally each stage can name its own model.
+ */
+export function coachWork(
+  image: string,
+  problem: string | undefined,
+  language: string,
+  models?: { reading?: string; coaching?: string },
+  signal?: AbortSignal,
+) {
+  return apiFetch<CoachResult>('/tutor/coach', {
+    method: 'POST',
+    body: {
+      image,
+      problem,
+      language,
+      reading_model: models?.reading,
+      coaching_model: models?.coaching,
+    },
+    timeoutMs: LONG_TIMEOUT_MS,
+    signal,
+  });
+}
+
 /** Fire-and-forget batch of workspace events. Never throws. */
 export function postObservations(
   session: string,

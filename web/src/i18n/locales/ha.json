@@ -417,5 +417,10 @@
   "replay.frameCount.one": "An dauki lokaci 1",
   "replay.frameCount.other": "An dauki lokuta {n}",
   "replay.visionFailed": "Sensei ya kasa kallon zaman a wannan karon.",
-  "replay.visionPrompt": "Wadannan hotunan sune zaman aikin dalibi daya bi da bi, na farko ne a gaba. Bayyana yadda aikinsu ya ci gaba, kuma ka fadi a wane hoto ne suka fara yin kuskure."
+  "replay.visionPrompt": "Wadannan hotunan sune zaman aikin dalibi daya bi da bi, na farko ne a gaba. Bayyana yadda aikinsu ya ci gaba, kuma ka fadi a wane hoto ne suka fara yin kuskure.",
+  "coach.ask": "Tambayi Sensei ya duba wannan",
+  "coach.looking": "Sensei yana duba aikinka…",
+  "coach.lookAt": "Duba",
+  "coach.discuss": "Tattauna shi",
+  "coach.failed": "Sensei ya kasa duba wannan a yanzu."
 }

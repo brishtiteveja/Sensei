@@ -16,6 +16,7 @@ import {
 import { Button, IconButton } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { PhoneHandoff } from '@/components/tutor/PhoneHandoff';
+import { FloatingSensei, pokeSensei } from '@/components/tutor/FloatingSensei';
 import { observe } from '@/lib/observe';
 import { readJSON, removeKey, writeJSON } from '@/lib/storage';
 import { t } from '@/i18n/strings';
@@ -157,6 +158,7 @@ export function ScratchpadPanel({
   onInsert,
   insertLabel,
   draftKey = 'scratch.draft',
+  problem,
   title,
 }: {
   open: boolean;
@@ -169,6 +171,8 @@ export function ScratchpadPanel({
   insertLabel?: string;
   /** Storage slot for the unfinished drawing; per-surface so they don't collide. */
   draftKey?: string;
+  /** What the student is solving — gives the watching owl its context. */
+  problem?: string;
   title?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -254,6 +258,7 @@ export function ScratchpadPanel({
       return;
     }
     setShapes((prev) => [...prev, d]);
+    pokeSensei(); // let the watching owl react
     // The tutor teaches against what was actually drawn, so each committed
     // stroke is reported — not the intermediate drag.
     // The geometry, not just a count: replay redraws the canvas from these, and
@@ -456,8 +461,12 @@ export function ScratchpadPanel({
         {/* canvas — scrolls within a fixed viewport once zoomed past 100% */}
         <div
           ref={scrollRef}
-          className="s-scroll max-h-[58vh] overflow-auto rounded-xl border border-line bg-white shadow-inner"
+          className="s-scroll relative max-h-[58vh] overflow-auto rounded-xl border border-line bg-white shadow-inner"
         >
+          <FloatingSensei
+            problem={problem}
+            getImage={() => canvasRef.current?.toDataURL('image/png') ?? null}
+          />
           <canvas
             ref={canvasRef}
             width={W}

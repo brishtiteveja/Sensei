@@ -15,6 +15,7 @@ export function NotebookSheet({
   context,
   onAttach,
   header,
+  problem,
 }: {
   open: boolean;
   onClose: () => void;
@@ -23,6 +24,8 @@ export function NotebookSheet({
   onAttach?: (handoff: NotebookHandoff) => void;
   /** Pinned above the blocks — the problem being solved, so it stays in view. */
   header?: ReactNode;
+  /** Plain-text problem for the scratchpad's watching owl. */
+  problem?: string;
 }) {
   return (
     <Modal
@@ -33,7 +36,7 @@ export function NotebookSheet({
       width="max-w-3xl"
     >
       {header ? <div className="mb-4">{header}</div> : null}
-      <NotebookEditor context={context} onAttach={onAttach} compact />
+      <NotebookEditor context={context} onAttach={onAttach} problem={problem} compact />
     </Modal>
   );
 }

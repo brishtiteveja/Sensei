@@ -417,5 +417,10 @@
   "replay.frameCount.one": "1 moment captured",
   "replay.frameCount.other": "{n} moments captured",
   "replay.visionFailed": "Sensei could not watch the session back this time.",
-  "replay.visionPrompt": "These panels are one student's work session in order, earliest first. Describe how their working developed, and say at which panel they first go wrong."
+  "replay.visionPrompt": "These panels are one student's work session in order, earliest first. Describe how their working developed, and say at which panel they first go wrong.",
+  "coach.ask": "Ask Sensei to look at this",
+  "coach.looking": "Sensei is looking at your work…",
+  "coach.lookAt": "Look at",
+  "coach.discuss": "Talk it through",
+  "coach.failed": "Sensei could not look at that just now."
 }
