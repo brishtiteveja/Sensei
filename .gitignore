@@ -36,3 +36,6 @@ docs/lang_samples/_fonts/
 # Web build output
 web/dist/
 web/node_modules/
+
+# Sample images are copied into web/public at build prep; source of truth is /samples
+web/public/samples/

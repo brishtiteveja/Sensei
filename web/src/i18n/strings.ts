@@ -360,6 +360,12 @@ function build(dict: Dict) {
       resultsReview: s('practice.resultsReview'),
       source: s('practice.source'),
       exitSet: s('practice.exitSet'),
+      special: s('practice.special'),
+      specialHint: s('practice.specialHint'),
+      specialIntro: s('practice.specialIntro'),
+      advanced: s('practice.advanced'),
+      solveStepByStep: s('practice.solveStepByStep'),
+      spotMistake: s('practice.spotMistake'),
     },
 
     progress: {

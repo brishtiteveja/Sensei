@@ -1,12 +1,13 @@
 {
   "name": "sensei-web",
   "version": "0.1.0",
-  "description": "Sensei desktop web — multilingual Socratic tutor",
+  "description": "Sensei desktop web \u2014 multilingual Socratic tutor",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prebuild": "node scripts/copy-samples.mjs"
   },
   "dependencies": {
     "@types/katex": "^0.16.8",

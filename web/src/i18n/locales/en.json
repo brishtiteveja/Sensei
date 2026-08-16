@@ -274,6 +274,12 @@
   "practice.resultsReview": "Review answers",
   "practice.source": "Source",
   "practice.exitSet": "Exit set",
+  "practice.special": "Special examples",
+  "practice.specialHint": "Curated worked problems to solve step by step, instead of random questions.",
+  "practice.specialIntro": "Hand-picked problems for physics, chemistry and math. Solve one step by step and Sensei watches for the mistake.",
+  "practice.advanced": "Advanced",
+  "practice.solveStepByStep": "Solve step by step",
+  "practice.spotMistake": "A student's attempt — spot the mistake",
 
   "progress.title": "Progress",
   "progress.subtitle": "What you have mastered, and what is still shaky.",

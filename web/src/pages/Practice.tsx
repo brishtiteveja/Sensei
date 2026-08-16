@@ -20,6 +20,7 @@ import { Modal } from '@/components/ui/Modal';
 import { CorrectBurst, ScoreBurst } from '@/components/art/Burst';
 import { TutorChat } from '@/components/tutor/TutorChat';
 import { NotebookSheet } from '@/components/notebook/NotebookSheet';
+import { SpecialExamples } from '@/components/practice/SpecialExamples';
 import { useAsync } from '@/hooks/useAsync';
 import { useSubjects } from '@/hooks/useCurriculum';
 import { getPracticeQuestions } from '@/lib/api';
@@ -57,6 +58,7 @@ export function PracticePage() {
   const [finished, setFinished] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
+  const [special, setSpecial] = useState(false);
 
   const resetSet = useCallback(() => {
     setIndex(0);
@@ -137,6 +139,18 @@ export function PracticePage() {
       subtitle={t.practice.subtitle}
       actions={
         <div className="flex items-center gap-2">
+          <label
+            className="flex cursor-pointer select-none items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] font-medium text-ink-soft transition-colors hover:border-accent/40"
+            title={t.practice.specialHint}
+          >
+            <input
+              type="checkbox"
+              checked={special}
+              onChange={(e) => setSpecial(e.target.checked)}
+              className="h-4 w-4 accent-[rgb(var(--s-accent))]"
+            />
+            {t.practice.special}
+          </label>
           <label className="sr-only" htmlFor="subject-filter">
             {t.practice.subject}
           </label>
@@ -156,14 +170,18 @@ export function PracticePage() {
               </option>
             ))}
           </select>
-          <Button variant="secondary" onClick={questionsQuery.reload}>
-            <RotateCcw size={15} />
-            {t.practice.newSet}
-          </Button>
+          {!special ? (
+            <Button variant="secondary" onClick={questionsQuery.reload}>
+              <RotateCcw size={15} />
+              {t.practice.newSet}
+            </Button>
+          ) : null}
         </div>
       }
     >
-      {questionsQuery.status === 'loading' ? (
+      {special ? (
+        <SpecialExamples subjectId={subject || undefined} />
+      ) : questionsQuery.status === 'loading' ? (
         <PracticeSkeleton />
       ) : questionsQuery.status === 'error' ? (
         <ErrorState error={questionsQuery.error} onRetry={questionsQuery.reload} />
