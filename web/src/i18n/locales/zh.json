@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "先作答，再问为什么",
   "tour.leCheckBody": "先答题。无论对错，\"为什么\"都会把它变成一次对话，而不是一次纠正。",
   "tour.leNotebookTitle": "写出你的过程",
-  "tour.leNotebookBody": "打开笔记本书写、画图，或从手机发一张照片。Sensei 读的是整页过程，不只是答案。"
+  "tour.leNotebookBody": "打开笔记本书写、画图，或从手机发一张照片。Sensei 读的是整页过程，不只是答案。",
+  "owl.stopMoving": "待在角落",
+  "owl.startMoving": "跟着我走",
+  "owl.sayLook": "要我看看你写到哪儿了吗？",
+  "owl.sayWhy": "卡住了？问我\"为什么\"，别只问\"是什么\"。",
+  "owl.sayPick": "挑一道题，我陪你做。"
 }

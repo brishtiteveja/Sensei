@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Eye, Loader2, Send, Sparkles, X } from 'lucide-react';
+import { Eye, Loader2, Move, Pin, Send, Sparkles, X } from 'lucide-react';
 import { SenseiOwl } from '@/components/art/SenseiOwl';
 import { RichText } from '@/components/ui/RichText';
 import { Button, IconButton } from '@/components/ui/Button';
@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
  */
 
 const POS_KEY = 'owl.pos';
+const MOTION_KEY = 'owl.motion';
 const PANEL_W = 352;
 const PANEL_H = 416;
 
@@ -47,6 +48,12 @@ const STANDOFF = 76;
  * for it, which is maddening.
  */
 const APPROACH_HOLD = 116;
+/** First wander, after the page settles. Early enough to be noticed. */
+const FIRST_ROAM_MS = 11_000;
+/** And roughly every this often after that, jittered. */
+const ROAM_EVERY_MS = 42_000;
+/** How long it stays put once it has arrived and said its piece. */
+const ROAM_HOLD_MS = 9_000;
 /** Comet length. Each node is one past position, oldest last. */
 const TRAIL = 9;
 /** Brand palette, head to tail: indigo into cyan into gold. */
@@ -69,6 +76,17 @@ export function GlobalSensei() {
   const [input, setInput] = useState('');
   const [looking, setLooking] = useState(false);
   const [nudge, setNudge] = useState(false);
+  const [says, setSays] = useState<{ text: string; left: boolean } | null>(null);
+  /**
+   * The knob. On by default, but off out of the box for anyone whose system
+   * asks for reduced motion -- who can still switch it on, which an
+   * unconditional opt-out would not allow.
+   */
+  const [moves, setMoves] = useState(() => {
+    const saved = readRaw(MOTION_KEY);
+    if (saved != null) return saved === '1';
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
 
   // Bottom-right by default; dragged position is remembered.
   const [pos, setPos] = useState<{ x: number; y: number }>(() => {
@@ -91,6 +109,10 @@ export function GlobalSensei() {
   const offsetRef = useRef({ x: 0, y: 0 });
   /** Set whenever the owl's home moves, so the loop re-measures it once. */
   const homeDirty = useRef(true);
+  /** Where it has wandered off to, and until when it stays there. */
+  const roamRef = useRef<{ x: number; y: number; until: number } | null>(null);
+  const movesRef = useRef(moves);
+  movesRef.current = moves;
   // Read by the animation loop without restarting it.
   const openRef = useRef(open);
   openRef.current = open;
@@ -137,8 +159,6 @@ export function GlobalSensei() {
    * -- no permanent smear behind a still button.
    */
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
     const pointer = { x: -1, y: -1 };
     const lean = offsetRef.current;
     const path = Array.from({ length: TRAIL + 1 }, () => ({ x: -999, y: -999 }));
@@ -181,20 +201,36 @@ export function GlobalSensei() {
       const cx = home.x;
       const cy = home.y;
 
-      // Reasons to hold position: being dragged; the panel is open (it is
-      // placed against the owl and would drift away from it); a tour is
-      // spotlighting it; or you are reaching for it.
+      const roam = roamRef.current && roamRef.current.until > Date.now() ? roamRef.current : null;
+      // Reasons to hold position: the knob is off; being dragged; the panel is
+      // open (it is placed against the owl and would drift away from it); a
+      // tour is spotlighting it; or you are reaching for it -- though a wander
+      // already in progress is allowed to finish.
       const reaching =
+        !roam &&
         pointer.x >= 0 &&
         Math.hypot(pointer.x - (cx + lean.x), pointer.y - (cy + lean.y)) < APPROACH_HOLD;
+      const parked = !movesRef.current;
       if (!drag.current && !openRef.current && !document.body.dataset.tour && !reaching) {
         let tx = 0;
         let ty = 0;
-        if (pointer.x >= 0) {
-          // Sideways it only *leans* -- capped, so it never leaves its margin
-          // and crosses the work. Vertically it travels the whole viewport,
-          // gliding along beside whatever line you are on. That is the bit
-          // that reads as company rather than as a button.
+        let easeX = 0.085;
+        // Lazier than the lean, so it arrives a beat after you do and draws a
+        // longer tail on the way.
+        let easeY = 0.055;
+        if (parked) {
+          // Knob off: settle back into the corner and stay there.
+          easeX = easeY = 0.12;
+        } else if (roam) {
+          // Off across the screen, and this one is deliberately not capped --
+          // crossing the page is the whole point of a wander.
+          tx = roam.x - cx;
+          ty = roam.y - cy;
+          easeX = easeY = 0.055;
+        } else if (pointer.x >= 0) {
+          // Sideways it only *leans* -- capped, so it stays in the margin and
+          // does not sit on the work. Vertically it travels the whole
+          // viewport, gliding along beside whatever line you are on.
           const dx = pointer.x - cx;
           tx = Math.max(-MAX_LEAN, Math.min(MAX_LEAN, dx * 0.12));
           // Alongside you, never underneath: it holds a standoff on its home
@@ -207,10 +243,8 @@ export function GlobalSensei() {
           );
           ty = wantY - cy;
         }
-        lean.x += (tx - lean.x) * 0.085;
-        // Lazier than the lean, so it arrives a beat after you do and draws a
-        // longer tail on the way.
-        lean.y += (ty - lean.y) * 0.055;
+        lean.x += (tx - lean.x) * easeX;
+        lean.y += (ty - lean.y) * easeY;
         el.style.transform = `translate3d(${lean.x.toFixed(2)}px, ${lean.y.toFixed(2)}px, 0)`;
       }
 
@@ -219,7 +253,7 @@ export function GlobalSensei() {
 
       // Gaze is measured from where the owl actually *is*, not from its home --
       // otherwise it stares off at an angle the whole time it is travelling.
-      if (pointer.x >= 0) {
+      if (pointer.x >= 0 && !parked) {
         const gx = Math.max(-1, Math.min(1, (pointer.x - nx) / 220));
         const gy = Math.max(-1, Math.min(1, (pointer.y - ny) / 220));
         host.style.setProperty('--gaze-x', gx.toFixed(3));
@@ -233,7 +267,7 @@ export function GlobalSensei() {
 
       // Brightness follows speed, with a floor while something just happened --
       // that is the owl reacting to you rather than to the mouse.
-      const target = Math.min(1, speed / 4) * 0.9 + excitedRef.current * 0.4;
+      const target = parked ? 0 : Math.min(1, speed / 4) * 0.9 + excitedRef.current * 0.4;
       glow += (Math.min(1, target) - glow) * (target > glow ? 0.35 : 0.08);
       excitedRef.current *= 0.94;
 
@@ -255,6 +289,69 @@ export function GlobalSensei() {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('resize', measure);
     };
+  }, []);
+
+  /**
+   * Every so often it gets up and goes somewhere else, and says something when
+   * it lands.
+   *
+   * The line is chosen from what is actually on screen, so the interruption
+   * earns itself: with a drawable surface it offers to read the work, with a
+   * problem open it points at the Socratic move, and with neither it suggests
+   * starting one. It crosses to the *opposite* margin, because a companion you
+   * never see move is just a button in a corner.
+   */
+  const roamNow = useCallback(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const r = host.getBoundingClientRect();
+    const here = r.left + r.width / 2 + offsetRef.current.x;
+    const goLeft = here > window.innerWidth / 2;
+    // Perching on the nav would cover the links, so the left post starts
+    // wherever the sidebar ends -- which is nothing at all on a phone.
+    const aside = document.querySelector('aside')?.getBoundingClientRect();
+    const leftPost = Math.max(76, (aside?.right ?? 0) + 56);
+    const rightPost = window.innerWidth - 76;
+    const x = goLeft ? Math.min(leftPost, window.innerWidth / 2) : rightPost;
+    roamRef.current = {
+      x,
+      y: HOME_MARGIN + 60 + Math.random() * Math.max(60, window.innerHeight - HOME_MARGIN * 2 - 180),
+      until: Date.now() + ROAM_HOLD_MS,
+    };
+    const surf = activeSurface();
+    const text = surf?.getImage ? t.owl.sayLook : surf ? t.owl.sayWhy : t.owl.sayPick;
+    // Said on arrival, not on departure -- a bubble that flies across the
+    // screen is unreadable -- and opening away from the nearest edge.
+    window.setTimeout(() => setSays({ text, left: x > window.innerWidth / 2 }), 1500);
+    window.setTimeout(() => setSays(null), ROAM_HOLD_MS - 300);
+  }, []);
+
+  useEffect(() => {
+    if (!moves) {
+      roamRef.current = null;
+      setSays(null);
+      return;
+    }
+    let timer = 0;
+    const schedule = (delay: number) => {
+      timer = window.setTimeout(() => {
+        // Not while it is busy being useful, or being read.
+        const blocked =
+          openRef.current || drag.current || document.body.dataset.tour || document.hidden;
+        if (!blocked) roamNow();
+        schedule(ROAM_EVERY_MS * (0.75 + Math.random() * 0.5));
+      }, delay);
+    };
+    schedule(FIRST_ROAM_MS);
+    return () => window.clearTimeout(timer);
+  }, [moves, roamNow]);
+
+  const toggleMoves = useCallback(() => {
+    setMoves((was) => {
+      writeRaw(MOTION_KEY, was ? '0' : '1');
+      observe('owl.motion', { on: !was });
+      return !was;
+    });
   }, []);
 
   // ---- dragging -------------------------------------------------------------
@@ -445,6 +542,12 @@ export function GlobalSensei() {
                 <p className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">
                   {surface?.label ?? t.tutor.title}
                 </p>
+                <IconButton
+                  label={moves ? t.owl.stopMoving : t.owl.startMoving}
+                  onClick={toggleMoves}
+                >
+                  {moves ? <Pin size={14} /> : <Move size={14} />}
+                </IconButton>
                 <IconButton label={t.common.close} onClick={() => setOpen(false)}>
                   <X size={14} />
                 </IconButton>
@@ -515,8 +618,27 @@ export function GlobalSensei() {
         <div
           id="sensei-owl"
           ref={leanRef}
-          className="pointer-events-auto will-change-transform"
+          className="pointer-events-auto relative will-change-transform"
         >
+          {says && !open ? (
+            /* Travels with the owl because it lives inside the moving wrapper,
+               and opens the conversation on the line it just offered. */
+            <button
+              type="button"
+              onClick={() => {
+                setSays(null);
+                setOpen(true);
+              }}
+              className={cn(
+                'absolute bottom-full mb-2 w-max max-w-[210px] animate-fade-up rounded-xl',
+                'border border-line bg-surface px-3 py-2 text-left text-[12.5px] leading-snug',
+                'text-ink-soft shadow-lift hover:border-accent/50 hover:text-ink',
+                says.left ? 'right-0' : 'left-0',
+              )}
+            >
+              {says.text}
+            </button>
+          ) : null}
           <button
             ref={owlRef}
             type="button"

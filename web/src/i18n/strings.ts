@@ -313,6 +313,13 @@ function build(dict: Dict) {
       startNew: s('attempt.startNew'),
     },
 
+    owl: {
+      stopMoving: s('owl.stopMoving'),
+      startMoving: s('owl.startMoving'),
+      sayLook: s('owl.sayLook'),
+      sayWhy: s('owl.sayWhy'),
+      sayPick: s('owl.sayPick'),
+    },
     slides: {
       skip: s('slides.skip'),
       start: s('slides.start'),

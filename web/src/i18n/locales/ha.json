@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "Duba, sannan ka tambaya me ya sa",
   "tour.leCheckBody": "Amsa da farko. Ko daidai ko kuskure, \"me ya sa\" yana mai da shi tattaunawa, ba gyara ba.",
   "tour.leNotebookTitle": "Nuna aikinka",
-  "tour.leNotebookBody": "Buɗe littafin rubutu ka rubuta, ka zana, ko ka aika hoto daga waya. Sensei yana karanta shafin, ba amsa kaɗai ba."
+  "tour.leNotebookBody": "Buɗe littafin rubutu ka rubuta, ka zana, ko ka aika hoto daga waya. Sensei yana karanta shafin, ba amsa kaɗai ba.",
+  "owl.stopMoving": "Ka tsaya a kusurwa",
+  "owl.startMoving": "Ka bi ni",
+  "owl.sayLook": "Ina son in karanta abin da ka rubuta zuwa yanzu?",
+  "owl.sayWhy": "Ka makale? Ka tambaye ni me ya sa, ba kawai me ba.",
+  "owl.sayPick": "Zaɓi tambaya, zan kasance tare da kai."
 }

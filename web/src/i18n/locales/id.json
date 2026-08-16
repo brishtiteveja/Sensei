@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "Periksa, lalu tanya kenapa",
   "tour.leCheckBody": "Jawab dulu. Benar atau salah, \"kenapa\" mengubahnya jadi percakapan, bukan koreksi.",
   "tour.leNotebookTitle": "Tunjukkan caranya",
-  "tour.leNotebookBody": "Buka buku catatan untuk menulis, menggambar, atau kirim foto dari ponsel. Sensei membaca halamannya, bukan cuma jawabannya."
+  "tour.leNotebookBody": "Buka buku catatan untuk menulis, menggambar, atau kirim foto dari ponsel. Sensei membaca halamannya, bukan cuma jawabannya.",
+  "owl.stopMoving": "Diam di pojok",
+  "owl.startMoving": "Ikuti aku",
+  "owl.sayLook": "Mau kubaca yang sudah kamu tulis?",
+  "owl.sayWhy": "Buntu? Tanya kenapa, bukan cuma apa.",
+  "owl.sayPick": "Pilih satu soal, aku temani."
 }

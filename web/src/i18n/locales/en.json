@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "Check, then ask why",
   "tour.leCheckBody": "Answer first. Right or wrong, Ask why turns it into a conversation instead of a correction.",
   "tour.leNotebookTitle": "Show your working",
-  "tour.leNotebookBody": "Open the notebook to write, sketch, or send a photo from your phone. Sensei reads the page, not just the answer."
+  "tour.leNotebookBody": "Open the notebook to write, sketch, or send a photo from your phone. Sensei reads the page, not just the answer.",
+  "owl.stopMoving": "Stay in the corner",
+  "owl.startMoving": "Follow me around",
+  "owl.sayLook": "Want me to read what you've written so far?",
+  "owl.sayWhy": "Stuck? Ask me why — not just what.",
+  "owl.sayPick": "Pick a problem and I'll follow along."
 }

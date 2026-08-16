@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "Semak, kemudian tanya kenapa",
   "tour.leCheckBody": "Jawab dahulu. Betul atau salah, \"kenapa\" menjadikannya perbualan, bukan pembetulan.",
   "tour.leNotebookTitle": "Tunjukkan kerja anda",
-  "tour.leNotebookBody": "Buka buku nota untuk menulis, melakar, atau hantar gambar dari telefon. Sensei membaca halaman itu, bukan jawapan sahaja."
+  "tour.leNotebookBody": "Buka buku nota untuk menulis, melakar, atau hantar gambar dari telefon. Sensei membaca halaman itu, bukan jawapan sahaja.",
+  "owl.stopMoving": "Kekal di penjuru",
+  "owl.startMoving": "Ikut saya",
+  "owl.sayLook": "Mahu saya baca apa yang anda tulis setakat ini?",
+  "owl.sayWhy": "Buntu? Tanya kenapa, bukan sekadar apa.",
+  "owl.sayPick": "Pilih satu soalan, saya temani."
 }

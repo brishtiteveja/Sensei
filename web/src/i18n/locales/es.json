@@ -478,5 +478,10 @@
   "tour.leCheckTitle": "Comprueba y pregunta por qué",
   "tour.leCheckBody": "Responde primero. Acertando o no, \"por qué\" lo convierte en conversación, no en corrección.",
   "tour.leNotebookTitle": "Muestra tu trabajo",
-  "tour.leNotebookBody": "Abre el cuaderno para escribir, dibujar o enviar una foto desde el móvil. Sensei lee la página, no solo la respuesta."
+  "tour.leNotebookBody": "Abre el cuaderno para escribir, dibujar o enviar una foto desde el móvil. Sensei lee la página, no solo la respuesta.",
+  "owl.stopMoving": "Quédate en la esquina",
+  "owl.startMoving": "Acompáñame",
+  "owl.sayLook": "¿Quieres que lea lo que llevas escrito?",
+  "owl.sayWhy": "¿Atascado? Pregúntame por qué, no solo qué.",
+  "owl.sayPick": "Elige un problema y te acompaño."
 }
