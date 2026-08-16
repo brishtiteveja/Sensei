@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "问题标题…",
   "notebook.addNote": "文本 / 数学公式",
   "notebook.addSketch": "草图",
+  "notebook.addImage": "图片",
+  "notebook.uploadError": "该文件不是可读取的的图片格式。请尝试使用 PNG、JPG 或 WebP。",
   "notebook.notePlaceholder": "写下一个步骤。使用 $x^2$ 插入行内公式，或使用 $$…$$ 独占一行。",
   "notebook.empty": "空白页",
   "notebook.emptyBody": "添加笔记或草图，一步步解决问题。内容会自动保存。",

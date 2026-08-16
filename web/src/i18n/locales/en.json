@@ -221,6 +221,8 @@
   "notebook.titlePlaceholder": "Problem title…",
   "notebook.addNote": "Text / math",
   "notebook.addSketch": "Sketch",
+  "notebook.addImage": "Image",
+  "notebook.uploadError": "That file isn't an image we can read. Try a PNG, JPG or WebP.",
   "notebook.notePlaceholder": "Write a step. Use $x^2$ for inline math or $$…$$ on its own line.",
   "notebook.empty": "A blank page",
   "notebook.emptyBody": "Add a note or a sketch and work through a problem one step at a time. It saves as you go.",

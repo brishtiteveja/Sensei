@@ -14,7 +14,10 @@ import { readJSON, writeJSON, readRaw } from '@/lib/storage';
  */
 export type NotebookBlock =
   | { id: string; type: 'note'; text: string }
-  | { id: string; type: 'sketch'; image: string };
+  | { id: string; type: 'sketch'; image: string }
+  // An uploaded photo/image (downscaled to a data URI). `name` is the original
+  // filename, shown as a caption.
+  | { id: string; type: 'image'; image: string; name?: string };
 
 export type NotebookContext =
   | { kind: 'free'; id: string; label?: string }
@@ -121,13 +124,16 @@ export function notebookHasContent(context: NotebookContext): boolean {
 export function compileForTutor(nb: Notebook): string {
   const parts: string[] = [];
   if (nb.title.trim()) parts.push(`# ${nb.title.trim()}`);
-  let sketchN = 0;
+  let imgN = 0;
   for (const b of nb.blocks) {
     if (b.type === 'note') {
       if (b.text.trim()) parts.push(b.text.trim());
+    } else if (b.type === 'sketch') {
+      imgN += 1;
+      parts.push(`[my hand-drawn sketch #${imgN} for this step]`);
     } else {
-      sketchN += 1;
-      parts.push(`[my hand-drawn sketch #${sketchN} for this step]`);
+      imgN += 1;
+      parts.push(`[an image I uploaded${b.name ? ` (${b.name})` : ''} #${imgN}]`);
     }
   }
   const body = parts.join('\n\n');

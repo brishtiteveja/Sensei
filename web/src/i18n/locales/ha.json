@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "Sunan lissafin…",
   "notebook.addNote": "Rubutu / lissafi",
   "notebook.addSketch": "Zane",
+  "notebook.addImage": "Hoto",
+  "notebook.uploadError": "Wannan fayil ɗin ba hoton da za mu iya karantawa ba ne. Gwada PNG, JPG ko WebP.",
   "notebook.notePlaceholder": "Rubuta mataki. Yi amfani da $x^2$ don lissafi a cikin layi ko $$…$$ a layinsa na kansa.",
   "notebook.empty": "Shafi maras komai",
   "notebook.emptyBody": "Ƙara bayanin kula ko zane sannan ka warware lissafi mataki ɗaya bayan ɗaya. Yana adana kansa yayin da kake yi.",

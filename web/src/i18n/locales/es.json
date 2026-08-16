@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "Título del problema…",
   "notebook.addNote": "Texto / matemática",
   "notebook.addSketch": "Boceto",
+  "notebook.addImage": "Imagen",
+  "notebook.uploadError": "Ese archivo no es una imagen que podamos leer. Intenta con un PNG, JPG o WebP.",
   "notebook.notePlaceholder": "Escribe un paso. Usa $x^2$ para matemáticas en línea o $$…$$ en su propia línea.",
   "notebook.empty": "Una página en blanco",
   "notebook.emptyBody": "Agrega una nota o un boceto y resuelve un problema paso a paso. Se guarda automáticamente.",

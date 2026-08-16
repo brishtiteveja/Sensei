@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "সমস্যার শিরোনাম…",
   "notebook.addNote": "টেক্সট / গণিত",
   "notebook.addSketch": "স্কেচ",
+  "notebook.addImage": "ছবি",
+  "notebook.uploadError": "ফাইলটি এমন কোনো ছবি নয় যা আমরা পড়তে পারি। একটি PNG, JPG বা WebP ফাইল চেষ্টা করে দেখুন।",
   "notebook.notePlaceholder": "একটি ধাপ লেখো। ইনলাইন গণিতের জন্য $x^2$ অথবা আলাদা লাইনের জন্য $$…$$ ব্যবহার করো।",
   "notebook.empty": "একটি খালি পাতা",
   "notebook.emptyBody": "একটি নোট বা স্কেচ যোগ করো এবং ধাপে ধাপে একটি সমস্যার সমাধান করো। এটি নিজে থেকেই সেভ হতে থাকবে।",

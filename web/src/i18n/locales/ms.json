@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "Tajuk masalah…",
   "notebook.addNote": "Teks / matematik",
   "notebook.addSketch": "Lakaran",
+  "notebook.addImage": "Imej",
+  "notebook.uploadError": "Fail tersebut bukan imej yang boleh dibaca. Cuba fail PNG, JPG atau WebP.",
   "notebook.notePlaceholder": "Tulis satu langkah. Gunakan $x^2$ untuk matematik dalam baris atau $$…$$ pada baris tersendiri.",
   "notebook.empty": "Halaman kosong",
   "notebook.emptyBody": "Tambah nota atau lakaran dan selesaikan masalah satu langkah demi satu langkah. Ia disimpan secara automatik.",

@@ -306,6 +306,8 @@ function build(dict: Dict) {
       titlePlaceholder: s('notebook.titlePlaceholder'),
       addNote: s('notebook.addNote'),
       addSketch: s('notebook.addSketch'),
+      addImage: s('notebook.addImage'),
+      uploadError: s('notebook.uploadError'),
       notePlaceholder: s('notebook.notePlaceholder'),
       empty: s('notebook.empty'),
       emptyBody: s('notebook.emptyBody'),

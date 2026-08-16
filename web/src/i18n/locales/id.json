@@ -207,6 +207,8 @@
   "notebook.titlePlaceholder": "Judul soal…",
   "notebook.addNote": "Teks / matematika",
   "notebook.addSketch": "Sketsa",
+  "notebook.addImage": "Gambar",
+  "notebook.uploadError": "File tersebut bukan gambar yang dapat kami baca. Coba gunakan PNG, JPG, atau WebP.",
   "notebook.notePlaceholder": "Tuliskan satu langkah. Gunakan $x^2$ untuk matematika sebaris atau $$…$$ di baris baru.",
   "notebook.empty": "Halaman kosong",
   "notebook.emptyBody": "Tambahkan catatan atau sketsa dan selesaikan soal langkah demi langkah. Otomatis tersimpan saat Anda menulis.",

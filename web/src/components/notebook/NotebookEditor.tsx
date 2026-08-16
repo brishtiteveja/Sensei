@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ChevronDown,
   ChevronUp,
+  ImageUp,
   MessageCircle,
   Pencil,
   PenLine,
@@ -13,6 +14,7 @@ import { Button, IconButton } from '@/components/ui/Button';
 import { RichText } from '@/components/ui/RichText';
 import { EmptyState } from '@/components/ui/States';
 import { ScratchpadPanel } from '@/components/tutor/ScratchpadPanel';
+import { fileToDownscaledDataUri } from '@/lib/image';
 import {
   blockId,
   compileForTutor,
@@ -48,6 +50,8 @@ export function NotebookEditor({
   const [nb, setNb] = useState<Notebook>(() => getNotebook(context));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [sketchTarget, setSketchTarget] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // Reload when the bound context changes (e.g. the practice question advances).
   useEffect(() => {
@@ -104,6 +108,18 @@ export function NotebookEditor({
     setSketchTarget(null);
   };
 
+  const onUpload = async (file: File | undefined | null) => {
+    if (fileRef.current) fileRef.current.value = '';
+    if (!file) return;
+    setUploadError(null);
+    try {
+      const image = await fileToDownscaledDataUri(file);
+      update((b) => [...b, { id: blockId(), type: 'image', image, name: file.name }]);
+    } catch {
+      setUploadError(t.notebook.uploadError);
+    }
+  };
+
   const setTitle = (title: string) => setNb((prev) => ({ ...prev, title }));
   const hasContent = nb.blocks.length > 0;
 
@@ -155,15 +171,33 @@ export function NotebookEditor({
         </div>
       )}
 
-      <div className="flex items-center gap-2 pt-1">
+      <div className="flex flex-wrap items-center gap-2 pt-1">
         <AddButton icon={<Type size={15} />} label={t.notebook.addNote} onClick={addNote} />
         <AddButton
           icon={<Pencil size={15} />}
           label={t.notebook.addSketch}
           onClick={() => setSketchTarget('new')}
         />
+        <AddButton
+          icon={<ImageUp size={15} />}
+          label={t.notebook.addImage}
+          onClick={() => fileRef.current?.click()}
+        />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(e) => void onUpload(e.target.files?.[0])}
+        />
         <span className="ml-auto text-2xs text-ink-faint">{t.notebook.saved}</span>
       </div>
+
+      {uploadError ? (
+        <p role="alert" className="text-[13px] font-medium text-danger-text">
+          {uploadError}
+        </p>
+      ) : null}
 
       <ScratchpadPanel
         open={sketchTarget !== null}
@@ -236,6 +270,19 @@ function BlockRow({
         >
           <img src={block.image} alt="Sketch" className="mx-auto max-h-80 w-auto" />
         </button>
+      ) : block.type === 'image' ? (
+        <figure className="space-y-1.5">
+          <div className="overflow-hidden rounded-lg border border-line bg-surface-alt">
+            <img
+              src={block.image}
+              alt={block.name ?? 'Uploaded image'}
+              className="mx-auto max-h-96 w-auto"
+            />
+          </div>
+          {block.name ? (
+            <figcaption className="truncate text-2xs text-ink-faint">{block.name}</figcaption>
+          ) : null}
+        </figure>
       ) : editing ? (
         <textarea
           ref={taRef}
