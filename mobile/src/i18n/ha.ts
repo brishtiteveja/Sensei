@@ -713,6 +713,8 @@ export const ha: TranslationTree = {
     noModels: 'Babu samfuran da ake da su.',
   },
   replay: {
+    card: 'rikodi {count} — ka duba yadda ka yi aiki',
+    cardEmpty: 'Ba a yi rikodi ba tukuna',
     title: 'Sake kallon zaman',
     empty: 'Ba a yi rikodi ba tukuna. Ka warware tambaya a kan allo, zaman ka zai bayyana a nan.',
     untitled: 'Tambaya mara suna',

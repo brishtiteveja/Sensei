@@ -768,6 +768,8 @@ aboutModalPrivacy: 'Privacy Policy',
     noModels: 'No models available.',
   },
   replay: {
+    card: '{count} recorded — watch how you worked',
+    cardEmpty: 'Nothing recorded yet',
     title: 'Session replay',
     empty: 'Nothing recorded yet. Work through a problem on the canvas and your session will show up here.',
     untitled: 'Untitled problem',

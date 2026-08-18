@@ -64,6 +64,7 @@ import { learnerId } from '@/lib/learner';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { senseiWorkApi } from '@/api';
 import { toDataUri } from '@/lib/image';
+import { SenseiOwl, SenseiOwlGlyph } from '@/components/art/sensei-owl';
 
 interface Message {
   id: string;
@@ -1103,7 +1104,7 @@ export default function AiChatScreen() {
                 style={{ width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.accentStrong }}
               >
                 <Animated.View style={{ transform: [{ rotate: rotateDeg }] }}>
-                  <Sparkles size={20} color={theme.textInverse} />
+                  <SenseiOwlGlyph size={22} color={theme.textInverse} />
                 </Animated.View>
               </View>
             ) : null}
@@ -1243,11 +1244,7 @@ export default function AiChatScreen() {
                 ) : (
                 <View className="flex-1 items-center pt-6 pb-2">
                   <View className="mb-4">
-                    <View
-                      style={{ width: 88, height: 88, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.accentSoft }}
-                    >
-                      <Sparkles size={40} color={theme.accent} />
-                    </View>
+                    <SenseiOwl size={88} />
                   </View>
                   <Text className="font-space-bold text-xl text-center mb-2.5" style={{ color: theme.text }}>{t('aiChat.emptyTitle')}</Text>
                   <Text className="font-space text-sm text-center leading-[22px] mb-6 px-2" style={{ color: theme.textMuted }}>

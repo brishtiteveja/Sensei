@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Settings, User, RotateCcw, ChevronRight } from 'lucide-react-native';
+import { Settings, User, RotateCcw, ChevronRight, History } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import { useTheme } from '@/contexts/theme-context';
 import { useAuth } from '@/contexts/auth-context';
@@ -10,6 +10,10 @@ import { useI18n } from '@/i18n/i18n-context';
 import { useProgress } from '@/gamification/progress-context';
 import { loadMastery, type MasteryData } from '@/gamification/subject-mastery';
 import { useState, useEffect } from 'react';
+import { listAttempts, onAttemptsChange } from '@/lib/attempts';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
+import { SubjectArt } from '@/components/art/subject-art';
 
 const SUBJECT_KEYS = [
   { emoji: '⚛️', nameKey: 'progress.subjectPhysics', id: 'পদার্থবিজ্ঞান' },
@@ -42,6 +46,11 @@ export default function ProgressScreen() {
 
   const { streak, totalXp, streakDays, today: todayEntry, data: progressData } = useProgress();
   const [mastery, setMastery] = useState<MasteryData>({});
+  const [recordings, setRecordings] = useState(() => listAttempts().length);
+
+  // The store is written from gestures elsewhere in the app, so subscribe
+  // rather than reading once on mount.
+  useEffect(() => onAttemptsChange(() => setRecordings(listAttempts().length)), []);
 
   useEffect(() => { loadMastery().then(setMastery); }, []);
 
@@ -64,7 +73,12 @@ export default function ProgressScreen() {
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
         {/* 1. Profile Header */}
-        <View className="px-5 pt-5 pb-14 rounded-b-3xl" style={{ backgroundColor: theme.heroBg }}>
+        <LinearGradient
+          colors={[...SENSEI_GRADIENT]}
+          start={GRADIENT_START}
+          end={GRADIENT_END}
+          style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 56, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}
+        >
           <View className="flex-row items-start justify-between">
             <View className="flex-row items-center gap-3">
               <View className="w-14 h-14 rounded-full items-center justify-center bg-white/20">
@@ -81,7 +95,7 @@ export default function ProgressScreen() {
               <Settings size={22} color="rgba(255,255,255,0.85)" />
             </TouchableOpacity>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* 2. Stats Row */}
         <View className="mx-4 -mt-8 rounded-2xl p-4 flex-row items-center justify-around shadow-lg shadow-black/15" style={{ backgroundColor: theme.surface }}>
@@ -136,6 +150,33 @@ export default function ProgressScreen() {
           </Card>
         </View>
 
+        {/* 3.5 Session replay — the way into recorded work */}
+        <View className="mt-4">
+          <Pressable onPress={() => router.push('/replay')}>
+            <Card theme={theme}>
+              <View className="flex-row items-center gap-3">
+                <View
+                  className="w-11 h-11 rounded-2xl items-center justify-center"
+                  style={{ backgroundColor: theme.accentSoft }}
+                >
+                  <History size={20} color={theme.accent} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-space-bold" style={{ color: theme.text }}>
+                    {t('replay.title')}
+                  </Text>
+                  <Text className="text-[11.5px] font-space-regular mt-0.5" style={{ color: theme.textMuted }}>
+                    {recordings > 0
+                      ? t('replay.card', { count: String(recordings) })
+                      : t('replay.cardEmpty')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={theme.textMuted} />
+              </View>
+            </Card>
+          </Pressable>
+        </View>
+
         {/* 4. Subject Mastery */}
         <View className="mt-4">
           <Card theme={theme}>
@@ -145,7 +186,9 @@ export default function ProgressScreen() {
               const pct = stats?.accuracy ?? 0;
               return (
               <View key={i} className="flex-row items-center gap-2.5 mb-3">
-                <Text className="text-base w-7 text-center">{subj.emoji}</Text>
+                <View className="w-8 h-8 rounded-lg overflow-hidden items-center justify-center">
+                  <SubjectArt subject={subj.id} width={32} height={32} />
+                </View>
                 <Text className="text-xs font-space-semibold w-24" style={{ color: theme.text }} numberOfLines={1}>
                   {t(subj.nameKey)}
                 </Text>

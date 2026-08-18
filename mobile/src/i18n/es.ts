@@ -713,6 +713,8 @@ export const es: TranslationTree = {
     noModels: 'No hay modelos disponibles.',
   },
   replay: {
+    card: '{count} grabadas — mira cómo lo hiciste',
+    cardEmpty: 'Aún no hay nada grabado',
     title: 'Repetición de la sesión',
     empty: 'Aún no hay nada grabado. Resuelve un problema en el lienzo y tu sesión aparecerá aquí.',
     untitled: 'Problema sin título',

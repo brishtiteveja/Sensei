@@ -713,6 +713,8 @@ export const ms: TranslationTree = {
     noModels: 'Tiada model tersedia.',
   },
   replay: {
+    card: '{count} rakaman — lihat cara anda mengerjakannya',
+    cardEmpty: 'Belum ada rakaman',
     title: 'Main semula sesi',
     empty: 'Belum ada rakaman. Selesaikan soalan pada kanvas dan sesi anda akan muncul di sini.',
     untitled: 'Soalan tanpa tajuk',

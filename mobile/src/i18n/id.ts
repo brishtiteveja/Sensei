@@ -713,6 +713,8 @@ export const id: TranslationTree = {
     noModels: 'Tidak ada model tersedia.',
   },
   replay: {
+    card: '{count} rekaman — lihat caramu mengerjakan',
+    cardEmpty: 'Belum ada rekaman',
     title: 'Putar ulang sesi',
     empty: 'Belum ada rekaman. Kerjakan soal di kanvas, sesimu akan muncul di sini.',
     untitled: 'Soal tanpa judul',

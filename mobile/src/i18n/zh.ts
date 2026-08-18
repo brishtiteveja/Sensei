@@ -713,6 +713,8 @@ export const zh: TranslationTree = {
     noModels: '暂无可用模型。',
   },
   replay: {
+    card: '已记录 {count} 次 — 看看你是怎么做的',
+    cardEmpty: '还没有记录',
     title: '学习回放',
     empty: '还没有记录。在画布上做一道题，你的过程就会出现在这里。',
     untitled: '未命名的题目',
