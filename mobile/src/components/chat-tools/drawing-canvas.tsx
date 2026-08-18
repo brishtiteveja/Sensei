@@ -27,6 +27,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/theme';
 import { useI18n } from '@/i18n/i18n-context';
 import { showAppDialog } from '@/feedback/dialog';
+import { observe } from '@/lib/observe';
+import { buildShapePath, PAPER as ERASER_PAPER, type Pt, type Tool } from '@/lib/strokes';
 
 import type { SkPath as SkPathType } from '@shopify/react-native-skia';
 
@@ -36,16 +38,22 @@ interface DrawingCanvasProps {
   onSend: (imageUri: string) => void;
 }
 
-type Tool = 'pen' | 'line' | 'rect' | 'circle' | 'triangle' | 'arrow' | 'eraser';
-
 interface DrawPath {
   path: SkPathType;
   color: string;
   strokeWidth: number;
   tool: Tool;
+  /**
+   * The same stroke as plain geometry.
+   *
+   * An SkPath is an opaque native object: it cannot be serialised, stored, or
+   * redrawn later, which would make the drawing unrecordable. Keeping the
+   * points alongside costs a few hundred bytes a stroke and is what lets a
+   * session be replayed, summarised, and shown to a vision model afterwards.
+   * Freehand keeps every point; a shape is defined by its two corners.
+   */
+  points: Pt[];
 }
-
-type Pt = { x: number; y: number };
 
 const DRAW_TOOLS: { tool: Tool; Icon: typeof Pencil; label: string }[] = [
   { tool: 'pen', Icon: Pencil, label: 'Pen' },
@@ -57,42 +65,24 @@ const DRAW_TOOLS: { tool: Tool; Icon: typeof Pencil; label: string }[] = [
   { tool: 'eraser', Icon: Eraser, label: 'Eraser' },
 ];
 
-const ERASER_PAPER = '#FFFFFF';
-
 /**
- * Build the Skia path for a shape tool from its start and current point. Called
- * on every gesture update, so shapes rubber-band as the finger moves. Freehand
- * (pen/eraser) is handled separately by appending line segments.
+ * Drop points that add nothing. Keeps the first and last (a stroke's ends are
+ * what shapes read from) and any point far enough from the last kept one to
+ * change the line.
  */
-function buildShapePath(tool: Tool, a: Pt, b: Pt): SkPathType {
-  const p = Skia.Path.Make();
-  const x = Math.min(a.x, b.x);
-  const y = Math.min(a.y, b.y);
-  const w = Math.abs(b.x - a.x);
-  const h = Math.abs(b.y - a.y);
-
-  if (tool === 'line' || tool === 'arrow') {
-    p.moveTo(a.x, a.y);
-    p.lineTo(b.x, b.y);
-    if (tool === 'arrow') {
-      const ang = Math.atan2(b.y - a.y, b.x - a.x);
-      const head = 20;
-      p.moveTo(b.x, b.y);
-      p.lineTo(b.x - head * Math.cos(ang - Math.PI / 6), b.y - head * Math.sin(ang - Math.PI / 6));
-      p.moveTo(b.x, b.y);
-      p.lineTo(b.x - head * Math.cos(ang + Math.PI / 6), b.y - head * Math.sin(ang + Math.PI / 6));
-    }
-  } else if (tool === 'rect') {
-    p.addRect(Skia.XYWHRect(x, y, w, h));
-  } else if (tool === 'circle') {
-    p.addOval(Skia.XYWHRect(x, y, w, h));
-  } else if (tool === 'triangle') {
-    p.moveTo(x + w / 2, y); // apex
-    p.lineTo(x, y + h);
-    p.lineTo(x + w, y + h);
-    p.close();
+function thin(points: Pt[], minDist = 3, max = 120): Pt[] {
+  if (points.length <= 2) return points;
+  const out: Pt[] = [points[0]];
+  for (const p of points.slice(1, -1)) {
+    const last = out[out.length - 1];
+    if (Math.hypot(p.x - last.x, p.y - last.y) >= minDist) out.push(p);
   }
-  return p;
+  out.push(points[points.length - 1]);
+  if (out.length <= max) return out;
+  // Still too long: keep an evenly spaced subset rather than truncating, so
+  // the tail of the stroke is not lost.
+  const step = Math.ceil(out.length / max);
+  return out.filter((_, i) => i % step === 0 || i === out.length - 1);
 }
 
 const PRESET_COLORS = [
@@ -130,12 +120,16 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
   toolRef.current = tool;
   const currentPathRef = useRef<DrawPath | null>(null);
   const startRef = useRef<Pt>({ x: 0, y: 0 });
+  // Recorded with every stroke: replay renders into a different-sized surface
+  // on a different device, so the drawing space has to be part of the record.
+  const sizeRef = useRef({ w: 0, h: 0 });
 
   const hasContent = paths.length > 0;
 
   const handleUndo = useCallback(() => {
     if (paths.length === 0) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    observe('sketch.undo');
     setPaths((prev) => prev.slice(0, -1));
   }, [paths.length]);
 
@@ -151,6 +145,7 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
           label: t('chatTools.drawClear'),
           variant: 'destructive',
           onPress: () => {
+            observe('sketch.clear');
             setPaths([]);
           },
         },
@@ -179,13 +174,14 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
 
       const base64 = image.encodeToBase64();
       const uri = `data:image/png;base64,${base64}`;
+      observe('sketch.insert', { strokes: paths.length });
       onSend(uri);
     } catch {
       // Export failed silently
     } finally {
       setExporting(false);
     }
-  }, [canvasRef, paths.length, onSend]);
+  }, [canvasRef, paths, onSend]);
 
   const handleClose = useCallback(() => {
     // Reset state when closing
@@ -213,6 +209,7 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
         color: isEraser ? ERASER_PAPER : strokeColorRef.current,
         strokeWidth: isEraser ? Math.max(strokeWidthRef.current * 4, 16) : strokeWidthRef.current,
         tool: activeTool,
+        points: [{ x: e.x, y: e.y }],
       };
       currentPathRef.current = newPath;
       setPaths((prev) => [...prev, newPath]);
@@ -222,14 +219,33 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
       if (!current) return;
       if (current.tool === 'pen' || current.tool === 'eraser') {
         current.path.lineTo(e.x, e.y);
+        current.points.push({ x: e.x, y: e.y });
       } else {
         current.path = buildShapePath(current.tool, startRef.current, { x: e.x, y: e.y });
+        // A shape is its start and its current corner, nothing between.
+        current.points = [startRef.current, { x: e.x, y: e.y }];
       }
       // Force re-render by creating new array reference
       setPaths((prev) => [...prev]);
     })
     .onEnd(() => {
+      const done = currentPathRef.current;
       currentPathRef.current = null;
+      if (!done) return;
+      /*
+       * One event per committed stroke -- not per gesture frame, which would
+       * bury the log in noise. Points are thinned first: at 120 Hz a single
+       * swipe lands hundreds of samples, and every third one redraws the same
+       * curve to the eye and to a vision model.
+       */
+      observe('sketch.shape', {
+        tool: done.tool,
+        color: done.color,
+        width: done.strokeWidth,
+        points: thin(done.points).map((p) => [Math.round(p.x), Math.round(p.y)]),
+        w: Math.round(sizeRef.current.w),
+        h: Math.round(sizeRef.current.h),
+      });
     })
     .onFinalize(() => {
       currentPathRef.current = null;
@@ -323,7 +339,14 @@ export function DrawingCanvas({ visible, onClose, onSend }: DrawingCanvasProps) 
         {/* Canvas Area */}
         <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
           <GestureDetector gesture={pan}>
-            <Canvas ref={canvasRef} style={{ flex: 1 }}>
+            <Canvas
+              ref={canvasRef}
+              style={{ flex: 1 }}
+              onLayout={(e) => {
+                const { width, height } = e.nativeEvent.layout;
+                sizeRef.current = { w: width, h: height };
+              }}
+            >
               {paths.map((p, i) => (
                 <Path
                   key={i}

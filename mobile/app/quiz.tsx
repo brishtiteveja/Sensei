@@ -13,6 +13,10 @@ import { recordQuizSession } from '@/gamification/daily-limits';
 import { recordAnswer } from '@/gamification/subject-mastery';
 import { recordWrongQuestion, clearWrongQuestion, loadWrongQuestions } from '@/gamification/wrong-questions';
 import { ProPaywall } from '@/components/pro-paywall';
+import { useAttemptRecording } from '@/lib/use-attempt-recording';
+import { observe } from '@/lib/observe';
+import { learnerId } from '@/lib/learner';
+import { recordObservation } from '@/api/sensei-work';
 
 type AnswerState = 'unanswered' | 'correct' | 'wrong';
 
@@ -70,6 +74,28 @@ export default function QuizScreen() {
 
   const question = questions[currentIdx];
 
+  /*
+   * Recording is scoped to the question on screen: opening one opens (or
+   * resumes) an attempt, so the replay reads as "your goes at this problem"
+   * rather than one undifferentiated tape.
+   */
+  const { finish } = useAttemptRecording({
+    key: `practice:${question?.id ?? ''}`,
+    title: question?.question?.slice(0, 80) ?? '',
+    text: question?.question,
+    subject: question?.subject,
+    enabled: Boolean(question),
+  });
+
+  useEffect(() => {
+    if (!question) return;
+    observe('practice.question', {
+      index: currentIdx + 1,
+      subject: question.subject,
+      text: question.question,
+    });
+  }, [question, currentIdx]);
+
   const handleSelect = (optionId: string) => {
     if (answerState !== 'unanswered') return;
     setSelected(optionId);
@@ -79,6 +105,26 @@ export default function QuizScreen() {
     if (isCorrect) setScore(s => s + 1);
     record(isCorrect ? 'correct_answer' : 'wrong_answer');
     if (question.subject) recordAnswer(question.subject, isCorrect);
+
+    observe('practice.check', { correct: isCorrect, picked: optionId });
+    // The attempt is over the moment it is answered -- an answered question is
+    // not something you resume.
+    finish(isCorrect ? 'correct' : 'wrong');
+
+    /*
+     * And the tutor is told, so its memory of this student moves. On a wrong
+     * answer the backend consults the concept graph and may come back with the
+     * root cause -- the upstream idea actually missing rather than the symptom.
+     * Failure here is silent: a tutor that forgets beats one that will not
+     * answer.
+     */
+    if (question.subject) {
+      void recordObservation(learnerId(), {
+        topic: question.subject,
+        correct: isCorrect,
+        note: isCorrect ? undefined : `chose ${optionId} on: ${question.question?.slice(0, 120)}`,
+      }).catch(() => undefined);
+    }
     // Track wrong questions for the review module; clear when answered right
     if (isCorrect) {
       void clearWrongQuestion(question.id);

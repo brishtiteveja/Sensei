@@ -24,6 +24,9 @@ import { PreferencesProvider } from '@/contexts/preferences-context';
 import { AppToastViewport } from '@/feedback/toast';
 import { AppDialogViewport } from '@/feedback/dialog';
 import { useAppTheme, useThemeVariables } from '@/theme';
+import { hydrateLearner } from '@/lib/learner';
+import { hydrateObserve } from '@/lib/observe';
+import { hydrateAttempts, pruneEmpty } from '@/lib/attempts';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -40,6 +43,21 @@ function AppContent() {
       SplashScreen.hideAsync();
     }
   }, [isLanguageReady, isThemeReady, state.isLoading]);
+
+  /*
+   * Bring the recorder up before anything can record into it: the learner id
+   * that tags every event, the recorder's own flag and session, and the
+   * attempt history. All three keep in-memory state so the paths that write to
+   * them (gestures, answers) stay synchronous. Empty attempts from a previous
+   * run are dropped here rather than shown as blank rows in the history.
+   */
+  useEffect(() => {
+    void (async () => {
+      await hydrateLearner();
+      await Promise.all([hydrateObserve(), hydrateAttempts()]);
+      pruneEmpty();
+    })();
+  }, []);
 
   useEffect(() => {
     if (state.isLoading) return;
@@ -107,6 +125,7 @@ function AppContent() {
         <Stack.Screen name="mocktest" />
         <Stack.Screen name="mocktest-session" />
         <Stack.Screen name="notebook" />
+        <Stack.Screen name="replay" />
       </Stack>
     </View>
   );

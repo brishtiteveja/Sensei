@@ -10,11 +10,14 @@
  * - sendSenseiMessage() — non-streaming from /tutor/query
  * - getSenseiSuggestions() — starter prompts from /tutor/suggestions
  * - getSenseiHint() — Socratic hint for a question
+ *
+ * Vision, learner memory, telemetry and the teacher routes live next door in
+ * `sensei-work.ts`; this file stays about conversation.
  */
 
 import type { AiStreamEvent } from '@/types';
 
-const SENSEI_BASE_URL =
+export const SENSEI_BASE_URL =
   process.env.EXPO_PUBLIC_SENSEI_API_URL?.trim() || 'http://167.86.98.204:4050';
 
 export interface SenseiStreamOptions {

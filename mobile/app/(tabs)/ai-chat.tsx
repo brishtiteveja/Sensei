@@ -57,6 +57,8 @@ import { getGuestAiSessionId } from '@/lib/guest-ai-session';
 import { FormattedText } from '@/components/formatted-text';
 import { ToolGrid, CalculatorSheet, pickImage, pickFile, useVoiceInput, DrawingCanvas, EquationEditor, AttachmentPreview } from '@/components/chat-tools';
 import type { ToolType, ChatAttachment } from '@/components/chat-tools';
+import { digest, observe } from '@/lib/observe';
+import { learnerId } from '@/lib/learner';
 
 interface Message {
   id: string;
@@ -679,6 +681,7 @@ export default function AiChatScreen() {
     setAttachments([]);
     setIsTyping(true);
     scrollToBottom();
+    observe('tutor.user', { text: messageText });
 
     try {
       // Use SenseiClaw directly for Socratic tutoring (both guest and authenticated)
@@ -689,7 +692,20 @@ export default function AiChatScreen() {
           message: messageText,
           sessionId: senseiSessionRef.current ?? undefined,
           contextType: lessonId ? 'topic_study' : 'free_chat',
-          contextData: lessonId ? { lesson_id: lessonId, lesson_step: lessonStep + 1 } : undefined,
+          /*
+           * Every turn carries who is asking and what they have been doing.
+           * `learner_id` is what the backend hangs mastery and the concept
+           * graph off, so the tutor can teach as though it remembers; the
+           * digest is the last couple of minutes at the workspace, so its
+           * questions react to the actual work rather than to the message
+           * alone. Both are additive -- the server ignores what it does not
+           * use.
+           */
+          contextData: {
+            ...(lessonId ? { lesson_id: lessonId, lesson_step: lessonStep + 1 } : {}),
+            learner_id: learnerId(),
+            ...(digest() ? { observation: digest() } : {}),
+          },
           language,
         },
         (event) => {
