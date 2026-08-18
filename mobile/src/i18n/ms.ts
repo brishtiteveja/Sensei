@@ -748,4 +748,10 @@ export const ms: TranslationTree = {
     failed: 'Saya tidak dapat melihatnya. Semak sambungan dan cuba lagi.',
     reading: 'Membaca kerja anda…',
   },
+  server: {
+    title: 'Pelayan tutor',
+    checking: 'Memeriksa sambungan…',
+    ok: 'Bersambung',
+    recheck: 'Periksa semula',
+  },
 };

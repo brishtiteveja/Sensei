@@ -12,8 +12,23 @@ const DEV_BASE_URL = Platform.select({
   default: 'http://localhost:3000',
 });
 
-const BASE_URL = ENV_BASE_URL || (__DEV__ ? DEV_BASE_URL : 'http://167.86.98.204:4050');
+/*
+ * No production fallback on purpose.
+ *
+ * This used to fall back to `http://167.86.98.204:4050`, which is the *tutor*
+ * server, not this API — so a release build without EXPO_PUBLIC_API_BASE_URL
+ * set sent every auth, credits and mocktest call to a service that has never
+ * heard of them, and the failures looked like login bugs. Guessing a host is
+ * worse than not having one: an empty base URL fails immediately and says so.
+ */
+const BASE_URL = ENV_BASE_URL || (__DEV__ ? DEV_BASE_URL : '');
 export const API_BASE_URL = BASE_URL;
+
+if (!BASE_URL) {
+  console.warn(
+    '[api] EXPO_PUBLIC_API_BASE_URL is not set. Accounts, credits and mocktests will not work in this build.',
+  );
+}
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,

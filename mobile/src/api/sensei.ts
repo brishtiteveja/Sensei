@@ -17,8 +17,8 @@
 
 import type { AiStreamEvent } from '@/types';
 
-export const SENSEI_BASE_URL =
-  process.env.EXPO_PUBLIC_SENSEI_API_URL?.trim() || 'http://167.86.98.204:4050';
+export { SENSEI_BASE_URL } from './tutor-endpoint';
+import { SENSEI_BASE_URL } from './tutor-endpoint';
 
 export interface SenseiStreamOptions {
   message: string;

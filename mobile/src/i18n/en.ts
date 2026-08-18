@@ -803,4 +803,10 @@ aboutModalPrivacy: 'Privacy Policy',
     failed: 'I could not get a look at that. Check your connection and try again.',
     reading: 'Reading your work…',
   },
+  server: {
+    title: 'Tutor server',
+    checking: 'Checking the connection…',
+    ok: 'Connected',
+    recheck: 'Check again',
+  },
 };

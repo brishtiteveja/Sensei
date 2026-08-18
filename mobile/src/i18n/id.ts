@@ -748,4 +748,10 @@ export const id: TranslationTree = {
     failed: 'Aku tidak bisa melihatnya. Periksa koneksi lalu coba lagi.',
     reading: 'Membaca pekerjaanmu…',
   },
+  server: {
+    title: 'Server tutor',
+    checking: 'Memeriksa koneksi…',
+    ok: 'Terhubung',
+    recheck: 'Periksa lagi',
+  },
 };

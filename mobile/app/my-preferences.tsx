@@ -37,6 +37,7 @@ import type {
   ReminderMomentPreference,
   UpdatePreferencesPayload,
 } from '@/types/preferences';
+import { diagnoseTutor, SENSEI_BASE_URL, type TutorDiagnosis } from '@/api/tutor-endpoint';
 
 type UniversityOption = {
   id: string;
@@ -168,6 +169,16 @@ export default function MyPreferencesScreen() {
   const [modelLoading, setModelLoading] = useState(true);
   const [modelError, setModelError] = useState('');
   const [modelModalVisible, setModelModalVisible] = useState(false);
+  const [serverState, setServerState] = useState<TutorDiagnosis | 'checking' | null>('checking');
+
+  const checkServer = useCallback(async () => {
+    setServerState('checking');
+    setServerState(await diagnoseTutor());
+  }, []);
+
+  useEffect(() => {
+    void checkServer();
+  }, [checkServer]);
   const [modelWarning, setModelWarning] = useState<string | null>(null);
 
   const preferencesRef = useRef(preferences);
@@ -547,6 +558,50 @@ export default function MyPreferencesScreen() {
               </SettingRow>
             );
           })}
+        </Section>
+
+        {/*
+          * What the phone can actually reach. A generic "could not reach the
+          * tutor" sends whoever is deploying looking in the wrong place; this
+          * names which of the three usual causes it is.
+          */}
+        <Section title={t('server.title')} theme={theme}>
+          <View className="w-full gap-2">
+            <Text className="text-[11.5px] font-space" style={{ color: theme.textMuted }}>
+              {SENSEI_BASE_URL}
+            </Text>
+            {serverState === 'checking' ? (
+              <View className="flex-row items-center gap-2">
+                <ActivityIndicator size="small" color={theme.accentStrong} />
+                <Text className="text-xs font-space" style={{ color: theme.textMuted }}>
+                  {t('server.checking')}
+                </Text>
+              </View>
+            ) : serverState?.ok ? (
+              <View className="flex-row items-center gap-2">
+                <Check size={15} color={theme.success} />
+                <Text className="text-xs font-space-semibold" style={{ color: theme.successText }}>
+                  {t('server.ok')}
+                </Text>
+              </View>
+            ) : serverState ? (
+              <View className="flex-row items-start gap-2">
+                <TriangleAlert size={15} color={theme.warningText} />
+                <Text className="flex-1 text-xs font-space leading-[18px]" style={{ color: theme.warningText }}>
+                  {serverState.detail}
+                </Text>
+              </View>
+            ) : null}
+            <TouchableOpacity
+              onPress={() => void checkServer()}
+              className="self-start rounded-full px-3 py-1.5"
+              style={{ backgroundColor: theme.accentSoft }}
+            >
+              <Text className="text-xs font-space-semibold" style={{ color: theme.accent }}>
+                {t('server.recheck')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </Section>
 
         <Section title={t('modelSelector.title')} theme={theme}>

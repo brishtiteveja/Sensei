@@ -748,4 +748,10 @@ export const ha: TranslationTree = {
     failed: 'Ban iya ganin sa ba. Duba haɗin ka sannan ka sake gwadawa.',
     reading: 'Ina karanta aikinka…',
   },
+  server: {
+    title: 'Sabar na malami',
+    checking: 'Ana duba haɗin…',
+    ok: 'An haɗa',
+    recheck: 'Sake dubawa',
+  },
 };

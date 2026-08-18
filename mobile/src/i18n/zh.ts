@@ -748,4 +748,10 @@ export const zh: TranslationTree = {
     failed: '我没能看到它。检查一下网络再试试。',
     reading: '正在读你的过程…',
   },
+  server: {
+    title: '教师服务器',
+    checking: '正在检查连接…',
+    ok: '已连接',
+    recheck: '重新检查',
+  },
 };

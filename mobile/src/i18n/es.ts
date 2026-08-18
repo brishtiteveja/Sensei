@@ -748,4 +748,10 @@ export const es: TranslationTree = {
     failed: 'No pude verlo. Revisa la conexión e inténtalo de nuevo.',
     reading: 'Leyendo tu trabajo…',
   },
+  server: {
+    title: 'Servidor del tutor',
+    checking: 'Comprobando la conexión…',
+    ok: 'Conectado',
+    recheck: 'Comprobar de nuevo',
+  },
 };
