@@ -754,4 +754,12 @@ export const ha: TranslationTree = {
     ok: 'An haɗa',
     recheck: 'Sake dubawa',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: 'Ka duba aikina',
+    lookAtWorkHint: 'Ka ɗauki hoton shafin, zan yi tambaya a kansa',
+    replayHint: 'Kalli zaman da ya wuce',
+    ask: 'Yi tambaya',
+    askHint: 'Buɗe taɗi',
+  },
 };

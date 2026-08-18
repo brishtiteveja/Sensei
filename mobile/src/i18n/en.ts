@@ -809,4 +809,12 @@ aboutModalPrivacy: 'Privacy Policy',
     ok: 'Connected',
     recheck: 'Check again',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: 'Look at my work',
+    lookAtWorkHint: 'Photograph the page and I will ask about it',
+    replayHint: 'Watch a session back',
+    ask: 'Ask a question',
+    askHint: 'Open the conversation',
+  },
 };

@@ -754,4 +754,12 @@ export const es: TranslationTree = {
     ok: 'Conectado',
     recheck: 'Comprobar de nuevo',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: 'Mira mi trabajo',
+    lookAtWorkHint: 'Fotografía la página y te preguntaré sobre ella',
+    replayHint: 'Ver una sesión anterior',
+    ask: 'Hacer una pregunta',
+    askHint: 'Abrir la conversación',
+  },
 };

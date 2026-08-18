@@ -754,4 +754,12 @@ export const zh: TranslationTree = {
     ok: '已连接',
     recheck: '重新检查',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: '看看我的过程',
+    lookAtWorkHint: '拍下这一页，我来就它提问',
+    replayHint: '回看一次学习过程',
+    ask: '提个问题',
+    askHint: '打开对话',
+  },
 };

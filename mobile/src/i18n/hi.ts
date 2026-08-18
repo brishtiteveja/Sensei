@@ -754,4 +754,12 @@ export const hi: TranslationTree = {
     ok: 'जुड़ा हुआ',
     recheck: 'फिर जाँचें',
   },
+  owl: {
+    title: 'सेंसेई',
+    lookAtWork: 'मेरा काम देखिए',
+    lookAtWorkHint: 'पन्ने की फोटो लीजिए, मैं उसी पर पूछूँगा',
+    replayHint: 'पिछला सेशन देखिए',
+    ask: 'सवाल पूछिए',
+    askHint: 'बातचीत खोलिए',
+  },
 };

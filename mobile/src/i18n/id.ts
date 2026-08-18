@@ -754,4 +754,12 @@ export const id: TranslationTree = {
     ok: 'Terhubung',
     recheck: 'Periksa lagi',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: 'Lihat pekerjaanku',
+    lookAtWorkHint: 'Foto halamannya, nanti aku tanya soal itu',
+    replayHint: 'Tonton sesi sebelumnya',
+    ask: 'Ajukan pertanyaan',
+    askHint: 'Buka percakapan',
+  },
 };

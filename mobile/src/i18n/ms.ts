@@ -754,4 +754,12 @@ export const ms: TranslationTree = {
     ok: 'Bersambung',
     recheck: 'Periksa semula',
   },
+  owl: {
+    title: 'Sensei',
+    lookAtWork: 'Lihat kerja saya',
+    lookAtWorkHint: 'Ambil gambar halaman, saya akan bertanya mengenainya',
+    replayHint: 'Tonton sesi lepas',
+    ask: 'Tanya soalan',
+    askHint: 'Buka perbualan',
+  },
 };

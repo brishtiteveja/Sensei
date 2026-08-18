@@ -24,6 +24,7 @@ import { PreferencesProvider } from '@/contexts/preferences-context';
 import { AppToastViewport } from '@/feedback/toast';
 import { AppDialogViewport } from '@/feedback/dialog';
 import { useAppTheme, useThemeVariables } from '@/theme';
+import { FloatingSensei } from '@/components/floating-sensei';
 import { hydrateLearner } from '@/lib/learner';
 import { hydrateObserve } from '@/lib/observe';
 import { hydrateAttempts, pruneEmpty } from '@/lib/attempts';
@@ -137,6 +138,9 @@ function ThemedAppShell() {
   return (
     <View style={themeVariables} className="flex-1">
       <AppContent />
+      {/* Above the app, below toasts and dialogs -- the owl should never
+          cover the message it just caused. */}
+      <FloatingSensei />
       <AppToastViewport />
       <AppDialogViewport />
     </View>

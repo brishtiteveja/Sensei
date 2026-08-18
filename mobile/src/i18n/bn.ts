@@ -772,4 +772,12 @@ aboutModalPrivacy: 'গোপনীয়তা নীতি',
     ok: 'সংযুক্ত',
     recheck: 'আবার পরীক্ষা করুন',
   },
+  owl: {
+    title: 'সেনসেই',
+    lookAtWork: 'আমার কাজ দেখো',
+    lookAtWorkHint: 'পাতার ছবি তোলো, আমি প্রশ্ন করব',
+    replayHint: 'আগের সেশন দেখো',
+    ask: 'প্রশ্ন করো',
+    askHint: 'আলোচনা খোলো',
+  },
 };
