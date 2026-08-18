@@ -735,4 +735,15 @@ export const ms: TranslationTree = {
     recordOn: 'Merakam kerja anda',
     recordOff: 'Rakaman dihentikan',
   },
+  voice: {
+    listen: 'Dengar',
+    stop: 'Berhenti',
+    listening: 'Mendengar…',
+    dictate: 'Sebut soalan anda',
+  },
+  coach: {
+    noVision: 'Model yang sedang berjalan belum boleh membaca imej — beritahu saya apa yang anda tulis, kita semak bersama.',
+    failed: 'Saya tidak dapat melihatnya. Semak sambungan dan cuba lagi.',
+    reading: 'Membaca kerja anda…',
+  },
 };

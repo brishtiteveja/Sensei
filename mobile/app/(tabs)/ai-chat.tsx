@@ -23,6 +23,8 @@ import {
   Send,
   Sparkles,
   Copy,
+  Volume2,
+  VolumeX,
   Check,
   Lightbulb,
   BookOpen,
@@ -59,6 +61,9 @@ import { ToolGrid, CalculatorSheet, pickImage, pickFile, useVoiceInput, DrawingC
 import type { ToolType, ChatAttachment } from '@/components/chat-tools';
 import { digest, observe } from '@/lib/observe';
 import { learnerId } from '@/lib/learner';
+import { speak, stopSpeaking } from '@/lib/speech';
+import { senseiWorkApi } from '@/api';
+import { toDataUri } from '@/lib/image';
 
 interface Message {
   id: string;
@@ -642,6 +647,47 @@ export default function AiChatScreen() {
     }
   };
 
+  /**
+   * Read the work, then ask about it. Stage one describes the page, stage two
+   * turns that reading into one Socratic question; both come back in a single
+   * call. The reading is shown alongside the question so the student can see
+   * what the tutor thinks it saw — when a model misreads handwriting, that
+   * line is what makes the mistake obvious instead of baffling.
+   */
+  const coachOnImage = async (picture: ChatAttachment, question: string) => {
+    const replyId = `coach-${Date.now()}`;
+    observe('image.insert', { kind: picture.type });
+    try {
+      const image = await toDataUri(picture.uri);
+      const result = await senseiWorkApi.coachWork(image, question || undefined, language);
+
+      const body = result.coach
+        ? [
+            result.reading ? `_${result.reading.trim()}_` : '',
+            result.coach.hint,
+            result.coach.question,
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        // No vision model loaded: say so rather than answering as though the
+        // work had been read.
+        : result.reason || t('coach.noVision');
+
+      if (result.coach) observe('coach.reply', { status: result.coach.status });
+
+      setMessages((prev) => [
+        ...prev,
+        { id: replyId, role: 'assistant', text: body, timestamp: Date.now() },
+      ]);
+    } catch {
+      setErrorMessage(t('coach.failed'));
+    } finally {
+      setIsTyping(false);
+      sendingRef.current = false;
+      scrollToBottom();
+    }
+  };
+
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
     if ((!trimmed && attachments.length === 0) || sendingRef.current) return;
@@ -682,6 +728,21 @@ export default function AiChatScreen() {
     setIsTyping(true);
     scrollToBottom();
     observe('tutor.user', { text: messageText });
+
+    /*
+     * A photograph of working goes down the vision route, not the chat one.
+     *
+     * The chat endpoint would carry the image to a general assistant, which
+     * answers the question. Two-stage coaching reads the page first and then
+     * decides what to *ask* — which is the whole product. It matters most here:
+     * a phone is the natural instrument for photographing a page of homework,
+     * where a laptop needs a webcam pointed awkwardly at a desk.
+     */
+    const picture = attachments.find((a) => a.type === 'image' || a.type === 'drawing');
+    if (picture) {
+      await coachOnImage(picture, trimmed);
+      return;
+    }
 
     try {
       // Use SenseiClaw directly for Socratic tutoring (both guest and authenticated)
@@ -809,6 +870,30 @@ export default function AiChatScreen() {
       scrollToBottom();
     }
   };
+
+  /*
+   * One message speaks at a time, and leaving the screen silences it: audio
+   * that follows you out of the tutor into another screen is alarming.
+   */
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+
+  const toggleSpeak = useCallback(
+    (id: string, text: string) => {
+      if (speakingId === id) {
+        stopSpeaking();
+        setSpeakingId(null);
+        return;
+      }
+      setSpeakingId(id);
+      observe('tutor.listen', { id });
+      speak(text, language, {
+        onDone: () => setSpeakingId((cur) => (cur === id ? null : cur)),
+      });
+    },
+    [language, speakingId],
+  );
+
+  useEffect(() => () => stopSpeaking(), []);
 
   const handleCopy = async (id: string, text: string) => {
     await Clipboard.setStringAsync(text);
@@ -1245,19 +1330,41 @@ export default function AiChatScreen() {
                               />
                             </View>
                           </View>
-                          <TouchableOpacity
-                            className="flex-row items-center gap-1.5 self-start ml-[42px] mt-2 py-1 px-2.5 rounded-full"
-                            style={{
-                              backgroundColor: theme.accentSoft,
-                            }}
-                            activeOpacity={0.7}
-                            onPress={() => void handleCopy(msg.id, msg.text)}
-                          >
-                            {copiedId === msg.id ? <Check size={12} color={theme.success} /> : <Copy size={12} color={theme.accent} />}
-                            <Text className="font-space-medium text-[11px]" style={{ color: copiedId === msg.id ? theme.success : theme.accent }}>
-                              {copiedId === msg.id ? t('common.copied') : t('common.copy')}
-                            </Text>
-                          </TouchableOpacity>
+                          <View className="flex-row items-center gap-2 self-start ml-[42px] mt-2">
+                            <TouchableOpacity
+                              className="flex-row items-center gap-1.5 py-1 px-2.5 rounded-full"
+                              style={{
+                                backgroundColor: theme.accentSoft,
+                              }}
+                              activeOpacity={0.7}
+                              onPress={() => void handleCopy(msg.id, msg.text)}
+                            >
+                              {copiedId === msg.id ? <Check size={12} color={theme.success} /> : <Copy size={12} color={theme.accent} />}
+                              <Text className="font-space-medium text-[11px]" style={{ color: copiedId === msg.id ? theme.success : theme.accent }}>
+                                {copiedId === msg.id ? t('common.copied') : t('common.copy')}
+                              </Text>
+                            </TouchableOpacity>
+
+                            {/* Read aloud. For a student who reads slowly, or
+                                is studying in a language they read less well
+                                than they hear, this is the difference between
+                                using the tutor and giving up on it. */}
+                            <TouchableOpacity
+                              className="flex-row items-center gap-1.5 py-1 px-2.5 rounded-full"
+                              style={{ backgroundColor: theme.accentSoft }}
+                              activeOpacity={0.7}
+                              onPress={() => toggleSpeak(msg.id, msg.text)}
+                            >
+                              {speakingId === msg.id ? (
+                                <VolumeX size={12} color={theme.accent} />
+                              ) : (
+                                <Volume2 size={12} color={theme.accent} />
+                              )}
+                              <Text className="font-space-medium text-[11px]" style={{ color: theme.accent }}>
+                                {speakingId === msg.id ? t('voice.stop') : t('voice.listen')}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       )}
                     </View>

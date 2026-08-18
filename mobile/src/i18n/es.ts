@@ -735,4 +735,15 @@ export const es: TranslationTree = {
     recordOn: 'Grabando tu trabajo',
     recordOff: 'Grabación detenida',
   },
+  voice: {
+    listen: 'Escuchar',
+    stop: 'Parar',
+    listening: 'Escuchando…',
+    dictate: 'Di tu pregunta',
+  },
+  coach: {
+    noVision: 'Con el modelo que tengo ahora no puedo leer imágenes: cuéntame qué has escrito y lo repasamos juntos.',
+    failed: 'No pude verlo. Revisa la conexión e inténtalo de nuevo.',
+    reading: 'Leyendo tu trabajo…',
+  },
 };

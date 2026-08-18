@@ -735,4 +735,15 @@ export const ha: TranslationTree = {
     recordOn: 'Ana rikodin aikinka',
     recordOff: 'An dakatar da rikodi',
   },
+  voice: {
+    listen: 'Saurara',
+    stop: 'Tsaya',
+    listening: 'Ana saurara…',
+    dictate: 'Ka faɗi tambayarka',
+  },
+  coach: {
+    noVision: 'Samfurin da nake amfani da shi yanzu ba ya iya karanta hotuna — ka gaya mini abin da ka rubuta, mu duba tare.',
+    failed: 'Ban iya ganin sa ba. Duba haɗin ka sannan ka sake gwadawa.',
+    reading: 'Ina karanta aikinka…',
+  },
 };

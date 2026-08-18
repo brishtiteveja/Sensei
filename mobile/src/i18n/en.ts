@@ -790,4 +790,15 @@ aboutModalPrivacy: 'Privacy Policy',
     recordOn: 'Recording your work',
     recordOff: 'Recording stopped',
   },
+  voice: {
+    listen: 'Listen',
+    stop: 'Stop',
+    listening: 'Listening…',
+    dictate: 'Speak your question',
+  },
+  coach: {
+    noVision: "I can't read images with the model I'm running right now — tell me what you've written and I'll work through it with you.",
+    failed: 'I could not get a look at that. Check your connection and try again.',
+    reading: 'Reading your work…',
+  },
 };

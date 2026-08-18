@@ -735,4 +735,15 @@ export const zh: TranslationTree = {
     recordOn: '正在记录你的过程',
     recordOff: '已停止记录',
   },
+  voice: {
+    listen: '朗读',
+    stop: '停止',
+    listening: '正在听…',
+    dictate: '说出你的问题',
+  },
+  coach: {
+    noVision: '我现在用的模型还不能读图——把你写的内容告诉我，我们一起看。',
+    failed: '我没能看到它。检查一下网络再试试。',
+    reading: '正在读你的过程…',
+  },
 };
