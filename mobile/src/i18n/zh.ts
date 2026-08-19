@@ -713,6 +713,7 @@ export const zh: TranslationTree = {
     noModels: '暂无可用模型。',
   },
   replay: {
+    needsDevBuild: '回放绘图需要 development build——Expo Go 不含绘图引擎。其他功能都可用。',
     card: '已记录 {count} 次 — 看看你是怎么做的',
     cardEmpty: '还没有记录',
     title: '学习回放',

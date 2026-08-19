@@ -713,6 +713,7 @@ export const ha: TranslationTree = {
     noModels: 'Babu samfuran da ake da su.',
   },
   replay: {
+    needsDevBuild: 'Sake kallon zane yana bukatar development build — Expo Go ba shi da injin zane. Sauran duk suna aiki.',
     card: 'rikodi {count} — ka duba yadda ka yi aiki',
     cardEmpty: 'Ba a yi rikodi ba tukuna',
     title: 'Sake kallon zaman',

@@ -713,6 +713,7 @@ export const id: TranslationTree = {
     noModels: 'Tidak ada model tersedia.',
   },
   replay: {
+    needsDevBuild: 'Memutar ulang gambar butuh development build — Expo Go tidak menyertakan mesin gambarnya. Sisanya tetap berfungsi.',
     card: '{count} rekaman — lihat caramu mengerjakan',
     cardEmpty: 'Belum ada rekaman',
     title: 'Putar ulang sesi',

@@ -768,6 +768,7 @@ aboutModalPrivacy: 'Privacy Policy',
     noModels: 'No models available.',
   },
   replay: {
+    needsDevBuild: 'Replaying the drawing needs a development build — Expo Go does not include the drawing engine. Everything else here works.',
     card: '{count} recorded — watch how you worked',
     cardEmpty: 'Nothing recorded yet',
     title: 'Session replay',

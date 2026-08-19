@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -37,6 +37,38 @@ import { observe, reportAttempt } from '@/lib/observe';
  */
 
 const PLAY_MS = 850;
+
+/**
+ * Redrawing needs Skia's native module, which Expo Go does not carry. The rest
+ * of the screen — the history, the timeline, deleting — works regardless, so
+ * only the canvas is replaced rather than the whole screen failing.
+ */
+class SkiaBoundary extends Component<
+  { fallback: React.ReactNode; children: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
+function CanvasUnavailable({
+  theme,
+  label,
+}: {
+  theme: ReturnType<typeof useAppTheme>;
+  label: string;
+}) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <Text style={{ color: theme.textMuted, textAlign: 'center', lineHeight: 20 }}>{label}</Text>
+    </View>
+  );
+}
 
 export default function ReplayScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -166,13 +198,22 @@ function ReplayDetail({ id, onBack }: { id: string; onBack: () => void }) {
 
   const askSensei = useCallback(async () => {
     if (!attempt || asking) return;
-    const sheet = contactSheet(frames);
-    if (!sheet) {
-      showAppToast({ message: t('replay.nothingDrawn'), type: 'info' });
-      return;
-    }
     setAsking(true);
     setVerdict(null);
+    let sheet: ReturnType<typeof contactSheet> = null;
+    try {
+      sheet = contactSheet(frames);
+    } catch {
+      // Skia has no native module here (Expo Go). Say so rather than dying.
+      setVerdict(t('replay.needsDevBuild'));
+      setAsking(false);
+      return;
+    }
+    if (!sheet) {
+      showAppToast({ message: t('replay.nothingDrawn'), type: 'info' });
+      setAsking(false);
+      return;
+    }
     observe('coach.ask', { from: 'replay', attempt: attempt.id });
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
@@ -273,19 +314,21 @@ function ReplayDetail({ id, onBack }: { id: string; onBack: () => void }) {
           aspectRatio: 3 / 4,
         }}
       >
-        <Canvas style={{ flex: 1 }}>
-          {(frame?.strokes ?? []).map((s, n) => (
-            <Path
-              key={n}
-              path={strokePath(s, scale)}
-              color={s.tool === 'eraser' ? '#FFFFFF' : s.color}
-              style="stroke"
-              strokeWidth={Math.max(1, s.width * scale)}
-              strokeCap="round"
-              strokeJoin="round"
-            />
-          ))}
-        </Canvas>
+        <SkiaBoundary fallback={<CanvasUnavailable theme={theme} label={t('replay.needsDevBuild')} />}>
+          <Canvas style={{ flex: 1 }}>
+            {(frame?.strokes ?? []).map((s, n) => (
+              <Path
+                key={n}
+                path={strokePath(s, scale)}
+                color={s.tool === 'eraser' ? '#FFFFFF' : s.color}
+                style="stroke"
+                strokeWidth={Math.max(1, s.width * scale)}
+                strokeCap="round"
+                strokeJoin="round"
+              />
+            ))}
+          </Canvas>
+        </SkiaBoundary>
       </View>
 
       <View style={{ paddingHorizontal: 14, paddingTop: 12 }}>

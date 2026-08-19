@@ -713,6 +713,7 @@ export const es: TranslationTree = {
     noModels: 'No hay modelos disponibles.',
   },
   replay: {
+    needsDevBuild: 'Reproducir el dibujo necesita una development build — Expo Go no incluye el motor de dibujo. Todo lo demás funciona.',
     card: '{count} grabadas — mira cómo lo hiciste',
     cardEmpty: 'Aún no hay nada grabado',
     title: 'Repetición de la sesión',
