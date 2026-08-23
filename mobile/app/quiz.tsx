@@ -17,6 +17,9 @@ import { useAttemptRecording } from '@/lib/use-attempt-recording';
 import { observe } from '@/lib/observe';
 import { learnerId } from '@/lib/learner';
 import { recordObservation } from '@/api/sensei-work';
+import { LinearGradient } from 'expo-linear-gradient';
+import { CorrectBurst } from '@/components/art/burst';
+import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
 
 type AnswerState = 'unanswered' | 'correct' | 'wrong';
 
@@ -320,7 +323,13 @@ export default function QuizScreen() {
         {answerState !== 'unanswered' && (
           <View className="mt-5 gap-3">
             {/* Feedback */}
-            <View className="rounded-2xl p-4" style={{ backgroundColor: answerState === 'correct' ? '#DCFCE7' : '#FEF3C7' }}>
+            <View
+              className="rounded-2xl p-4 overflow-visible"
+              style={{ backgroundColor: answerState === 'correct' ? '#DCFCE7' : '#FEF3C7' }}
+            >
+              {/* Keyed on the question, so each correct answer fires its own
+                  burst instead of one animation replaying stale. */}
+              {answerState === 'correct' ? <CorrectBurst key={question.id} /> : null}
               <Text className="font-space-semibold text-sm" style={{ color: answerState === 'correct' ? '#166534' : '#92400E' }}>
                 {answerState === 'correct' ? t('quiz.feedbackCorrect') : t('quiz.feedbackWrong')}
               </Text>
@@ -329,14 +338,17 @@ export default function QuizScreen() {
             {/* Next button — inline */}
 
             {/* Next button */}
-            <TouchableOpacity
-              className="items-center py-4 rounded-2xl"
-              style={{ backgroundColor: theme.accent }}
-              onPress={handleNext}
-            >
-              <Text className="font-space-bold text-sm text-white">
-                {currentIdx >= questions.length - 1 ? t('quiz.seeResults') : t('quiz.nextQuestion')}
-              </Text>
+            <TouchableOpacity className="rounded-2xl overflow-hidden" onPress={handleNext}>
+              <LinearGradient
+                colors={[...SENSEI_GRADIENT]}
+                start={GRADIENT_START}
+                end={GRADIENT_END}
+                style={{ alignItems: 'center', paddingVertical: 16 }}
+              >
+                <Text className="font-space-bold text-sm text-white">
+                  {currentIdx >= questions.length - 1 ? t('quiz.seeResults') : t('quiz.nextQuestion')}
+                </Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         )}

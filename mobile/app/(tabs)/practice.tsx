@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/contexts/theme-context';
 import { useAppTheme } from '@/theme';
+import { SubjectArt } from '@/components/art/subject-art';
 
 // `id` is the filter key the server matches against the question bank; `nameKey` is
 // only ever the display label. They must stay separate -- passing the translated label
@@ -137,10 +138,11 @@ export default function PracticeScreen() {
                   onPress={() => navigateToQuiz(s.id, subjectName)}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mb-3"
-                    style={{ backgroundColor: `${s.color}20` }}
+                    className="h-16 w-full overflow-hidden rounded-2xl mb-3"
                   >
-                    <Text className="text-lg">{s.emoji}</Text>
+                    {/* The subject's own motif in its own hue, rather than an
+                        emoji that renders differently on every handset. */}
+                    <SubjectArt subject={s.id} width={160} height={64} />
                   </View>
                   <Text className="text-xs font-space-semibold" style={{ color: theme.text }}>
                     {subjectName}
