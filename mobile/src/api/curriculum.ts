@@ -240,10 +240,65 @@ export async function getQuestions(params?: {
     const response = await fetch(`${SENSEI_BASE_URL}/practice/questions${qs}`);
     if (!response.ok) return [];
     const data = await response.json();
-    return data.questions || [];
+    const questions: PracticeQuestion[] = data.questions || [];
+
+    const want = params?.lang;
+    if (!want || want === 'bn') return questions;
+    return repairUntranslated(questions, want);
   } catch {
     return [];
   }
+}
+
+/** Bengali block. The bank is stored in Bangla, so its presence means source text. */
+const BANGLA = /[\u0980-\u09FF]/;
+
+/**
+ * Second pass for questions that came back untranslated.
+ *
+ * The server translates on demand and falls back to the source text per unit when
+ * a call fails, but still stamps `target_lang` — so a rate-limited translation is
+ * indistinguishable from a real one, and a Hindi student is shown Bangla that
+ * claims to be Hindi. Rather than trust the label, look at the script: if Bengali
+ * characters survive into a non-Bangla request, that question was not translated.
+ *
+ * Retrying one question at a time also sidesteps the cause. A batch of ten fires
+ * roughly fifty provider calls at once and some get throttled; these go out a few
+ * at a time, and every success is cached server-side, so the same question does not
+ * need this twice.
+ */
+async function repairUntranslated(
+  questions: PracticeQuestion[],
+  lang: string,
+): Promise<PracticeQuestion[]> {
+  const stale = questions
+    .map((q, i) => ({ q, i }))
+    .filter(({ q }) => BANGLA.test(q.question ?? '') || (q.options ?? []).some((o) => BANGLA.test(o.text ?? '')));
+  if (!stale.length) return questions;
+
+  const out = [...questions];
+  const BATCH = 3;
+  for (let start = 0; start < stale.length; start += BATCH) {
+    const slice = stale.slice(start, start + BATCH);
+    await Promise.all(
+      slice.map(async ({ q, i }) => {
+        const fixed = (await translateQuestion(
+          q as unknown as Record<string, unknown>,
+          lang,
+        )) as Record<string, unknown>;
+
+        // translateQuestion answers in the server's sidecar shape, leaving the
+        // source in place, so the translated fields have to be promoted here.
+        const question = (fixed.question_translated as string) || q.question;
+        const options = (q.options ?? []).map((o, n) => {
+          const src = (fixed.options as Record<string, unknown>[] | undefined)?.[n];
+          return { ...o, text: (src?.text_translated as string) || o.text };
+        });
+        out[i] = { ...q, question, options };
+      }),
+    );
+  }
+  return out;
 }
 
 /**
