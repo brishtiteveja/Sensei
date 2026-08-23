@@ -205,6 +205,8 @@ export interface PracticeQuestion {
   exam: string;
   year: string;
   correct_answer: string;
+  /** Set by the server only when the text really was translated. */
+  target_lang?: string | null;
 }
 
 export interface PracticeSubject {
@@ -250,8 +252,27 @@ export async function getQuestions(params?: {
   }
 }
 
-/** Bengali block. The bank is stored in Bangla, so its presence means source text. */
-const BANGLA = /[\u0980-\u09FF]/;
+const BANGLA_CHAR = /[\u0980-\u09FF]/;
+const LETTER = /[\p{L}]/u;
+
+/**
+ * Is this text still in the source language?
+ *
+ * Not "contains a Bengali character" — a correct Hindi translation of a Bangla
+ * grammar question still quotes the Bangla term, and treating that as a failure
+ * sends perfectly good questions back for a pointless second translation. What
+ * marks an untranslated string is that it is *mostly* Bengali.
+ */
+function looksUntranslated(text: string): boolean {
+  let bengali = 0;
+  let letters = 0;
+  for (const ch of text ?? '') {
+    if (!LETTER.test(ch)) continue;
+    letters += 1;
+    if (BANGLA_CHAR.test(ch)) bengali += 1;
+  }
+  return letters > 0 && bengali / letters > 0.5;
+}
 
 /**
  * Second pass for questions that came back untranslated.
@@ -273,7 +294,14 @@ async function repairUntranslated(
 ): Promise<PracticeQuestion[]> {
   const stale = questions
     .map((q, i) => ({ q, i }))
-    .filter(({ q }) => BANGLA.test(q.question ?? '') || (q.options ?? []).some((o) => BANGLA.test(o.text ?? '')));
+    .filter(
+      ({ q }) =>
+        // No stamp at all means the server is telling us outright that it did
+        // not translate; otherwise judge by the script.
+        !q.target_lang ||
+        looksUntranslated(q.question ?? '') ||
+        (q.options ?? []).some((o) => looksUntranslated(o.text ?? '')),
+    );
   if (!stale.length) return questions;
 
   const out = [...questions];
