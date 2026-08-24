@@ -15,6 +15,7 @@ import { MathIllustration } from '@/illustrations/MathIllustration';
 import { BiologyIllustration } from '@/illustrations/BiologyIllustration';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
+import { SubjectArt } from '@/components/art/subject-art';
 
 type LessonStatus = 'completed' | 'current' | 'locked';
 
@@ -173,7 +174,9 @@ export default function LearnScreen() {
                   borderWidth: active ? 0 : 1, borderColor: theme.border,
                 }}
               >
-                <Text style={{ fontSize: 16, ...(active ? { textShadowColor: '#ffffff88', textShadowRadius: 6 } : {}) }}>{subj.icon}</Text>
+                <View style={{ width: 20, height: 20, borderRadius: 6, overflow: 'hidden' }}>
+                  <SubjectArt subject={subj.id} width={20} height={20} wash={false} />
+                </View>
                 <Text className="font-space-semibold text-sm" style={{ color: active ? '#fff' : theme.text }}>{subj.title}</Text>
               </TouchableOpacity>
             );
@@ -195,7 +198,9 @@ export default function LearnScreen() {
           <View className="mx-4 mt-3 rounded-2xl p-4 flex-row items-center" style={{ backgroundColor: theme.surface }}>
             <View className="flex-1">
               <View className="flex-row items-center gap-2">
-                <Text style={{ fontSize: 28 }}>{selectedSubject.icon}</Text>
+                <View style={{ width: 42, height: 42, borderRadius: 12, overflow: 'hidden' }}>
+                  <SubjectArt subject={selectedSubject.id} width={42} height={42} />
+                </View>
                 <Text className="font-space-bold text-lg" style={{ color: theme.text }}>{selectedSubject.title}</Text>
               </View>
               <Text className="font-space-medium text-xs mt-1" style={{ color: theme.textMuted }}>

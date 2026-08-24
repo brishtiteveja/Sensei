@@ -69,7 +69,7 @@ export default function ProgressScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.page }} edges={['top']}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
         {/* 1. Profile Header */}
