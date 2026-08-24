@@ -34,7 +34,7 @@ export default function PracticeScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.page }} edges={['top']}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView
         className="flex-1"
         style={{ backgroundColor: theme.page }}

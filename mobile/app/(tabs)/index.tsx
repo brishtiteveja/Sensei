@@ -11,6 +11,8 @@ import { usePreferences } from '@/contexts/preferences-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { AiTutorIllustration } from '@/illustrations/AiTutorIllustration';
 import { ExamPrepIllustration } from '@/illustrations/ExamPrepIllustration';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
 
 function AnimatedRing({ progress, size, color, bgColor }: { progress: number; size: number; color: string; bgColor: string }) {
   const anim = useRef(new Animated.Value(0)).current;
@@ -62,11 +64,16 @@ export default function HomeScreen() {
   const dailyProgress = Math.min(Math.round((todayXp / dailyTarget) * 100), 100);
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.page }} edges={['top']}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: 'transparent' }} edges={['top']}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Hero Header */}
-        <View className="px-5 pt-4 pb-16 rounded-b-[28px]" style={{ backgroundColor: theme.heroBg }}>
+        <LinearGradient
+        colors={[...SENSEI_GRADIENT]}
+        start={GRADIENT_START}
+        end={GRADIENT_END}
+        style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 64, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}
+      >
           <View className="flex-row items-center justify-between mb-5">
             <View className="flex-row items-center gap-3">
               <View className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
@@ -105,7 +112,7 @@ export default function HomeScreen() {
             <AnimatedRing progress={dailyProgress} size={80} color="#22C55E" bgColor="rgba(255,255,255,0.15)" />
             <Text className="text-white/70 text-xs font-space-medium mt-2">{t('home.todayProgressRing')}</Text>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Today's Missions */}
         <View className="px-5 -mt-10">

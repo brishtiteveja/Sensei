@@ -13,6 +13,8 @@ import { PhysicsIllustration } from '@/illustrations/PhysicsIllustration';
 import { ChemistryIllustration } from '@/illustrations/ChemistryIllustration';
 import { MathIllustration } from '@/illustrations/MathIllustration';
 import { BiologyIllustration } from '@/illustrations/BiologyIllustration';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
 
 type LessonStatus = 'completed' | 'current' | 'locked';
 
@@ -133,9 +135,14 @@ export default function LearnScreen() {
   }, [completeLesson, router, selectedSubjectId]);
 
   return (
-    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.page }} edges={['top']}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: 'transparent' }} edges={['top']}>
       {/* Hero Header */}
-      <View className="px-5 pt-4 pb-5 rounded-b-3xl" style={{ backgroundColor: theme.heroBg }}>
+      <LinearGradient
+        colors={[...SENSEI_GRADIENT]}
+        start={GRADIENT_START}
+        end={GRADIENT_END}
+        style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}
+      >
         <View className="flex-row items-center justify-between">
           <Text className="font-space-bold text-xl" style={{ color: '#fff' }}>{t('tabs.learn')}</Text>
           <View className="flex-row items-center gap-3">
@@ -148,7 +155,7 @@ export default function LearnScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 48 }} showsVerticalScrollIndicator={false}>
         {/* Subject Selector */}

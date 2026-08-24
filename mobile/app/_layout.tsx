@@ -24,6 +24,7 @@ import { PreferencesProvider } from '@/contexts/preferences-context';
 import { AppToastViewport } from '@/feedback/toast';
 import { AppDialogViewport } from '@/feedback/dialog';
 import { useAppTheme, useThemeVariables } from '@/theme';
+import { Aurora } from '@/components/art/aurora';
 import { FloatingSensei } from '@/components/floating-sensei';
 import { hydrateLearner } from '@/lib/learner';
 import { hydrateObserve } from '@/lib/observe';
@@ -107,12 +108,18 @@ function AppContent() {
       }
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
+      {/* Behind every screen. Screens paint their own surfaces on top, so this
+          shows through the page margins rather than under the content. */}
+      <Aurora />
       <Stack
         screenOptions={{
           headerShown: false,
           animation: 'slide_from_right',
           contentStyle: {
-            backgroundColor: theme.page,
+            // Transparent so the Aurora behind the navigator shows through the
+            // page margins. The root View below still supplies the page colour,
+            // so nothing renders on bare black during a transition.
+            backgroundColor: 'transparent',
           },
         }}
       >
