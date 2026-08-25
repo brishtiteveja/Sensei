@@ -3,11 +3,11 @@ const themes = {
     name: 'quantum-indigo',
     label: 'Quantum Indigo',
     light: {
-      page: '#FAFAFA',
+      page: '#F8F8FD',
       surface: '#FFFFFF',
       surfaceAlt: '#F4F4F5',
       card: '#FFFFFF',
-      border: '#E4E4E7',
+      border: '#E2E2EE',
       borderStrong: '#D4D4D8',
       text: '#18181B',
       textSoft: '#3F3F46',

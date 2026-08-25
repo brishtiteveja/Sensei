@@ -13,6 +13,7 @@ import { AiTutorIllustration } from '@/illustrations/AiTutorIllustration';
 import { ExamPrepIllustration } from '@/illustrations/ExamPrepIllustration';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SENSEI_GRADIENT, GRADIENT_START, GRADIENT_END } from '@/theme/gradient';
+import { HeroConstellation } from '@/components/art/hero-constellation';
 
 function AnimatedRing({ progress, size, color, bgColor }: { progress: number; size: number; color: string; bgColor: string }) {
   const anim = useRef(new Animated.Value(0)).current;
@@ -72,8 +73,16 @@ export default function HomeScreen() {
         colors={[...SENSEI_GRADIENT]}
         start={GRADIENT_START}
         end={GRADIENT_END}
-        style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 64, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}
+        style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 64, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' }}
       >
+          {/* The product thesis as a drawing: concepts, the links between them,
+              and an orbit sweeping the frontier. Sits behind the greeting. */}
+          <View
+            pointerEvents="none"
+            style={{ position: 'absolute', right: -40, top: -10, opacity: 0.55 }}
+          >
+            <HeroConstellation width={300} height={203} />
+          </View>
           <View className="flex-row items-center justify-between mb-5">
             <View className="flex-row items-center gap-3">
               <View className="w-11 h-11 rounded-full items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
