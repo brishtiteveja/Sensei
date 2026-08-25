@@ -10,66 +10,18 @@
  * Everything is hand-rolled inline SVG — no sprites, no network.
  */
 
-export type SubjectMotif = 'orbit' | 'hex' | 'curve' | 'geometry' | 'cell' | 'code' | 'glyph' | 'globe';
+// The mapping and hue table now live in shared/art, so this client and the
+// mobile one cannot drift. Note the web inherits the localised subject-name
+// matching that was added for the phone: ids here are English, but a curriculum
+// served in Bangla will now draw the right motif rather than a hashed one.
+import { subjectVisual, hexPath, type SubjectMotif, type SubjectVisual } from '@art/subjects';
 
-export interface SubjectVisual {
-  hue: number;
-  motif: SubjectMotif;
-}
+export type { SubjectMotif, SubjectVisual };
+export { subjectVisual };
 
-const MOTIF_CYCLE: SubjectMotif[] = ['orbit', 'hex', 'curve', 'cell', 'geometry', 'globe'];
-
-/** Deterministic hue for ids we do not recognise, so art stays stable per id. */
-function hashHue(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 100_000;
-  return h;
-}
-
-/**
- * Subject id -> art. Matching is on substrings because the curriculum uses ids
- * like `general_math` / `higher_math` and may grow new ones; anything unknown
- * still gets a stable, distinct look instead of a blank card.
- */
-export function subjectVisual(id: string | undefined): SubjectVisual {
-  const s = (id ?? '').toLowerCase();
-
-  if (s.includes('physic')) return { hue: 248, motif: 'orbit' };
-  if (s.includes('chem')) return { hue: 168, motif: 'hex' };
-  if (s.includes('bio') || s.includes('botan') || s.includes('zoo')) return { hue: 142, motif: 'cell' };
-  if (s.includes('higher_math') || s.includes('higher math') || s.includes('calculus'))
-    return { hue: 286, motif: 'curve' };
-  if (s.includes('math') || s.includes('geom') || s.includes('algebra'))
-    return { hue: 206, motif: 'geometry' };
-  if (s.includes('ict') || s.includes('comput') || s.includes('program'))
-    return { hue: 190, motif: 'code' };
-  if (
-    s.includes('bangla') ||
-    s.includes('bengali') ||
-    s.includes('english') ||
-    s.includes('lang') ||
-    s.includes('liter')
-  )
-    return { hue: 32, motif: 'glyph' };
-  if (s.includes('gk') || s.includes('general_know') || s.includes('history') || s.includes('social'))
-    return { hue: 322, motif: 'globe' };
-
-  const h = hashHue(s || 'sensei');
-  return { hue: h % 360, motif: MOTIF_CYCLE[h % MOTIF_CYCLE.length] };
-}
-
-/** A CSS gradient in the subject's hue — handy for tinted headers and chips. */
+/** A CSS gradient in the subject's hue — web-only, since RN has no such string. */
 export function subjectGradient(hue: number, a = 1): string {
   return `linear-gradient(125deg, hsl(${hue} 82% 58% / ${a}), hsl(${(hue + 46) % 360} 84% 62% / ${a}))`;
-}
-
-function hexPath(cx: number, cy: number, r: number): string {
-  const pts: string[] = [];
-  for (let i = 0; i < 6; i++) {
-    const a = (Math.PI / 180) * (60 * i - 30);
-    pts.push(`${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`);
-  }
-  return `M${pts.join('L')}Z`;
 }
 
 /**

@@ -11,6 +11,9 @@ const config = getDefaultConfig(projectRoot);
 config.watchFolders = [
   path.resolve(projectRoot, 'vendor/rn-onboardly'),
   path.resolve(projectRoot, 'vendor/rn-motionfold'),
+  // Art geometry and palette shared with the web client. Metro only watches the
+  // project root by default, so a sibling directory has to be named explicitly.
+  path.resolve(projectRoot, '../shared/art'),
 ];
 
 // Resolve modules from the app only, so React / RN never duplicate.

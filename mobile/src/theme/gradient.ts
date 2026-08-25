@@ -10,7 +10,7 @@
  * expo-linear-gradient, to an SVG gradient, or read a single stop for a border.
  */
 
-export const SENSEI_GRADIENT = ['#4F46E5', '#8B5CF6', '#D946EF'] as const;
+export { GRADIENT as SENSEI_GRADIENT, DECO } from '@art/palette';
 
 /** The same ramp, softened — for washes behind content that must stay readable. */
 export const SENSEI_GRADIENT_SOFT = ['#EEF2FF', '#F5F3FF', '#FDF4FF'] as const;
@@ -19,9 +19,3 @@ export const SENSEI_GRADIENT_SOFT = ['#EEF2FF', '#F5F3FF', '#FDF4FF'] as const;
 export const GRADIENT_START = { x: 0, y: 0 };
 export const GRADIENT_END = { x: 1, y: 1 };
 
-/** Secondary identity hues, for subject chips and accents. */
-export const DECO = {
-  teal: '#0D9488',
-  amber: '#D97706',
-  cyan: '#0891B2',
-} as const;

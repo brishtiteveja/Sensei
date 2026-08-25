@@ -12,16 +12,18 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // Art geometry and palette shared with the mobile client. Lives outside
+      // web/, so Vite needs both the alias and fs.allow below to serve it.
+      '@art': fileURLToPath(new URL('../shared/art', import.meta.url)),
     },
+  },
+  server: {
+    fs: { allow: ['..'] },
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
     chunkSizeWarningLimit: 900,
-  },
-  server: {
-    port: 5273,
-    host: true,
   },
   preview: {
     port: 5273,

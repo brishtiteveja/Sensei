@@ -10,6 +10,9 @@
       ],
       "rn-motionfold": [
         "./src/types/rn-motionfold.d.ts"
+      ],
+      "@art/*": [
+        "../shared/art/*"
       ]
     }
   },
@@ -20,5 +23,8 @@
     ".expo/types/**/*.d.ts",
     "nativewind-env.d.ts"
   ],
-  "exclude": ["node_modules", "vendor"]
+  "exclude": [
+    "node_modules",
+    "vendor"
+  ]
 }
