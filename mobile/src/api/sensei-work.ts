@@ -158,6 +158,24 @@ export function saveLearner(
   return call(`/learner/${encodeURIComponent(id)}`, { method: 'POST', body: fields, signal });
 }
 
+/**
+ * Fold an anonymous device learner into a signed-in account.
+ *
+ * Called once at sign-in. Safe to retry: the server deletes the source as part
+ * of the merge, so a repeat reports zero rather than double-counting the work.
+ */
+export function mergeLearner(
+  accountLearnerId: string,
+  source: string,
+  signal?: AbortSignal,
+): Promise<{ ok: boolean; moved: number }> {
+  return call(`/learner/${encodeURIComponent(accountLearnerId)}/merge`, {
+    method: 'POST',
+    body: { source },
+    signal,
+  });
+}
+
 export function getLearner(id: string, signal?: AbortSignal): Promise<LearnerState> {
   return call(`/learner/${encodeURIComponent(id)}`, { signal });
 }

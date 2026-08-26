@@ -10,6 +10,8 @@ import { getApiErrorMessage } from '@/api';
 import { clearTokens } from '@/lib/token-storage';
 import type { User } from '@/types';
 import { clearGuestAiSessionId } from '@/lib/guest-ai-session';
+import { adoptAccount, learnerId, releaseAccount } from '@/lib/learner';
+import { mergeLearner } from '@/api/sensei-work';
 
 const ONBOARDING_KEY = 'has_completed_onboarding';
 
@@ -54,6 +56,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>(initialState);
 
   const isAuthenticated = state.step === 'authenticated' && state.user !== null;
+
+  /*
+   * Tie the tutor's memory to the person, not the handset.
+   *
+   * A student can work for weeks before signing in -- the tutor deliberately
+   * does not ask first -- so their mastery accrues under a device id. At
+   * sign-in that history is merged into the account, or they would meet a
+   * tutor that had forgotten them, which is worse than one that never
+   * remembered. Failure here is silent and non-blocking: losing the merge
+   * costs history, but blocking the sign-in costs the session.
+   */
+  useEffect(() => {
+    const accountId = state.user?.id;
+    if (!isAuthenticated || !accountId) {
+      void releaseAccount();
+      return;
+    }
+    void (async () => {
+      const orphan = await adoptAccount(String(accountId));
+      if (!orphan) return;
+      try {
+        const { moved } = await mergeLearner(learnerId(), orphan);
+        if (moved) console.info(`[learner] carried ${moved} observations into the account`);
+      } catch {
+        /* the account simply starts from what the server already had */
+      }
+    })();
+  }, [isAuthenticated, state.user?.id]);
 
   // ─── Hydrate local session flags on boot ──────────────────
   useEffect(() => {
