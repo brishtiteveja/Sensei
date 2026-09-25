@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Moon,
   GraduationCap,
+  MonitorPlay,
   NotebookPen,
   Settings as SettingsIcon,
   ShieldCheck,
@@ -44,6 +45,7 @@ function navItems() {
     // empty state -- so "Ask Sensei" reads as asking a character, not a feature.
     { to: '/tutor', label: t.nav.tutor, icon: SenseiOwlGlyph, group: 'learn', tour: 'tutor' },
     { to: '/teach', label: t.nav.teach, icon: GraduationCap, group: 'teach', tour: 'teach' },
+    { to: '/desk', label: t.nav.desk, icon: MonitorPlay, group: 'teach' },
     { to: '/progress', label: t.nav.progress, icon: TrendingUp, group: 'you', tour: 'progress' },
     { to: '/settings', label: t.nav.settings, icon: SettingsIcon, group: 'you' },
   ] as const;

@@ -15,6 +15,7 @@ import { LandingPage } from '@/pages/Landing';
 import { ProgressPage } from '@/pages/ProgressPage';
 import { SettingsPage } from '@/pages/Settings';
 import { TutorPage } from '@/pages/Tutor';
+import { DeskPage } from '@/pages/Desk';
 import { NotFoundPage } from '@/pages/NotFound';
 
 /**
@@ -63,6 +64,7 @@ function LocalisedTree() {
           <Route path="practice" element={<PracticePage />} />
           <Route path="notebook" element={<NotebookPage />} />
           <Route path="teach" element={<TeachPage />} />
+          <Route path="desk" element={<DeskPage />} />
           <Route path="tutor" element={<TutorPage />} />
           <Route path="progress" element={<ProgressPage />} />
           <Route path="settings" element={<SettingsPage />} />
