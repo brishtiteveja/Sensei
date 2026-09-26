@@ -23,7 +23,9 @@ export default function Index() {
 
   if (state.isLoading || languageChosen === null) return null;
 
-  if (!languageChosen) return <Redirect href="/choose-language" />;
+  // Country picker is off until multi-language is ready: onboarding sets
+  // Bangladesh / Bangla itself (DEFAULT_REGION), so don't detour here.
+  // if (!languageChosen) return <Redirect href="/choose-language" />;
   if (!state.hasCompletedOnboarding) return <Redirect href="/welcome-onboarding" />;
   return <Redirect href="/(tabs)" />;
 }

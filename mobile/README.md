@@ -140,6 +140,17 @@ the camera. It hides on the chat tab, notebook, replay and onboarding.
 `progress`, plus `quiz`, `lesson-detail`, `mocktest`, `mocktest-session`, `notebook`,
 `replay`, `my-preferences`, `choose-language`.
 
+**Onboarding is chat-only.** First run goes straight to "Welcome to Sensei!" (tap Continue --
+no auto-advance, no splash) → the chat setup questions → personalizing → tabs. The old "Quick Visual"
+card-style flow was removed.
+
+**Country / language picker is off for now.** Every new install starts as Bangladesh / Bangla
+(`DEFAULT_REGION` in
+`src/constants/languages.ts`). The picker is commented out, not deleted: to bring it back,
+start `langPhase` at `'splash'`, restore the commented splash timer, and uncomment the `langPhase === 'pick'`
+block and the back button in `app/welcome-onboarding.tsx`, and the `/choose-language`
+redirect in `app/index.tsx`. Users can still switch language later in `my-preferences`.
+
 ## i18n
 
 Eight languages (`en bn hi es id ms ha zh`) in `src/i18n/*.ts`. `t()` splits keys on `.`, so a
