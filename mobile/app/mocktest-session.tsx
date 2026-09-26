@@ -2,10 +2,13 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Clock, CheckCircle2, XCircle, MessageCircleQuestion, ChevronRight, RotateCcw, Flag } from 'lucide-react-native';
+import { ArrowLeft, Clock, CheckCircle2, XCircle, MessageCircleQuestion, ChevronRight, RotateCcw, Flag, Share2, Users } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import { useI18n } from '@/i18n/i18n-context';
-import { curriculumApi } from '@/api';
+import { communityApi, curriculumApi, getApiErrorMessage } from '@/api';
+import type { CommunityAttemptInput } from '@/types';
+import { MIXED_SUBJECT_ID } from '@/constants/community';
+import { showAppToast } from '@/feedback/toast';
 import type { PracticeQuestion } from '@/api/curriculum';
 import { useProgress } from '@/gamification/progress-context';
 
@@ -32,6 +35,11 @@ export default function MockTestSession() {
   const [finished, setFinished] = useState(false);
   const [reviewing, setReviewing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Sharing saves the attempt once, then posts it; a retry after a failed
+  // share reuses the saved attempt rather than saving a second copy.
+  const savedAttemptIdRef = useRef<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isShared, setIsShared] = useState(false);
 
   const loadQuestions = useCallback(async () => {
     setLoading(true);
@@ -107,6 +115,58 @@ export default function MockTestSession() {
   const isUrgent = timeLeft < 60;
   const question = questions[currentIdx];
 
+  const buildAttempt = (): CommunityAttemptInput => {
+    const subjectId = subject || MIXED_SUBJECT_ID;
+    return {
+      questionSet: {
+        id: subjectId,
+        name: headerTitle,
+        year: String(new Date().getFullYear()),
+        subject: { id: subjectId, name: subject || t('community.mixedSubject') },
+      },
+      timeTaken: durationMins * 60 - timeLeft,
+      answers: questions
+        .map((q, idx) => {
+          const correctIndex = q.options.findIndex(o => o.isCorrect);
+          const selectedIndex = q.options.findIndex(o => o.id === answers[idx]);
+          return {
+            questionId: q.id,
+            selectedIndex: selectedIndex >= 0 ? selectedIndex : null,
+            question: {
+              text: q.question,
+              options: q.options.map(o => o.text),
+              correctIndex,
+              explanation: '',
+            },
+          };
+        })
+        // A question with no marked answer can't be scored or reviewed.
+        .filter(a => a.question.correctIndex >= 0),
+    };
+  };
+
+  const handleShare = async () => {
+    if (isShared) {
+      router.push('/community' as any);
+      return;
+    }
+    if (isSharing) return;
+    try {
+      setIsSharing(true);
+      if (!savedAttemptIdRef.current) {
+        const saved = await communityApi.submitAttempt(buildAttempt());
+        savedAttemptIdRef.current = saved.id;
+      }
+      await communityApi.shareAttempt(savedAttemptIdRef.current);
+      setIsShared(true);
+      showAppToast({ type: 'success', message: t('community.shared') });
+    } catch (err) {
+      showAppToast({ type: 'error', title: t('community.shareFailed'), message: getApiErrorMessage(err) });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   if (loading || !questions.length || !question) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center" style={{ backgroundColor: theme.page }}>
@@ -167,6 +227,18 @@ export default function MockTestSession() {
             >
               <Flag size={18} color="#fff" />
               <Text className="font-space-bold text-sm text-white">{t('mocktest.reviewAnswers')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-row items-center justify-center gap-2 py-4 rounded-2xl"
+              style={{ backgroundColor: isSharing ? theme.accentDisabled : theme.accentStrong }}
+              onPress={handleShare}
+              disabled={isSharing}
+              activeOpacity={0.85}
+            >
+              {isShared ? <Users size={18} color="#fff" /> : <Share2 size={18} color="#fff" />}
+              <Text className="font-space-bold text-sm text-white">
+                {isShared ? t('mcqScreen.goToCommunity') : isSharing ? t('mcqScreen.sharing') : t('mcqScreen.shareToCommunity')}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="flex-row items-center justify-center gap-2 py-4 rounded-2xl border"

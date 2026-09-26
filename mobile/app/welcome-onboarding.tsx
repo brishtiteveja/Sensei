@@ -43,6 +43,7 @@ import { usePreferences } from '@/contexts/preferences-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { useAppTheme } from '@/theme';
 import { DEFAULT_REGION } from '@/constants/languages';
+import { setDisplayName } from '@/lib/display-name';
 import {
   MathIllustration,
   PhysicsIllustration,
@@ -670,6 +671,8 @@ export default function WelcomeOnboardingScreen() {
     );
 
     await saveOnboardingAnswers(mapped);
+    // The only name Sensei has for a student; shown on their community posts.
+    if (typeof chatAnswers.name === 'string') await setDisplayName(chatAnswers.name);
     completeOnboarding();
     router.replace('/(tabs)' as any);
   }, [

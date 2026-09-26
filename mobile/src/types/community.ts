@@ -94,3 +94,38 @@ export interface CommunityCommentListResponse {
   nextCursor: string | null;
   limit: number;
 }
+
+/** A finished mock test, saved so it can be shared. Scored on the server. */
+export interface CommunityAttemptInput {
+  questionSet: {
+    id: string;
+    name: string;
+    year: string;
+    subject: {
+      id: string;
+      name: string;
+    };
+  };
+  timeTaken: number;
+  answers: Array<{
+    questionId: string;
+    selectedIndex: number | null;
+    /** A snapshot of the question as the student saw it. */
+    question: {
+      text: string;
+      options: string[];
+      correctIndex: number;
+      explanation: string;
+    };
+  }>;
+}
+
+export interface CommunityAttemptResult {
+  id: string;
+  score: number;
+  total: number;
+  percentage: number;
+  timeTaken: number;
+  createdAt: string;
+  questionSetId: string;
+}

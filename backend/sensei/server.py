@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from pathlib import Path
 
+from . import community
 from .config import load_settings
 from .curriculum import build_graph
 from .graph import KnowledgeGraph
@@ -73,6 +74,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+community.install(app, community.CommunityStore(store.connection))
 
 
 class Turn(BaseModel):

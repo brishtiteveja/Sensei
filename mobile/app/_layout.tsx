@@ -27,6 +27,7 @@ import { useAppTheme, useThemeVariables } from '@/theme';
 import { Aurora } from '@/components/art/aurora';
 import { FloatingSensei } from '@/components/floating-sensei';
 import { hydrateLearner } from '@/lib/learner';
+import { hydrateDisplayName } from '@/lib/display-name';
 import { hydrateObserve } from '@/lib/observe';
 import { hydrateAttempts, pruneEmpty } from '@/lib/attempts';
 
@@ -55,7 +56,7 @@ function AppContent() {
    */
   useEffect(() => {
     void (async () => {
-      await hydrateLearner();
+      await Promise.all([hydrateLearner(), hydrateDisplayName()]);
       await Promise.all([hydrateObserve(), hydrateAttempts()]);
       pruneEmpty();
     })();
@@ -134,6 +135,9 @@ function AppContent() {
         <Stack.Screen name="mocktest-session" />
         <Stack.Screen name="notebook" />
         <Stack.Screen name="replay" />
+        <Stack.Screen name="community" />
+        <Stack.Screen name="community/post/[postId]" />
+        <Stack.Screen name="community/[postId]/attempt" />
       </Stack>
     </View>
   );

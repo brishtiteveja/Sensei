@@ -25,6 +25,7 @@ runtime. Run it before committing anything structural.
 |---|---|---|
 | **SenseiClaw** | `EXPO_PUBLIC_SENSEI_API_URL` | tutor, curriculum, question bank, vision, learner memory, telemetry |
 | **NestJS** | `EXPO_PUBLIC_API_BASE_URL` | accounts, credits, mock-test sets |
+| **Sensei backend** (`backend/sensei`) | `EXPO_PUBLIC_COMMUNITY_API_URL` | community feed, saved mock-test attempts |
 
 Neither has a hardcoded production fallback any more. An unset URL fails immediately and says
 so, because a wrong host that answers is harder to debug than no host at all — the NestJS
@@ -150,6 +151,35 @@ card-style flow was removed.
 start `langPhase` at `'splash'`, restore the commented splash timer, and uncomment the `langPhase === 'pick'`
 block and the back button in `app/welcome-onboarding.tsx`, and the `/choose-language`
 redirect in `app/index.tsx`. Users can still switch language later in `my-preferences`.
+
+## Community
+
+Ported from ShikkhaDikkha (`mobile-app/app/community.tsx` and its NestJS module) and kept
+wire-compatible with it. A student finishes a mock test (`app/mocktest-session.tsx`) and taps
+**Share to Community**: the attempt is saved with a snapshot of every question, then posted.
+Others react (🔥 🎉 💪 ❤️ 😮 — one each, same again removes it, never on your own), comment and
+reply in a bottom sheet, and open **View Attempt** for the full answer review
+(`app/community/[postId]/attempt.tsx`). `app/community/post/[postId]` is the deep-link target.
+
+The server is `backend/sensei/community.py` (SQLite, tests in `backend/tests/`):
+
+```bash
+cd backend && uv run uvicorn sensei.server:app --host 0.0.0.0 --port 8000
+uv run --with pytest --with httpx pytest -q tests/test_community.py
+```
+
+Two things differ from ShikkhaDikkha, both because Sensei has no sign-in:
+
+- **You are your learner id** (`src/lib/learner.ts`), sent as `X-Learner-Id`. It is an
+  identifier, not a credential — anyone who knows an id can post as it. Fine for a pilot; put
+  real auth in front of the write routes before this is public.
+- **Your name is the one you gave in onboarding** (`src/lib/display-name.ts`), else
+  "Anonymous User". No avatars.
+
+Not ported: push notifications for reactions and replies (the app has no push setup). Like the
+original there is **no reporting, blocking or moderation**, and correct answers on a shared
+attempt are visible to everyone. The users are minors — decide who reviews comments before
+launch.
 
 ## i18n
 
