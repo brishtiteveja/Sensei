@@ -135,7 +135,7 @@ web/                 Vite + React student and teacher app -- the deployed surfac
   src/i18n/          8 locales; strings.ts is a module singleton (see gotcha below)
   scripts/           gen-locales.mjs, copy-samples.mjs (prebuild staging)
 mobile/              Expo app
-backend/sensei/      earlier standalone backend; learner.py + graph.py, and community.py
+backend/sensei/      earlier standalone backend; learner.py + graph.py, community.py, payments.py
   learner.py         per-student memory in SQLite -- the two-sigma differentiator
   graph.py           concepts as nodes, prerequisites as edges; mastery-gated path
 samples/             17 curated worked problems, rendered by scripts/render_samples.py
@@ -149,8 +149,9 @@ docs/
 
 `backend/sensei/` predates SenseiClaw and is not what serves the tutor. It is kept
 because `learner.py` and `graph.py` are the server-side progress model and
-knowledge graph, written and not yet wired up. It does serve one thing to the
-mobile app: the community feed (`community.py`, see `mobile/README.md`).
+knowledge graph, written and not yet wired up. It does serve the mobile app two
+things: the community feed (`community.py`) and payments with AI credits
+(`payments.py`, bKash and Nagad) -- see `mobile/README.md`.
 
 ## Running
 

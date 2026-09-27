@@ -397,8 +397,7 @@ export default function QuizScreen() {
     <ProPaywall
       visible={showProPaywall}
       onClose={() => setShowProPaywall(false)}
-      /* STUB: /subscription removed (no payments backend) — paywall just closes. */
-      onSubscribe={() => { setShowProPaywall(false); }}
+      onSubscribe={() => { setShowProPaywall(false); router.push('/subscription'); }}
     />
     </>
   );

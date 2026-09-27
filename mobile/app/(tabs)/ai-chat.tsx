@@ -43,7 +43,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useI18n } from '@/i18n/i18n-context';
 import { useTheme } from '@/contexts/theme-context';
-import { aiApi, aiCreditsApi, senseiApi, getApiErrorMessage } from '@/api';
+import { aiApi, aiCreditsApi, paymentsApi, senseiApi, getApiErrorMessage } from '@/api';
 import { useAuth } from '@/contexts/auth-context';
 import { useProgress } from '@/gamification/progress-context';
 import { saveConversation, loadHistory, deleteConversation, type ConversationEntry } from '@/gamification/conversation-history';
@@ -55,7 +55,6 @@ import type { AiChatSession, AiCreditBalance } from '@/types';
 import { showAppDialog } from '@/feedback/dialog';
 import { showAppToast } from '@/feedback/toast';
 import { useAppTheme } from '@/theme';
-import { getGuestAiSessionId } from '@/lib/guest-ai-session';
 import { FormattedText } from '@/components/formatted-text';
 import { ToolGrid, CalculatorSheet, pickImage, pickFile, useVoiceInput, DrawingCanvas, EquationEditor, AttachmentPreview } from '@/components/chat-tools';
 import type { ToolType, ChatAttachment } from '@/components/chat-tools';
@@ -369,7 +368,6 @@ export default function AiChatScreen() {
   const [historyCursor, setHistoryCursor] = useState<string | null>(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [creditBalance, setCreditBalance] = useState<AiCreditBalance | null>(null);
-  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
   const [toolGridVisible, setToolGridVisible] = useState(false);
   const [activeTool, setActiveTool] = useState<ToolType | null>(null);
@@ -399,46 +397,30 @@ export default function AiChatScreen() {
   const { record: recordXp } = useProgress();
 
   const showCreditGate = useCallback(() => {
-    setShowProPaywall(true);
-    return;
-
-    // Legacy credit gate — kept for reference
-    if (!isAuthenticated) {
-      showAppDialog({
-        title: 'Login required',
-        message: 'Your guest AI credits are finished. Log in or register to get 30 more free credits.',
-        actions: [
-          { label: 'Not now', variant: 'cancel' },
-          { label: 'Login / Register', onPress: () => {} }, // STUB: /login removed (no auth backend)
-        ],
-      });
-      return;
-    }
-
     showAppDialog({
-      title: 'Buy AI credits',
-      message: 'Your free AI credits are finished. Buy a credit package or view plans to continue.',
+      title: t('aiChat.creditsOutTitle'),
+      message: t('aiChat.creditsOutBody'),
       actions: [
-        { label: 'Cancel', variant: 'cancel' },
-        { label: 'View Plans', onPress: () => {} }, // STUB: /subscription removed (no payments backend)
-        { label: 'Buy Credits', onPress: () => {} }, // STUB: /ai-credits removed (no credits backend)
+        { label: t('common.cancel'), variant: 'cancel' },
+        { label: t('aiChat.viewPlans'), onPress: () => router.push('/subscription') },
+        { label: t('aiChat.buyCredits'), onPress: () => router.push('/ai-credits') },
       ],
     });
-  }, [isAuthenticated, router]);
+  }, [router, t]);
 
   const refreshCreditBalance = useCallback(async () => {
     try {
-      if (isAuthenticated) {
-        setCreditBalance(await aiCreditsApi.getUserBalance());
-        return;
-      }
-      const sessionId = guestSessionId ?? (await getGuestAiSessionId());
-      setGuestSessionId(sessionId);
-      setCreditBalance(await aiCreditsApi.getGuestBalance(sessionId));
+      const [balance, subscription] = await Promise.all([
+        aiCreditsApi.getUserBalance(),
+        paymentsApi.getSubscriptionStatus(),
+      ]);
+      // A subscriber chats free, so there is no meter to show them -- and a
+      // zero balance must not grey out their send button.
+      setCreditBalance(subscription.isActive ? null : balance);
     } catch {
-      // Credit state is non-blocking for screen load; send still relies on backend.
+      // Credit state is non-blocking for screen load; sending checks for itself.
     }
-  }, [guestSessionId, isAuthenticated]);
+  }, []);
 
   // Header rotation animation
   useEffect(() => {
@@ -655,7 +637,7 @@ export default function AiChatScreen() {
    * what the tutor thinks it saw — when a model misreads handwriting, that
    * line is what makes the mistake obvious instead of baffling.
    */
-  const coachOnImage = async (picture: ChatAttachment, question: string) => {
+  const coachOnImage = async (picture: ChatAttachment, question: string): Promise<boolean> => {
     const replyId = `coach-${Date.now()}`;
     observe('image.insert', { kind: picture.type });
     try {
@@ -680,8 +662,10 @@ export default function AiChatScreen() {
         ...prev,
         { id: replyId, role: 'assistant', text: body, timestamp: Date.now() },
       ]);
+      return Boolean(result.coach);
     } catch {
       setErrorMessage(t('coach.failed'));
+      return false;
     } finally {
       setIsTyping(false);
       sendingRef.current = false;
@@ -696,6 +680,30 @@ export default function AiChatScreen() {
       showCreditGate();
       return;
     }
+
+    /*
+     * One credit per turn, spent before the tutor is asked. SenseiClaw knows
+     * nothing about credits, so the app spends here and hands the credit back
+     * if the turn fails. Only an empty wallet stops a message: when the
+     * credits server cannot be reached, the tutor still answers.
+     */
+    sendingRef.current = true;
+    let creditTx: string | null = null;
+    try {
+      const spent = await aiCreditsApi.consumeUserCredit({ feature: 'ai_chat' });
+      creditTx = spent.transactionId;
+      setCreditBalance(spent.code === 'SUBSCRIPTION_ACTIVE' ? null : spent);
+    } catch (error) {
+      if (aiCreditsApi.isOutOfCredits(error)) {
+        sendingRef.current = false;
+        void refreshCreditBalance();
+        showCreditGate();
+        return;
+      }
+    }
+    const refundCredit = async () => {
+      if (creditTx) await aiCreditsApi.refundUserCredit(creditTx).catch(() => undefined);
+    };
 
     // Build message text including attachment indicators
     let messageText = trimmed;
@@ -719,7 +727,6 @@ export default function AiChatScreen() {
       timestamp: Date.now(),
     };
 
-    sendingRef.current = true;
     setErrorMessage(null);
     setLastFailedMessage(null);
     setFollowUpSuggestions([]);
@@ -741,10 +748,12 @@ export default function AiChatScreen() {
      */
     const picture = attachments.find((a) => a.type === 'image' || a.type === 'drawing');
     if (picture) {
-      await coachOnImage(picture, trimmed);
+      if (!(await coachOnImage(picture, trimmed))) await refundCredit();
+      void refreshCreditBalance();
       return;
     }
 
+    let failed = false;
     try {
       // Use SenseiClaw directly for Socratic tutoring (both guest and authenticated)
       let streamStarted = false;
@@ -831,6 +840,7 @@ export default function AiChatScreen() {
           } else if (event.type === 'suggestions') {
             setFollowUpSuggestions(event.suggestions);
           } else if (event.type === 'error') {
+            failed = true;
             setErrorMessage(event.error);
             setLastFailedMessage(trimmed);
             setIsTyping(false);
@@ -860,6 +870,7 @@ export default function AiChatScreen() {
           ];
         });
       } catch (fallbackError) {
+        failed = true;
         const message = getApiErrorMessage(fallbackError);
         setErrorMessage(message);
         setLastFailedMessage(trimmed);
@@ -867,6 +878,7 @@ export default function AiChatScreen() {
     } finally {
       setIsTyping(false);
       sendingRef.current = false;
+      if (failed) await refundCredit();
       void refreshCreditBalance();
       scrollToBottom();
     }
@@ -1645,9 +1657,9 @@ export default function AiChatScreen() {
     <ProPaywall
       visible={showProPaywall}
       onClose={() => setShowProPaywall(false)}
-      onSubscribe={(plan) => {
-        // STUB: /subscription removed (no payments backend) — paywall just closes.
+      onSubscribe={() => {
         setShowProPaywall(false);
+        router.push('/subscription');
       }}
     />
     </>

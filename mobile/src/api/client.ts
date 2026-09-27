@@ -26,7 +26,7 @@ export const API_BASE_URL = BASE_URL;
 
 if (!BASE_URL) {
   console.warn(
-    '[api] EXPO_PUBLIC_API_BASE_URL is not set. Accounts, credits and mocktests will not work in this build.',
+    '[api] EXPO_PUBLIC_API_BASE_URL is not set. Accounts and mocktests will not work in this build.',
   );
 }
 

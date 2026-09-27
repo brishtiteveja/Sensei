@@ -24,8 +24,8 @@ runtime. Run it before committing anything structural.
 | Service | Base URL | Owns |
 |---|---|---|
 | **SenseiClaw** | `EXPO_PUBLIC_SENSEI_API_URL` | tutor, curriculum, question bank, vision, learner memory, telemetry |
-| **NestJS** | `EXPO_PUBLIC_API_BASE_URL` | accounts, credits, mock-test sets |
-| **Sensei backend** (`backend/sensei`) | `EXPO_PUBLIC_COMMUNITY_API_URL` | community feed, saved mock-test attempts |
+| **NestJS** | `EXPO_PUBLIC_API_BASE_URL` | accounts, mock-test sets |
+| **Sensei backend** (`backend/sensei`) | `EXPO_PUBLIC_BACKEND_URL` | community feed, saved mock-test attempts, payments, AI credits |
 
 Neither has a hardcoded production fallback any more. An unset URL fails immediately and says
 so, because a wrong host that answers is harder to debug than no host at all — the NestJS
@@ -180,6 +180,52 @@ Not ported: push notifications for reactions and replies (the app has no push se
 original there is **no reporting, blocking or moderation**, and correct answers on a shared
 attempt are visible to everyone. The users are minors — decide who reviews comments before
 launch.
+
+## Payments
+
+Ported from ShikkhaDikkha (`subscription.tsx`, `ai-credits.tsx`, `payment-history.tsx`,
+`payment-result.tsx` and its NestJS `payments` / `ai-credits` modules), wire-compatible like
+community. Two products share one pipeline: **subscriptions** (7 days ৳59 to 6 months ৳849,
+stacking on an active one) and **AI credit packs** (100 / 300 / 800). Both pay through
+**bKash** (tokenized checkout) or **Nagad**. Entry points: Progress → Quick Links, the chat's
+out-of-credits dialog, and the Pro paywall.
+
+```
+app                         backend/sensei/payments.py            gateway
+POST /payment/initiate ───► PENDING row ── create / initiate ────► checkout URL
+openAuthSessionAsync(checkoutURL, sensei://payment-result)
+                             GET /payments/<gw>/callback ◄──────── browser redirect
+                             execute (bKash) / verify (Nagad),
+                             amount check, PENDING→APPROVED + grant
+                             302 → sensei://payment-result?status=…
+POST /payment/verify ──────► asks the gateway again: the safety net
+```
+
+Nothing the client sends approves a payment; only a successful execute/verify does, and only
+a `PENDING` payment changes state, so double callbacks and replays cannot fulfil twice.
+
+**Credits.** Every learner starts with 20, and each tutor turn costs one
+(`app/(tabs)/ai-chat.tsx`): spent before the tutor is asked, refunded if the turn fails, and at
+zero the chat offers plans or credits. An active subscription makes chats free and hides the
+meter. SenseiClaw knows nothing about credits, so **this gate runs on the client and is easy to
+bypass**. That is fine for a pilot, but it is not enforcement. When the credits server is
+unreachable, the tutor still answers.
+
+Server config is in `backend/.env.example`: gateway credentials, and a **callback URL that the
+phone's browser can reach**. Without credentials a gateway shows as disabled. The redirect back
+into the app needs the `sensei` scheme, so test in a dev build (`yarn ios` / `yarn android`).
+In Expo Go the redirect does not come back, but `verify` still settles the payment once the
+browser is closed.
+
+```bash
+cd backend && uv run --with pytest --with httpx pytest -q tests/test_payments.py
+```
+
+As with community, **you are your learner id**. A purchase belongs to that id, so reinstalling
+without signing in loses it. Anyone who knows an id can read its history and spend its credits,
+but cannot move money. Put real auth in front before this is public. Still open, as in the
+original: Nagad response signatures are not verified, and payments left `PENDING` are never
+swept.
 
 ## i18n
 

@@ -138,6 +138,10 @@ function AppContent() {
         <Stack.Screen name="community" />
         <Stack.Screen name="community/post/[postId]" />
         <Stack.Screen name="community/[postId]/attempt" />
+        <Stack.Screen name="subscription" />
+        <Stack.Screen name="ai-credits" />
+        <Stack.Screen name="payment-history" />
+        <Stack.Screen name="payment-result" />
       </Stack>
     </View>
   );
