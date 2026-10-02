@@ -204,29 +204,59 @@ function LiveVideo({ cfg, session }: { cfg: DeskConfig; session: string | null }
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mode, setMode] = useState<'webrtc' | 'mjpeg' | 'off'>('off');
   const [muted, setMuted] = useState(true);
+  // Bumped to reconnect the video; after a few failed tries, fall back to the MJPEG preview.
+  const [attempt, setAttempt] = useState(0);
+  const MAX_ATTEMPTS = 3;
 
   // A new phone call means new tracks: watch again for every session.
+  useEffect(() => {
+    setAttempt(0);
+  }, [session]);
+
   useEffect(() => {
     if (!session || !videoRef.current) {
       setMode('off');
       return;
     }
+    if (attempt >= MAX_ATTEMPTS) {
+      setMode('mjpeg');
+      return;
+    }
+    const video = videoRef.current;
     let pc: RTCPeerConnection | null = null;
     let cancelled = false;
-    watchCall(cfg, videoRef.current)
+    let watchdog: ReturnType<typeof setInterval> | undefined;
+    const retry = () => !cancelled && setAttempt((a) => a + 1);
+    watchCall(cfg, video)
       .then((p) => {
-        if (cancelled) p.close();
-        else {
-          pc = p;
-          setMode('webrtc');
+        if (cancelled) {
+          p.close();
+          return;
         }
+        pc = p;
+        setMode('webrtc');
+        p.addEventListener('connectionstatechange', () => {
+          if (p.connectionState === 'failed' || p.connectionState === 'disconnected') retry();
+        });
+        // A picture that stops moving for 6 s (a stalled network path) gets a fresh call.
+        let lastTime = -1;
+        let still = 0;
+        watchdog = setInterval(() => {
+          if (video.currentTime === lastTime) still += 1;
+          else {
+            still = 0;
+            lastTime = video.currentTime;
+          }
+          if (still >= 3) retry();
+        }, 2000);
       })
-      .catch(() => !cancelled && setMode('mjpeg')); // no WebRTC path: fall back to the preview stream
+      .catch(retry);
     return () => {
       cancelled = true;
+      if (watchdog) clearInterval(watchdog);
       pc?.close();
     };
-  }, [cfg, session]);
+  }, [cfg, session, attempt]);
 
   return (
     <Card className="overflow-hidden p-0">
