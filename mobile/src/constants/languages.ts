@@ -28,6 +28,13 @@ export const LANGUAGE_REGIONS: LanguageRegion[] = [
   { id: 'other', flag: '🌍', name: 'Other', nameEn: 'Other', lang: 'en' },
 ];
 
+/**
+ * The region every new install starts in while the first-run country picker
+ * is switched off (see app/welcome-onboarding.tsx). Bangladesh / Bangla until
+ * multi-language onboarding comes back.
+ */
+export const DEFAULT_REGION: LanguageRegion = LANGUAGE_REGIONS[0];
+
 export type LanguageOption = {
   code: Language;
   flag: string;

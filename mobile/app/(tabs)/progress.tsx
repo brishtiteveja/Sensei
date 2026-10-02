@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Pressable } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Settings, User, RotateCcw, ChevronRight, History } from 'lucide-react-native';
+import { Settings, User, RotateCcw, ChevronRight, History, Crown, Sparkles, WalletCards } from 'lucide-react-native';
 import { useAppTheme } from '@/theme';
 import { useTheme } from '@/contexts/theme-context';
 import { useAuth } from '@/contexts/auth-context';
@@ -254,6 +254,36 @@ export default function ProgressScreen() {
           >
             <User size={18} color={theme.accent} />
             <Text className="flex-1 text-xs font-space-semibold" style={{ color: theme.text }}>{t('progress.profileSettings')}</Text>
+            <ChevronRight size={16} color={theme.borderStrong} />
+          </TouchableOpacity>
+          <View className="h-px ml-12" style={{ backgroundColor: theme.border }} />
+          <TouchableOpacity
+            className="flex-row items-center px-4 py-3.5 gap-3"
+            activeOpacity={0.7}
+            onPress={() => router.push('/subscription')}
+          >
+            <Crown size={18} color={theme.accent} />
+            <Text className="flex-1 text-xs font-space-semibold" style={{ color: theme.text }}>{t('profile.subscription')}</Text>
+            <ChevronRight size={16} color={theme.borderStrong} />
+          </TouchableOpacity>
+          <View className="h-px ml-12" style={{ backgroundColor: theme.border }} />
+          <TouchableOpacity
+            className="flex-row items-center px-4 py-3.5 gap-3"
+            activeOpacity={0.7}
+            onPress={() => router.push('/ai-credits')}
+          >
+            <Sparkles size={18} color={theme.accent} />
+            <Text className="flex-1 text-xs font-space-semibold" style={{ color: theme.text }}>{t('profile.aiCredits')}</Text>
+            <ChevronRight size={16} color={theme.borderStrong} />
+          </TouchableOpacity>
+          <View className="h-px ml-12" style={{ backgroundColor: theme.border }} />
+          <TouchableOpacity
+            className="flex-row items-center px-4 py-3.5 gap-3"
+            activeOpacity={0.7}
+            onPress={() => router.push('/payment-history')}
+          >
+            <WalletCards size={18} color={theme.accent} />
+            <Text className="flex-1 text-xs font-space-semibold" style={{ color: theme.text }}>{t('profile.paymentHistory')}</Text>
             <ChevronRight size={16} color={theme.borderStrong} />
           </TouchableOpacity>
           <View className="h-px ml-12" style={{ backgroundColor: theme.border }} />

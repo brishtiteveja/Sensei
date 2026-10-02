@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from pathlib import Path
 
+from . import community, payments
 from .config import load_settings
 from .curriculum import build_graph
 from .graph import KnowledgeGraph
@@ -60,6 +61,7 @@ async def lifespan(app: FastAPI):
         print(f"!! could not reach router at {settings.base_url}: {e}")
     yield
     await llm.aclose()
+    payment_service.store.close()
     store.close()
 
 
@@ -73,6 +75,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+community.install(app, community.CommunityStore(store.connection))
+# Its own connection to the same file -- see PaymentsStore for why.
+payment_service = payments.build(store.path)
+payments.install(app, payment_service)
 
 
 class Turn(BaseModel):

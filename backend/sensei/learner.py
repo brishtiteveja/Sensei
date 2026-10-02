@@ -86,6 +86,11 @@ class LearnerStore:
         self._conn.executescript(_SCHEMA)
         self._conn.commit()
 
+    @property
+    def connection(self) -> sqlite3.Connection:
+        """Shared with CommunityStore, which reads display names from `learner`."""
+        return self._conn
+
     def close(self) -> None:
         self._conn.close()
 

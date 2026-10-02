@@ -24,7 +24,8 @@ runtime. Run it before committing anything structural.
 | Service | Base URL | Owns |
 |---|---|---|
 | **SenseiClaw** | `EXPO_PUBLIC_SENSEI_API_URL` | tutor, curriculum, question bank, vision, learner memory, telemetry |
-| **NestJS** | `EXPO_PUBLIC_API_BASE_URL` | accounts, credits, mock-test sets |
+| **NestJS** | `EXPO_PUBLIC_API_BASE_URL` | accounts, mock-test sets |
+| **Sensei backend** (`backend/sensei`) | `EXPO_PUBLIC_BACKEND_URL` | community feed, saved mock-test attempts, payments, AI credits |
 
 Neither has a hardcoded production fallback any more. An unset URL fails immediately and says
 so, because a wrong host that answers is harder to debug than no host at all — the NestJS
@@ -139,6 +140,92 @@ the camera. It hides on the chat tab, notebook, replay and onboarding.
 `app/welcome-onboarding.tsx` → tabs: `index` (home), `learn`, `ai-chat`, `practice`,
 `progress`, plus `quiz`, `lesson-detail`, `mocktest`, `mocktest-session`, `notebook`,
 `replay`, `my-preferences`, `choose-language`.
+
+**Onboarding is chat-only.** First run goes straight to "Welcome to Sensei!" (tap Continue --
+no auto-advance, no splash) → the chat setup questions → personalizing → tabs. The old "Quick Visual"
+card-style flow was removed.
+
+**Country / language picker is off for now.** Every new install starts as Bangladesh / Bangla
+(`DEFAULT_REGION` in
+`src/constants/languages.ts`). The picker is commented out, not deleted: to bring it back,
+start `langPhase` at `'splash'`, restore the commented splash timer, and uncomment the `langPhase === 'pick'`
+block and the back button in `app/welcome-onboarding.tsx`, and the `/choose-language`
+redirect in `app/index.tsx`. Users can still switch language later in `my-preferences`.
+
+## Community
+
+Ported from ShikkhaDikkha (`mobile-app/app/community.tsx` and its NestJS module) and kept
+wire-compatible with it. A student finishes a mock test (`app/mocktest-session.tsx`) and taps
+**Share to Community**: the attempt is saved with a snapshot of every question, then posted.
+Others react (🔥 🎉 💪 ❤️ 😮 — one each, same again removes it, never on your own), comment and
+reply in a bottom sheet, and open **View Attempt** for the full answer review
+(`app/community/[postId]/attempt.tsx`). `app/community/post/[postId]` is the deep-link target.
+
+The server is `backend/sensei/community.py` (SQLite, tests in `backend/tests/`):
+
+```bash
+cd backend && uv run uvicorn sensei.server:app --host 0.0.0.0 --port 8000
+uv run --with pytest --with httpx pytest -q tests/test_community.py
+```
+
+Two things differ from ShikkhaDikkha, both because Sensei has no sign-in:
+
+- **You are your learner id** (`src/lib/learner.ts`), sent as `X-Learner-Id`. It is an
+  identifier, not a credential — anyone who knows an id can post as it. Fine for a pilot; put
+  real auth in front of the write routes before this is public.
+- **Your name is the one you gave in onboarding** (`src/lib/display-name.ts`), else
+  "Anonymous User". No avatars.
+
+Not ported: push notifications for reactions and replies (the app has no push setup). Like the
+original there is **no reporting, blocking or moderation**, and correct answers on a shared
+attempt are visible to everyone. The users are minors — decide who reviews comments before
+launch.
+
+## Payments
+
+Ported from ShikkhaDikkha (`subscription.tsx`, `ai-credits.tsx`, `payment-history.tsx`,
+`payment-result.tsx` and its NestJS `payments` / `ai-credits` modules), wire-compatible like
+community. Two products share one pipeline: **subscriptions** (7 days ৳59 to 6 months ৳849,
+stacking on an active one) and **AI credit packs** (100 / 300 / 800). Both pay through
+**bKash** (tokenized checkout) or **Nagad**. Entry points: Progress → Quick Links, the chat's
+out-of-credits dialog, and the Pro paywall.
+
+```
+app                         backend/sensei/payments.py            gateway
+POST /payment/initiate ───► PENDING row ── create / initiate ────► checkout URL
+openAuthSessionAsync(checkoutURL, sensei://payment-result)
+                             GET /payments/<gw>/callback ◄──────── browser redirect
+                             execute (bKash) / verify (Nagad),
+                             amount check, PENDING→APPROVED + grant
+                             302 → sensei://payment-result?status=…
+POST /payment/verify ──────► asks the gateway again: the safety net
+```
+
+Nothing the client sends approves a payment; only a successful execute/verify does, and only
+a `PENDING` payment changes state, so double callbacks and replays cannot fulfil twice.
+
+**Credits.** Every learner starts with 20, and each tutor turn costs one
+(`app/(tabs)/ai-chat.tsx`): spent before the tutor is asked, refunded if the turn fails, and at
+zero the chat offers plans or credits. An active subscription makes chats free and hides the
+meter. SenseiClaw knows nothing about credits, so **this gate runs on the client and is easy to
+bypass**. That is fine for a pilot, but it is not enforcement. When the credits server is
+unreachable, the tutor still answers.
+
+Server config is in `backend/.env.example`: gateway credentials, and a **callback URL that the
+phone's browser can reach**. Without credentials a gateway shows as disabled. The redirect back
+into the app needs the `sensei` scheme, so test in a dev build (`yarn ios` / `yarn android`).
+In Expo Go the redirect does not come back, but `verify` still settles the payment once the
+browser is closed.
+
+```bash
+cd backend && uv run --with pytest --with httpx pytest -q tests/test_payments.py
+```
+
+As with community, **you are your learner id**. A purchase belongs to that id, so reinstalling
+without signing in loses it. Anyone who knows an id can read its history and spend its credits,
+but cannot move money. Put real auth in front before this is public. Still open, as in the
+original: Nagad response signatures are not verified, and payments left `PENDING` are never
+swept.
 
 ## i18n
 

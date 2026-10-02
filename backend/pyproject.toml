@@ -9,6 +9,8 @@ dependencies = [
     "httpx>=0.27",
     "pydantic>=2.9",
     "python-multipart>=0.0.12",
+    # Nagad's checkout handshake is RSA-encrypted and signed.
+    "cryptography>=43",
 ]
 
 [build-system]

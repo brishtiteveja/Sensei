@@ -29,11 +29,21 @@ export interface AiCreditPackagesResponse {
   gateways: GatewayOption[];
 }
 
-export interface AiCreditConsumeResponse {
-  code: 'CREDIT_CONSUMED';
+/**
+ * Flat, as the server sends it (this used to claim a nested `balance`, which
+ * neither backend ever returned). SUBSCRIPTION_ACTIVE means nothing was spent,
+ * so there is no transaction to refund.
+ */
+export type AiCreditConsumeResponse = AiCreditBalance &
+  (
+    | { code: 'CREDIT_CONSUMED'; transactionId: string }
+    | { code: 'SUBSCRIPTION_ACTIVE'; transactionId: null }
+  );
+
+export type AiCreditRefundResponse = AiCreditBalance & {
+  code: 'CREDIT_REFUNDED';
   transactionId: string;
-  balance: AiCreditBalance;
-}
+};
 
 export interface GuestAiMessageResponse {
   text: string;
